@@ -1,0 +1,39 @@
+# configures and IDE-env
+/.idea
+
+# server-log and sensitive-information
+/logs
+/server/dao/redis-configure.js
+/server/ssl/*.pem
+/server/ssl/*.csr
+
+# test
+.coveralls.yml
+/coverage
+
+# my batch
+/CallShell.bat
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
