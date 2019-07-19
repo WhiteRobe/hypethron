@@ -3,6 +3,7 @@ const koa_static = require('koa-static');
 const koa_compress = require('koa-compress');
 const koa_helmet = require('koa-helmet');
 const koa_convert = require('koa-convert'); // Convert koa legacy generator middleware to modern promise middleware.
+const koa_jwt = require('koa-jwt');
 
 const http = require('http');
 const https = require('https');
@@ -12,11 +13,21 @@ const path = require('path');
 const fs = require('fs');
 
 const redis = require('./dao/redis-connector.js');
-const {SERVER_CONFIG, SKIP_HYPETHRON_INTRO_PAGE, STATIC_DIRECTORY} = require('./server-configure.js');
+const {
+  SERVER_DEBUG,
+  SERVER_CONFIG,
+  SKIP_HYPETHRON_INTRO_PAGE,
+  STATIC_DIRECTORY,
+  KOA_JWT_CONFIGURE,
+  JWT_PROTECT_UNLESS
+} = require('./server-configure.js');
 const {log4js, accessLogger} = require("./logger-configure.js");
 const router = require('./server-router.js');
 const koaIpFilter = require('./ip-filter-configure.js');
 
+const {global} = require('./util/global.js');
+const errorHandler = require('./util/errorHandler.js');
+const jwt = require('jsonwebtoken');
 
 const app = new Koa();
 
@@ -33,8 +44,28 @@ const app = new Koa();
       threshold: 2048, // 大于2kb时进行压缩
       flush: require('zlib').constants.Z_SYNC_FLUSH
     }))
+
+    /*
+    .use((ctx, next) => {
+      console.log(jwt.sign({type: "test"}, JWT_CONFIGURE.secret, {
+        audience: "github",
+        issuer: "WhiteRobe/hypethron@Github"
+      }));
+      return next();
+    })*/
+
+    .use(koa_jwt(KOA_JWT_CONFIGURE).unless({path: JWT_PROTECT_UNLESS}))
+
+    /*.use((ctx, next) => {
+      if(SERVER_DEBUG){
+        console.log("jwtData", ctx.state.jwtData);
+        console.log("originToken", ctx.state.originToken);
+      }
+      return next();
+    })*/
+
     .use(koa_static(path.join(__dirname, STATIC_DIRECTORY), {
-      defer: true // Allowing any downstream middleware to respond first
+      defer: true // Allowing any downstream middleware to respond first, work with koa-router
     }));
 
   if (SKIP_HYPETHRON_INTRO_PAGE) {
@@ -42,19 +73,23 @@ const app = new Koa();
       if (ctx.request.path === "/") {
         ctx.response.redirect('/pages/home');
       }
-      await next();
+      return next();
     });
   }
-
-  app.on('error', (err, ctx) => {
-    console.error('[Debug]Server Error', err, ctx);
-  });
 
   app
     .use(router.routes())
     .use(router.allowedMethods());
-
   // <<< import middleware and load router<<<
+
+
+  app.on('error', (err, ctx) => {
+    if (SERVER_DEBUG) {
+      console.error(chalk.red('[Debug]Server Error'), err/*, ctx*/);
+    } else {
+      errorHandler(err);
+    }
+  });
 
   for (let i in SERVER_CONFIG) {
     // >>> params >>>
@@ -79,14 +114,16 @@ const app = new Koa();
       });
     }
 
-    // Add an logger, and bind it to this server
-    const logger = log4js.getLogger('application');
-    logger.addContext('serverName', SERVER_NAME);
-    registerLogger(SERVER_NAME, logger);
-
-    redisConnectTest(logger);
-    // <<< Ready to start the server <<<
   }
+
+  // Add an logger, and bind it to this server
+  const logger = log4js.getLogger('application');
+  logger.addContext('loggerName', 'Hypethron');
+  registerLogger(logger);
+  // <<< Ready to start the server <<<
+
+  // test redis connection
+  redisConnectTest(logger);
 })();
 
 
@@ -129,10 +166,10 @@ function _serverStartTip(NAME, PORT, ssl) {
 
 
 /**
- * Register a logger with $serverName as key
- * @param serverName:String The server name
+ * Register a logger to /utils/global.js
  * @param logger
  */
-function registerLogger(serverName, logger) {
-
+function registerLogger(logger) {
+  global.logger = logger;
 }
+

@@ -1,6 +1,16 @@
+const FILE_ERROR_CODE = 10;
+
+
 const KoaRouter = require('koa-router');
 const koaBody = require('koa-body'); // @See https://www.npmjs.com/package/koa-body
 const chalk = require('chalk');
+
+
+//_______import your api here________//
+const login = require('./login.js');
+
+//____________________________ ______//
+
 
 /**
  * Method enum.
@@ -14,29 +24,43 @@ const METHOD_PUT = "PUT";
 const METHOD_PATCH = "PATCH";
 
 /**
- * All of the service(RESTful-api) register to this router,
- * will expose to path: '/api/*'
+ * All of the service(RESTful-api) register to $apiRouter,
+ * will expose to path: '/api/*', while $publicApiRouter will be exposed to /papi/*
  */
 const apiRouter = KoaRouter();
+const publicApiRouter = KoaRouter();
 
 
 /**
  * The router table, any service list on this table,
  * will be register to $apiRouter.
  *
- *  - When you use/call GET|HEAD|DELETE, use $ctx.query to get your parameters
- *  - When you use/call POST|PUT|PATCH,  use $ctx.body to get your parameters
+ *  - When you use/call GET|HEAD|DELETE, use $ctx.request.query to get your parameters
+ *  - When you use/call POST|PUT|PATCH,  use $ctx.request.body to get your parameters
+ *  - Always remember to call 'return next();'
  */
 const API_ROUTER_TABLE = {
   "/apiExample": {
     methods: [METHOD_GET, METHOD_POST],
-    service: async (ctx, next) => {
-      console.log("/api/apiExample body", ctx.request.body);
-      console.log("/api/apiExample query", ctx.request.query);
-      ctx.body = ctx.request.body ? ctx.request.body : ctx.request.query;
-      return next();
-    }
+    services: [
+      async (ctx, next) => {
+        ctx.body = ctx.request.query;
+        return next();
+      },
+      async (ctx, next) => {
+        ctx.body = ctx.request.body;
+        return next();
+      }
+    ]
   }
+};
+
+/**
+ * The router table, any service list on this table,
+ * will be register to $publicApiRouter.
+ */
+const PUBLIC_API_ROUTER_TABLE = {
+  "/login": login
 };
 
 
@@ -62,52 +86,65 @@ apiRouter.post("/apiTest", koaBody(), async (ctx, next) => {
 
 
 //---------------Do not modify codes below---------------//
-
 /**
- * Register all the service listed on $API_ROUTER_TABLE to $apiRouter.
+ * Register all the service listed on $table to $routerImplement.
+ *
+ * @param table 路由表
+ * @param routerImplement 路由器
  */
-(async function () {
-  for (let i in API_ROUTER_TABLE) {
-    let service = API_ROUTER_TABLE[i].service;
-    await API_ROUTER_TABLE[i].methods
-      .filter((item, index, self) => self.indexOf(item) === index)
+function registerAPI(table, routerImplement) {
+  for (let i in table) {
+    let services = table[i].services;
+    table[i].methods
+      .filter((item, index, self) => {
+        let pass = self.indexOf(item) === index;
+        if (!pass) { // 避免重复注册同一个方法
+          console.warn(chalk.red("api-router.js: Warning!Repeated HTTP Method register!"));
+          process.exit(FILE_ERROR_CODE);
+        }
+        return pass;
+      })
       .forEach(
-        (method) => registerAnService(i, method, service)
+        (method, index) => registerAnService(i, method, services[index], routerImplement)
       );
   }
-})();
+}
 
 
 /**
  * 注册一个服务
- * @param path 地址 (相对于 /api )
+ * @param path 地址
  * @param method HTTP 方法
  * @param service 服务 (异步)
+ * @param routerImplement 路由器
  */
-function registerAnService(path, method, service) {
+function registerAnService(path, method, service, routerImplement){
   switch (method) {
     case METHOD_GET:
-      apiRouter.get(path, service);
+      routerImplement.get(path, service);
       break;
     /*case METHOD_HEAD:
-      apiRouter.head(i, service);
+      routerImplement.head(i, service);
       break;*/
     case METHOD_DELETE:
-      apiRouter.del(path, service);
+      routerImplement.del(path, service);
       break;
     case METHOD_POST:
-      apiRouter.post(path, koaBody(), service);
+      routerImplement.post(path, koaBody(), service);
       break;
     case METHOD_PUT:
-      apiRouter.put(path, koaBody(), service);
+      routerImplement.put(path, koaBody(), service);
       break;
     case METHOD_PATCH:
-      apiRouter.patch(path, koaBody(), service);
+      routerImplement.patch(path, koaBody(), service);
       break;
     default:
       console.error(chalk.red("api-router.js: Error/Unknown HTTP Method!"));
-      process.exit(10);
+      process.exit(FILE_ERROR_CODE);
   }
 }
+registerAPI(API_ROUTER_TABLE, apiRouter);
+registerAPI(PUBLIC_API_ROUTER_TABLE, publicApiRouter);
 
-module.exports = apiRouter;
+module.exports.apiRouter = apiRouter;
+module.exports.publicApiRouter = publicApiRouter;

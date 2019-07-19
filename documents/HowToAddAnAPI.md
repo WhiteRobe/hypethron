@@ -34,7 +34,7 @@ const addFunc = require('./Add.js');
 
 apiRouter.get("/addServer", async (ctx, next) =>{
   ctx.response.body = addFunc(1, 2);
-  return next();
+  return next(); // 请一定要注意调用next()方法
 });
 ```
 
@@ -58,25 +58,70 @@ apiRouter.get("/addServer", add);
 
 像上文中所提到的那样，先要把业务逻辑作为一个异步函数，然后在`/server/controller/api-router.js`文件中进行表注册。
 
+> 注意：添加异步函数时，一定要在所有函数的出口显式调用`next()`方法。
+
 注册表`API_ROUTER_TABLE`的各项值如下:
 
 字段|意义|类型|样例
 :-:|:-:|:-:|:-:
 methods|对应的HTTP方法|array| [METHOD_GET, METHOD_POST]
-service|业务对象|async function|async (ctx, next) => {}
+services|业务对象|array[async function]|async (ctx, next) => {}
 
 注册时采用的键值即为其路由表的地址。
 
 如：
 ```
 "/apiExample": {
-    methods: [METHOD_GET, METHOD_POST],
-    service: async (ctx, next) => {
+    methods: [METHOD_GET],
+    service: [async (ctx, next) => {
       console.log("/api/apiExample body", ctx.request.body);
       console.log("/api/apiExample query", ctx.request.query);
       ctx.body = ctx.request.body ? ctx.request.body : ctx.request.query;
       return next();
-    }
+    }]
   }
 ```
 将会暴露"GET"和"POST"方法到`/api/apiExample`。
+
+---
+
+在`/server/util`中我们提供了新的工具包，你只需要导入该工具包，即可以更方便的方式绑定接口：
+`const binder = require("../util/api-binder.js")`
+
+你现在只需要定义相关业务函数，如`echo.js`：
+
+```
+// 需要以HTTP方法名开头，以下划线作方法名切分
+async function GET_echo(ctx, next) {
+  ctx.body = "服务器已收到：" + ctx.request.query ;
+  return next();
+}
+
+async function POST_echo(ctx, next) {
+  ctx.body = "服务器已收到：" + ctx.request.body;
+  return next();
+}
+
+module.exports = binder({
+  GET_echo,
+  POST_echo
+});
+```
+
+在 `/server/controller/api-router.js` 的路由表中进行绑定只需要：
+
+```
+const echo = require('./echo.js');
+const API_ROUTER_TABLE = {
+  //...
+  "/echo": echo
+};
+```
+
+## 访问权限
+
+在 `/server/controller/api-router.js` 的存在两份路由表，其中:
+- `API_ROUTER_TABLE` 将绑定受到JWT保护的服务器地址
+- `PUBLIC_API_ROUTER_TABLE` 公共接口不收JWT保护
+
+> 如果您不了解什么是JWT，请参考此处：[https://jwt.io/](https://jwt.io/)
