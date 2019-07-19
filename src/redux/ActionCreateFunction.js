@@ -1,4 +1,5 @@
 import {
+  MODIFY_DEMO_VALUE,
   ADD_TOKEN,
   REMOVE_TOKEN
 } from './ActionTypes.js';
@@ -6,6 +7,13 @@ import {
 /**
  * 在这里注册动作产生函数
  */
+
+export function modifyDemoValue(value) {
+  return{
+    type: MODIFY_DEMO_VALUE,
+    value
+  }
+}
 
 export function addToken(token) {
   return{
