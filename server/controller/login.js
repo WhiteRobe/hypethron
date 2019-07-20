@@ -1,4 +1,4 @@
-const binder = require("../util/api-binder.js");
+
 const jwt = require('jsonwebtoken');
 const {SERVER_PRIVATE_KEY, JWT_OPTIONS} = require('../server-configure.js');
 
@@ -12,7 +12,7 @@ async function POST_login(ctx, next) {
   return next();
 }
 
-module.exports = binder({
+module.exports = {
   GET_login,
   POST_login
-});
+};

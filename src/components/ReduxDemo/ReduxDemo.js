@@ -15,6 +15,10 @@ function H1View(props) {
   // console.log(props);
   return (
     <div>
+      <Button type="primary" shape="round" icon="ant-cloud" size="large" onClick={props.updateReduxStateCallback}>
+        更新高阶Redux状态
+      </Button>
+      <hr/>
       <h1>你的UI状态值是:</h1>
       <p>{props.uiState}</p>
       <h1>你的高阶Redux状态值是:</h1>
@@ -33,10 +37,10 @@ class ReduxDemo extends React.Component {
       uiState: "UI状态"
     };
 
-    this.updateReduxState = this.updateReduxState.bind(this);
+    this.updateReduxStateCallback = this.updateReduxStateCallback.bind(this);
   }
 
-  updateReduxState() {
+  updateReduxStateCallback() {
     this.props.modifyDemoValue("新的高阶Redux状态");
   }
 
@@ -44,11 +48,11 @@ class ReduxDemo extends React.Component {
     // this.props.addToken("new"); // Do not change state on render()!
     return (
       <div>
-        <Button type="primary" shape="round" icon="ant-cloud" size="large" onClick={this.updateReduxState}>
-          更新高阶Redux状态
-        </Button>
-        <hr/>
-        <H1View reduxState={this.props.reduxState} uiState={this.state.uiState}/>
+        <H1View props
+          reduxState={this.props.reduxState}
+          uiState={this.state.uiState}
+          updateReduxStateCallback={this.updateReduxStateCallback}
+        />
       </div>
     );
   }

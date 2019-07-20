@@ -1,3 +1,5 @@
+const { aesDecrypt, aesEncrypt } = require("./util/crypto-aes-tool.js");
+
 /**
  * Configure Your SERVER
  */
@@ -46,6 +48,20 @@ const KOA_JWT_CONFIGURE = { // JWT的解码值将会存放到 ctx.state.jwtData 
   audience: JWT_OPTIONS.audience,
   issuer: JWT_OPTIONS.issuer
 };
+const COOKIE_KEY_LIST = [SERVER_PRIVATE_KEY, 'I Like hypethron'];
+const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-session
+  key: 'hypethron:sess', // (string) cookie key
+  maxAge: 86400000, // (ms), 1 day -> 86400000
+  autoCommit: true,
+  overwrite: true,
+  httpOnly: true, // 防止JS脚本进行修改
+  signed: true,
+  rolling: false,
+  renew: true,
+  encode: (data) => aesEncrypt(JSON.stringify(data)), // 不采用Base64进行加解密，而使用AES。
+  decode: (data) => JSON.parse(aesDecrypt(data)),
+  // store: {配置} // 注释本行以取消使用 External Session Stores，性能分析@See https://www.npmjs.com/package/koa-redis#benchmark
+};
 // <<< 服务器运行常量 <<<
 
 
@@ -58,6 +74,8 @@ module.exports.MD5_SALT = MD5_SALT;
 module.exports.JWT_PROTECT_UNLESS = JWT_PROTECT_UNLESS;
 module.exports.JWT_OPTIONS = JWT_OPTIONS;
 module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
+module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
+module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
 
 /*
 你可以通过以下命令生成一份自签名的SSL证书:

@@ -55,6 +55,9 @@
 - 二次开发所需的文档
 - 持续集成测试
 - SPA(PWA for Https)
+- Cookie签名认证
+- Session加密(AES)
+- 前端可跨平台开发
 - ...
 
 你可以到此处查看该项目的效果：[项目演示|Examples](https://github.com/WhiteRobe/hypethron#%E9%A1%B9%E7%9B%AE%E6%BC%94%E7%A4%BA-example)。

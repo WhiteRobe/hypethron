@@ -118,10 +118,14 @@ const API_ROUTER_TABLE = {
 };
 ```
 
-## 访问权限
+## 映射表及访问控制
 
 在 `/server/controller/api-router.js` 的存在两份路由表，其中:
-- `API_ROUTER_TABLE` 将绑定受到JWT保护的服务器地址
-- `PUBLIC_API_ROUTER_TABLE` 公共接口不收JWT保护
+- `API_ROUTER_TABLE` 将绑定受到JWT保护的服务器地址，所有内容将被映射到`/api`路径下。
+- `PUBLIC_API_ROUTER_TABLE` 公共接口不收JWT保护，所有内容将被映射到`/papi`路径下。
+
+如果您有二次开发的需要：
+访问控制配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
+映射地址请在[`/server/server-router.js`](/server/server-router.js)中进行自定义。
 
 > 如果您不了解什么是JWT，请参考此处：[https://jwt.io/](https://jwt.io/)

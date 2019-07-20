@@ -4,10 +4,10 @@ const FILE_ERROR_CODE = 10;
 const KoaRouter = require('koa-router');
 const koaBody = require('koa-body'); // @See https://www.npmjs.com/package/koa-body
 const chalk = require('chalk');
-
+const binder = require("../util/api-binder.js");
 
 //_______import your api here________//
-const login = require('./login.js');
+const loginService = require('./login.js');
 
 //____________________________ ______//
 
@@ -60,7 +60,7 @@ const API_ROUTER_TABLE = {
  * will be register to $publicApiRouter.
  */
 const PUBLIC_API_ROUTER_TABLE = {
-  "/login": login
+  "/login": binder(loginService)
 };
 
 
