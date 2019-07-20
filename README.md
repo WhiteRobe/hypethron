@@ -82,7 +82,7 @@
 
 目前提供了以下几种方式来获取Web应用：
 
-#### ① 从Github安装(Intall with Git)
+#### ① 从Github安装(Install with Git)
 
 - **Step 1** 获取源码 Download Source-Code
 
@@ -110,7 +110,7 @@
 
 - **Step 1** Redis数据库安装与配置 Configure the Redis
 
-你需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](https://github.com/WhiteRobe/hypethron/blob/master/documents/HowToInstallRedis.md)。*(如果您已经安装过Redis服务器，您可以跳过这一节)*
+你需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](documents/HowToInstallRedis.md)。*(如果您已经安装过Redis服务器，您可以跳过这一节)*
 
 - **Step 2** 配置Redis连接信息 Configure the Redis-Connector
 
@@ -133,7 +133,7 @@ connectionName | 连接名 | "default"
 
 由于hypethron是一个支持多端口、多接入的Web应用，你可以通过配置相关文件来新增一个服务器。
 
-如果您只准备通过默认设置启动(HTTP协议+3000端口)服务器，您可以跳过这一节；否则，请参考：[如何注册一个服务器](https://github.com/WhiteRobe/hypethron/blob/master/documents/HowToRegisterAServer.md)。
+如果您只准备通过默认设置启动(HTTP协议+3000端口)服务器，您可以跳过这一节；否则，请参考：[如何注册一个服务器](documents/HowToRegisterAServer.md)。
 
 
 ### Ⅳ 启动项目 Usage
@@ -167,14 +167,14 @@ connectionName | 连接名 | "default"
 
 您可以在遵循本项目相关开源协议的情况下，使用、修改本项目。
 
-在参与项目时请遵循[行为指南](https://github.com/WhiteRobe/hypethron/blob/master/.github/CODE_OF_CONDUCT.md)。
+在参与项目时请遵循[行为指南](.github/CODE_OF_CONDUCT.md)。
 
 我们欢迎任何人指出缺点、修正我们的项目：
 
 1. 请【Fork】这个项目，修改、添加您觉得有必要变动的内容，向我们提交【Pull Request】。
 2. 在【Issues】中提出您的意见。
 
->For more detail? @See [CONTRIBUTING.md](https://github.com/WhiteRobe/hypethron/blob/master/.github/CONTRIBUTING.md)。
+>For more detail? @See [CONTRIBUTING.md](.github/CONTRIBUTING.md)。
 
 ## 作者 Authors
 <table>

@@ -39,7 +39,7 @@
 
 ### 数据库
 
-数据库采用**Redis***(5.0.5)*，其配置情况可参考[如何正确安装Redis数据库](https://github.com/WhiteRobe/hypethron/blob/master/documents/HowToInstallRedis.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
+数据库采用**Redis***(5.0.5)*，其配置情况可参考[如何正确安装Redis数据库](/documents/HowToInstallRedis.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
 
 数据库接入依赖采用`ioredis`，你可以到[此处获取其文档](https://www.npmjs.com/package/ioredis)。
 
@@ -49,9 +49,9 @@
 
 接口开发采用RESTful的方式，同时所有的默认接口均暴露在`/api/`地址下。由于采用了前后端分离的SPA开发方案，前端仅通过AJAX与后端交互，没有任何SSR的内容，配合接口文档可以进行二次开发。
 
-- 详细接口文档可参考：[接口文档|API doc](https://github.com/WhiteRobe/hypethron/blob/master/documents/sysdoc/APIdoc.md)。
+- 详细接口文档可参考：[接口文档|API doc](/documents/sysdoc/APIdoc.md)。
 
-- 要对服务器的接口进行二次开发，请参考：[如何新增一个接口|How to Add An API](https://github.com/WhiteRobe/hypethron/blob/master/documents/HowToAddAnAPI.md)。
+- 要对服务器的接口进行二次开发，请参考：[如何新增一个接口|How to Add An API](/documents/HowToAddAnAPI.md)。
 
 ### 静态服务器
 
@@ -94,4 +94,4 @@ router.use("/pages", staticPageRouter.routes(), staticPageRouter.allowedMethods(
 
 我们采用`react-redux`在根目录的路由组件进行全局注入，这样，SPA的子组件均可以通过`react-redux.connect()`方法建立与Redux的联系。
 
-关于如何进行状态管理和与Redux进行交互，请参考[如何连接Redux|How To Connect To Redux](https://github.com/WhiteRobe/hypethron/blob/master/documents/HowToConnectToRedux.md)和[演示DEMO](https://github.com/WhiteRobe/hypethron/blob/master/src/components/ReduxDemo/ReduxDemo.js)。
+关于如何进行状态管理和与Redux进行交互，请参考 [如何连接Redux|How To Connect To Redux](/documents/HowToConnectToRedux.md)和[演示DEMO](/src/components/ReduxDemo/ReduxDemo.js)。
