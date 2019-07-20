@@ -12,9 +12,10 @@ const https = require('https');
 const chalk = require('chalk');  // @See  https://www.npmjs.com/package/chalk
 const path = require('path');
 const fs = require('fs');
-require('keygrip')
 
-const redisConnect = require('./dao/redis-connector.js');
+const {redisConnectTest} = require('./dao/redis-connector.js');
+const {mysqlConnectTest} = require('./dao/mysql-connector.js');
+
 const {
   SERVER_DEBUG,
   SERVER_CONFIG,
@@ -113,8 +114,8 @@ app.keys = COOKIE_KEY_LIST;
 
   // test redis connection
   // If you do not want to use redis, comment out this line.
-  await redisConnectTest(logger)
-    .then(res =>{
+  await redisConnectTest()
+    .then(res => {
       logger.info(res.message);
     })
     .catch((err) => {
@@ -122,35 +123,18 @@ app.keys = COOKIE_KEY_LIST;
       process.exit(1); // 如果连不上数据库直接终止进程
     });
 
-  console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
-  console.log(chalk.bold  ("---------------------------------------------------------"));
-})();
-
-
-/**
- * 数据库接入测试
- */
-async function redisConnectTest() {
-  let redis = await redisConnect(true /*connect with default params, but put detail*/);
-  redis.set("hypethron.redis-connect-test", "Success!");
-  try{
-    await redis.get("hypethron.redis-connect-test", (err, result) => {
-      if (err !== null) {
-        let errorMsg = "Fail to connect to Redis[Error]: " + err;
-        console.log(chalk.red(errorMsg));
-      } else {
-        console.log(chalk.green("[Hypethron]Redis Connect Test:", result, '\n'));
-      }
+  await mysqlConnectTest()
+    .then(res => {
+      logger.info(res.message);
+    })
+    .catch((err) => {
+      logger.error(`Fail to connect to MySQL[Error]: ${err.message}`);
+      process.exit(1); // 如果连不上数据库直接终止进程
     });
-  } catch (e) {
-    throw e;
-  }
-  await redis.del("hypethron.redis-connect-test");
-  await redis.disconnect();
-  return{
-    message: "[Hypethron]Connect To Redis!"
-  }
-}
+
+  console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
+  console.log(chalk.bold("---------------------------------------------------------"));
+})();
 
 
 /**
@@ -162,7 +146,7 @@ async function redisConnectTest() {
 function _serverStartTip(NAME, PORT, ssl) {
   let protocol = ssl ? 'https' : 'http';
   console.log(chalk.bold("-----[" + new Date() + "]-----\n"));
-  console.log(chalk.greenBright(`Server[${NAME}] Open In Port[${PORT}] Successfully! Waiting for Redis connection..\n`));
+  console.log(chalk.greenBright(`Server[${NAME}] Open In Port[${PORT}] Successfully! Waiting for Database connection..\n`));
   console.log(chalk.cyan(`Local-HOST Start At:\t ${protocol}://localhost:${PORT}/\n`));
 }
 

@@ -22,6 +22,7 @@
 <p align="center">
 	<img src="https://img.shields.io/badge/Node.js-10-green.svg?logo=node.js&style=flat-square"/>
 	<img src="https://img.shields.io/badge/React-16-blue.svg?logo=react&style=flat-square"/>
+	<img src="https://img.shields.io/badge/MySQL-8.0.16-informational.svg?logo=mysql&style=flat-square"/>
 	<img src="https://img.shields.io/badge/Redis-5.0-red.svg?logo=redis&style=flat-square"/>
 	<img src="https://img.shields.io/badge/Babel-v7-yellow.svg?logo=babel&style=flat-square"/>
 	<img src="https://img.shields.io/badge/koa-2.7-black.svg"/>
@@ -30,9 +31,9 @@
 
 ## 介绍 Introduction
 
-“hypethron/院庭”是一款基于React和Node.js的人力信息统计、管理系统。
+"hypethron/院庭"是一款基于React和Node.js的人员信息可视化、统计和管理系统。
 
-整体将采用 **React+Node.js(koa)** 前后端分离的开发模式，数据库采用**Redis**，系统功能将包含以下内容：
+整体将采用 **React+Node.js(koa)** 前后端分离的开发模式，数据库采用**Redis**+**MySQL**，系统功能将包含以下内容：
 
 - 管理员后台系统
 - 人员信息采集系统
@@ -111,11 +112,11 @@
 
 ### Ⅲ 服务器配置 Configuration
 
-- **Step 1** Redis数据库安装与配置 Configure the Redis
+- **Step 1.1** Redis数据库安装与配置 Configure the Redis
 
 你需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](documents/HowToInstallRedis.md)。*(如果您已经安装过Redis服务器，您可以跳过这一节)*
 
-- **Step 2** 配置Redis连接信息 Configure the Redis-Connector
+- **Step 1.2** 配置Redis连接信息 Configure the Redis-Connector
 
 在 `/server/dao` 目录中，编辑【redis-configure.js】文件，其中各字段意义如下:
 
@@ -131,6 +132,25 @@ connectionName | 连接名 | "default"
 你可以添加其它的配置，请参考：[ioredis配置](https://github.com/luin/ioredis/blob/HEAD/API.md#new_Redis)。
 
 > 如果您在 `/server/dao` 目录下没有自动找到【redis-configure.js】文件，可以到`/documents/examples`目录中获取。
+
+- **Step 2.1** Mysql服务器的安装 Configure the MySQL
+
+> Windows环境下Mysql基于可视化的安装极其简单，Linux环境的安装请参考[这篇文章](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup)。
+
+- **Step 2.2** 配置Mysql连接信息 Configure the MySQL-Connector
+
+在 `/server/dao` 目录中，编辑【mysql-configure.js】文件，其中各字段意义如下:
+
+字段|意义|例值
+:-:|:-:|:-:
+host | 服务器IP/域名 | '127.0.0.1'
+port | 服务器访问端口 | 3306
+user | 数据库访问账号 | 'root'
+password | 数据库访问密码 | 'password'
+database | 所使用的数据库 | 'my_database'
+
+> 如果您在 `/server/dao` 目录下没有自动找到【mysql-configure.js】文件，可以到`/documents/examples`目录中获取。
+你可以添加其它的配置，请参考：[mysql配置](https://www.npmjs.com/package/mysql#connection-options)。
 
 - **Step 3** 配置Koa服务器 Configure the server
 

@@ -9,7 +9,7 @@ const REDIS_CONFIG = require("./redis-configure.js");
  * @param connectDetail 连接详情选项
  * @return {Redis|*}
  */
-async function connect(connectDetail, opt){
+async function connectRedis(connectDetail, opt){
   // 连接提示
   opt = opt || REDIS_CONFIG;
   if(connectDetail){
@@ -21,4 +21,33 @@ async function connect(connectDetail, opt){
   return new Redis(opt);
 }
 
-module.exports = connect;
+
+/**
+ * 数据库接入测试
+ */
+async function redisConnectTest() {
+  let redis = await connectRedis(true /*connect with default params, but put detail*/);
+  redis.set("hypethron.redis-connect-test", "Success!");
+  try{
+    await redis.get("hypethron.redis-connect-test", (err, result) => {
+      if (err !== null) {
+        let errorMsg = "Fail to connect to Redis[Error]: " + err;
+        console.log(chalk.red(errorMsg));
+      } else {
+        console.log(chalk.green("[Hypethron]Redis Connect Test:", result, '\n'));
+      }
+    });
+  } catch (e) {
+    throw e;
+  }
+  await redis.del("hypethron.redis-connect-test");
+  await redis.disconnect();
+  return{
+    message: "[Hypethron]Connect To Redis!"
+  }
+}
+
+module.exports = {
+  connectRedis,
+  redisConnectTest
+};

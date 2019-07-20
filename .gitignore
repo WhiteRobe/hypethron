@@ -4,6 +4,7 @@
 # server-log and sensitive-information
 /logs
 /server/dao/redis-configure.js
+/server/dao/mysql-configure.js
 /server/ssl/*.pem
 /server/ssl/*.csr
 

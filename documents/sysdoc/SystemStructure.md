@@ -11,8 +11,8 @@
 - 前端测试: `kest` + `react-test-render`
 - AJAX: `axios`
 
-- 数据库: `Redis`*(5.0.5)*
-- 数据库接入: `ioredis`
+- 数据库: `Redis`*(5.0.5)* + `MySQL`*(8.0.16)*
+- 数据库接入: `ioredis`、`mysql`
 - 后端框架: `koa`
 - 主要中间件:  `koa-jwt`(身份验证)、`koa-compress`(数据压缩)、`koa-log4`(服务器日志)、`koa-router`(服务器路由)、`koa-static`(静态文件服务器)
 
@@ -40,11 +40,13 @@
 
 ### 数据库
 
-数据库采用**Redis***(5.0.5)*，其配置情况可参考[如何正确安装Redis数据库](/documents/HowToInstallRedis.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
+数据库采用**Redis***(5.0.5)*+**MySQL***(8.0.16)*的双数据库配置。前者用于处理热数据及提供非侵入式的数据可视化接口，后者用于基本Web应用业务及冷数据的固化。
 
-数据库接入依赖采用`ioredis`，你可以到[此处获取其文档](https://www.npmjs.com/package/ioredis)。
+其中，Redis的配置情况可参考[如何正确安装Redis数据库](/documents/HowToInstallRedis.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
 
-<s>在时间允许的条件下，我们准备对数据库访问进行二次封装以使得多类型数据库的接入和二次开发成为可能。这意味着您并不需要再配置和学习Redis即可使用该项目。</s>
+Redis数据库的接入依赖采用`ioredis`，你可以到[此处获取其文档](https://www.npmjs.com/package/ioredis)。
+
+MySQL数据库的接入依赖采用`mysql`，你可以到[此处获取其文档](https://www.npmjs.com/package/mysql)。
 
 ### 接口开发
 

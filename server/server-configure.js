@@ -60,7 +60,11 @@ const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-sessio
   renew: true,
   encode: (data) => aesEncrypt(JSON.stringify(data)), // 不采用Base64进行加解密，而使用AES。
   decode: (data) => JSON.parse(aesDecrypt(data)),
-  // store: {配置} // 注释本行以取消使用 External Session Stores，性能分析@See https://www.npmjs.com/package/koa-redis#benchmark
+  // 启用本属性以使用 External Session Stores，性能分析@See https://www.npmjs.com/package/koa-redis#benchmark
+  // store: {
+  //  配置，如: new require('koa-redis')();
+  // }
+  //Use external session stores only if necessary, avoid using session as a cache, keep the session lean, and store it in a cookie if possible!
 };
 // <<< 服务器运行常量 <<<
 
