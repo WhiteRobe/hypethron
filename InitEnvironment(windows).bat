@@ -22,6 +22,7 @@ echo   host: '127.0.0.1', >> ./server/dao/mysql-configure.js
 echo   port: 3306, >> ./server/dao/mysql-configure.js
 echo   user: 'root', >> ./server/dao/mysql-configure.js
 echo   password: 'password', >> ./server/dao/mysql-configure.js
-echo   database: 'my_database' >> ./server/dao/mysql-configure.js
+echo   database: 'my_database', >> ./server/dao/mysql-configure.js
+echo   connectionLimit : 10 >> ./server/dao/mysql-configure.js
 echo }; >> ./server/dao/mysql-configure.js
 echo module.exports = MYSQL_CONFIGURE; >> ./server/dao/mysql-configure.js

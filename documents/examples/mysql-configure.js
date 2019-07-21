@@ -5,6 +5,7 @@ const MYSQL_CONFIGURE = {
   port: 3306,
   user: 'root',
   password: 'password',
-  database: 'my_database'
+  database: 'my_database',
+  connectionLimit : 10 // pool size
 };
 module.exports = MYSQL_CONFIGURE;

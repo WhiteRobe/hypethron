@@ -70,17 +70,9 @@
 
 “hypethron/院庭”依赖于Node.js环境，所以您应当先在本机配置Node.js环境。
 
-您可以通过指令`node -v`查看你的系统是否已经安装Node.js环境及其版本号是否在10.8.x以上。否则，您应该按照以下步骤安装或重新安装相应版本的Node.js环境：
+您可以通过指令`node -v`查看你的系统是否已经安装Node.js环境及其版本号是否在10.8.x以上。
 
-1. 下载Node.js(v10.8+)： [![](https://img.shields.io/badge/Node.js-download-green.svg?logo=node.js&style=flat)](https://nodejs.org/en/)
-
-2. 配置环境变量( `{NodejsDirectory}` 为Node.js安装所在目录)：
-
->**(Windows)** 右键【我的电脑】 -> 【属性】 -> 【高级系统设置】 -> 【环境变量】-> 在path字段添加 `{NodejsDirectory}/bin` 。
->
->**(Linux)** `vim ~/.bashrc` -> 添加 `export PATH="$PATH:{NodejsDirectory}/bin"` -> `source ~/.bashrc` 。
-
-
+否则，您应该按照[这篇文章的指引](/documents/HowToInstallNode.md)安装或重新安装相应版本的Node.js环境。
 
 ### Ⅱ 安装应用 Installation
 
@@ -112,11 +104,9 @@
 
 ### Ⅲ 服务器配置 Configuration
 
-- **Step 1.1** Redis数据库安装与配置 Configure the Redis
+- **Step 1** Redis数据库安装与配置 Configure the Redis
 
-你需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](documents/HowToInstallRedis.md)。*(如果您已经安装过Redis服务器，您可以跳过这一节)*
-
-- **Step 1.2** 配置Redis连接信息 Configure the Redis-Connector
+如果您还没有Redis数据库，您需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](documents/HowToInstallRedis.md)。
 
 在 `/server/dao` 目录中，编辑【redis-configure.js】文件，其中各字段意义如下:
 
@@ -133,11 +123,9 @@ connectionName | 连接名 | "default"
 
 > 如果您在 `/server/dao` 目录下没有自动找到【redis-configure.js】文件，可以到`/documents/examples`目录中获取。
 
-- **Step 2.1** Mysql服务器的安装 Configure the MySQL
+- **Step 2** MySQL数据库的安装 Configure the MySQL
 
-> Windows环境下Mysql基于可视化的安装极其简单，Linux环境的安装请参考[这篇文章](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup)。
-
-- **Step 2.2** 配置Mysql连接信息 Configure the MySQL-Connector
+如果您还没有MySQL数据库，您需要在正确的环境下安装MySQL数据库，详见[如何正确安装MySQL数据库](/documents/HowToInstallMySQL.md)。
 
 在 `/server/dao` 目录中，编辑【mysql-configure.js】文件，其中各字段意义如下:
 
@@ -148,9 +136,11 @@ port | 服务器访问端口 | 3306
 user | 数据库访问账号 | 'root'
 password | 数据库访问密码 | 'password'
 database | 所使用的数据库 | 'my_database'
+connectionLimit | 连接池大小 | 10
+
+你可以添加其它的配置，请参考：[mysql配置](https://www.npmjs.com/package/mysql#connection-options)。
 
 > 如果您在 `/server/dao` 目录下没有自动找到【mysql-configure.js】文件，可以到`/documents/examples`目录中获取。
-你可以添加其它的配置，请参考：[mysql配置](https://www.npmjs.com/package/mysql#connection-options)。
 
 - **Step 3** 配置Koa服务器 Configure the server
 

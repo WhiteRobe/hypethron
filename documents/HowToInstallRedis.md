@@ -16,11 +16,11 @@ Redis默认的运行环境是Linux，但是微软开源项目维护了一版Redi
 
 ### Linux环境下安装Redis
 
-本项目在阿里云上搭建了Redis环境并进行了测试，其版本为5.0.5。我们建议您与我们采用同样的系统(Unbuntu 16.0.4)。
+本项目在阿里云上搭建了Redis环境并进行了测试，其版本为5.0.5。我们建议您与我们采用同样的系统(Ubuntu 16.0.4)。
 
 Linux环境下，Redis的安装相当容易：
 
-1. 访问Redis官网，下载Stable版本的软件：[![](https://img.shields.io/badge/Redis_5.0.5-download-red.svg?logo=redis&style=flat-square)](https://redis.io/download)
+1. 访问Redis官网，下载Stable版本的软件：[![](https://img.shields.io/badge/Redis_5.0.5-download-red.svg?logo=redis&style=flat)](https://redis.io/download)
 
 2. 切换到安装目录，使用指令`make`编译安装软件。
 

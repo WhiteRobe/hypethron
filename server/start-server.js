@@ -14,7 +14,7 @@ const path = require('path');
 const fs = require('fs');
 
 const {redisConnectTest} = require('./dao/redis-connector.js');
-const {mysqlConnectTest} = require('./dao/mysql-connector.js');
+const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
 
 const {
   SERVER_DEBUG,
@@ -37,9 +37,34 @@ const jwt = require('jsonwebtoken');
 const app = new Koa();
 app.keys = COOKIE_KEY_LIST;
 
-(async function () { // 启动服务器
 
-  // >>> import middleware and load router>>>
+(async function () { // 启动服务器
+                     // Add an logger, and bind it to this server
+  const logger = log4js.getLogger('application');
+  logger.addContext('loggerName', 'Hypethron');
+  registerLogger(logger);
+
+  // >>> test mysql/redis connection >>>
+  await mysqlConnectTest()
+    .then(res => {
+      logger.info(res.message);
+    })
+    .catch((err) => {
+      logger.error(`Fail to connect to MySQL[Error]: ${err.message}`);
+      process.exit(2); // 如果连不上数据库直接终止进程
+    });
+
+  await redisConnectTest()
+    .then(res => { // If you do not want to use redis, comment out this line.
+      logger.info(res.message);
+    })
+    .catch((err) => {
+      logger.error(`Fail to connect to Redis[Error]: ${err.message}`);
+      process.exit(3); // 如果连不上数据库直接终止进程
+    });
+  // <<< test redis/mysql connection <<<
+
+  // >>> import middleware and load router >>>
   app
     .use(koa_session(KOA_SESSION_CONFIGURE, app)) // Use koa-session with `hypethron:sess` as cookie-key(default)
     .use(accessLogger()) // Use access-logger for koa
@@ -89,7 +114,6 @@ app.keys = COOKIE_KEY_LIST;
 
 
     // >>> Ready to start the server >>>
-    // Start the router and Server Start!
     if (SERVER_CONFIG[i].enableSLL) {
       const sslOptions = {
         key: fs.readFileSync(SERVER_CONFIG[i].sslOptions.key),
@@ -103,37 +127,14 @@ app.keys = COOKIE_KEY_LIST;
         _serverStartTip(SERVER_NAME, PORT, false);
       });
     }
-
+    // <<< Ready to start the server <<<
   }
 
-  // Add an logger, and bind it to this server
-  const logger = log4js.getLogger('application');
-  logger.addContext('loggerName', 'Hypethron');
-  registerLogger(logger);
-  // <<< Ready to start the server <<<
-
-  // test redis connection
-  // If you do not want to use redis, comment out this line.
-  await redisConnectTest()
-    .then(res => {
-      logger.info(res.message);
-    })
-    .catch((err) => {
-      logger.error(`Fail to connect to Redis[Error]: ${err.message}`);
-      process.exit(1); // 如果连不上数据库直接终止进程
+  // Get MySQL connection pool with default options
+  getMySQLPool()
+    .then((pool) => {
+      global.mysqlPool = pool;
     });
-
-  await mysqlConnectTest()
-    .then(res => {
-      logger.info(res.message);
-    })
-    .catch((err) => {
-      logger.error(`Fail to connect to MySQL[Error]: ${err.message}`);
-      process.exit(1); // 如果连不上数据库直接终止进程
-    });
-
-  console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
-  console.log(chalk.bold("---------------------------------------------------------"));
 })();
 
 
@@ -146,8 +147,10 @@ app.keys = COOKIE_KEY_LIST;
 function _serverStartTip(NAME, PORT, ssl) {
   let protocol = ssl ? 'https' : 'http';
   console.log(chalk.bold("-----[" + new Date() + "]-----\n"));
-  console.log(chalk.greenBright(`Server[${NAME}] Open In Port[${PORT}] Successfully! Waiting for Database connection..\n`));
+  console.log(chalk.greenBright(`Server[${NAME}] Open In Port[${PORT}] Successfully!\n`));
   console.log(chalk.cyan(`Local-HOST Start At:\t ${protocol}://localhost:${PORT}/\n`));
+  console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
+  console.log(chalk.bold("---------------------------------------------------------"));
 }
 
 
@@ -158,4 +161,5 @@ function _serverStartTip(NAME, PORT, ssl) {
 function registerLogger(logger) {
   global.logger = logger;
 }
+
 
