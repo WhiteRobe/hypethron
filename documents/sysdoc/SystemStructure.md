@@ -42,7 +42,7 @@
 
 数据库采用**Redis***(5.0.5)*+**MySQL***(8.0.16)*的双数据库配置。前者用于处理热数据及提供非侵入式的数据可视化接口，后者用于基本Web应用业务及冷数据的固化。
 
-其中，Redis的配置情况可参考[如何正确安装Redis数据库](/documents/HowToInstallRedis.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
+其中，数据库的安装、配置情况可参考[如何正确安装Redis数据库](/documents/HowToInstallRedis.md)、[如何正确安装MySQL数据库](/documents/HowToInstallMySQL.md)和[数据库配置](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)。
 
 Redis数据库的接入依赖采用`ioredis`，你可以到[此处获取其文档](https://www.npmjs.com/package/ioredis)。
 
@@ -50,7 +50,7 @@ MySQL数据库的接入依赖采用`mysql`，你可以到[此处获取其文档]
 
 ### 接口开发
 
-接口开发采用RESTful的方式，同时所有的私有接口均暴露在`/api/`地址下。由于采用了前后端分离的SPA开发方案，前端仅通过AJAX与后端交互，没有任何SSR的内容，配合接口文档可以进行二次和跨平台开发。
+接口开发采用RESTful的方式，同时所有的私有接口均暴露在`/api/*`地址下。由于采用了前后端分离的SPA开发方案，前端仅通过AJAX与后端交互，没有任何SSR的内容，配合接口文档可以进行二次和跨平台开发。
 
 - 详细接口文档可参考：[接口文档|API doc](/documents/sysdoc/APIdoc.md)。
 
@@ -92,7 +92,7 @@ router.use("/pages", staticPageRouter.routes(), staticPageRouter.allowedMethods(
 `Authorization`: `Bearer <token>`，其中 `<token>` 的值由`jsonwebtoken`进行签发。
 该部分内容请参考 [`koa-jwt`的文档](https://www.npmjs.com/package/koa-jwt) 和 [/server/server-configure.js](/server/server-configure.js)。
 
-在默认配置下，服务器路径中所有被映射到`/`、`/static/*`、`/pages/*`、`/papi`的资源都是不受JWT保护的，该部分配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
+在默认配置下，服务器路径中所有被映射到`/`、`/static/*`、`/pages/*`、`/papi/*`的资源都是不受JWT保护的，该部分配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
 
 
 ### 会话管理
@@ -106,7 +106,7 @@ console.log(ctx.session.name); // 后台会自动解码
 ```
 
 被设置到`ctx.session`中的值会被加密和签名中放到Cookie中。
-默认设置下，你可以通过`ctx.cookies.get('hypethron:sess')`取到原值；通过`ctx.cookies.get('hypethron:sess.sig')`获得签名(SHA256)，然后用其进行验证(后台已经实现了这部分功能，您不必操心)。
+默认设置下，你可以通过`ctx.cookies.get('hypethron:sess')`取到原值；通过`ctx.cookies.get('hypethron:sess.sig')`获得签名(SHA256)，然后用其进行验证(后台已经实现了这部分功能，除特别需要，您不必操心)。
 
 > 我们推荐您在二次开发时使用JWT来控制访问权限，而不是将此类信息通过session、cookie进行保管和传输。
 
@@ -127,3 +127,14 @@ console.log(ctx.session.name); // 后台会自动解码
 我们采用`react-redux`在根目录的路由组件进行全局注入，这样，SPA的子组件均可以通过`react-redux.connect()`方法建立与Redux的联系。
 
 关于如何进行状态管理和与Redux进行交互，请参考 [如何连接Redux|How To Connect To Redux](/documents/HowToConnectToRedux.md) 和 [演示DEMO](/src/components/ReduxDemo/ReduxDemo.js)。
+
+### 前后端路由交叉
+
+应用采用SPA的开发方式，前端路由和后端路由需要进行一定的转换。
+我们规定，所有前端SPA的页面均需在`/pages/*`地址下，由服务端将其进行映射。SPA的路由通过`react-router-dom`进行管理。
+
+请参考下图所示架构：
+
+![](/documents/pics/router-structure.png)
+
+关于前端页面的路由注册，请参考: [文档-静态服务器](#静态服务器)

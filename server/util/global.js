@@ -6,7 +6,9 @@
 
 
 const global = {
-  logger: null// 日志对象
+  logger: null,// 日志对象
+  mysqlPool: null, // MySQL连接池
+  redisPool: null // Redis连接池
 };
 
 module.exports.global = global;

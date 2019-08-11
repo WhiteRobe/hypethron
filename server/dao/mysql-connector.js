@@ -5,7 +5,7 @@ const MYSQL_CONFIG = require("./mysql-configure.js");
 
 /**
  * 连接MySQL
- * @param opt 连接选项 @See https://github.com/luin/ioredis/blob/HEAD/API.md#new-redisport-host-options
+ * @param opt 连接选项 @See https://www.npmjs.com/package/mysql#connection-options
  * @param connectDetail 连接详情选项
  * @return {Connection}
  */
@@ -25,8 +25,8 @@ function connectMySQL(connectDetail, opt) {
 
 
 /**
- * 获得一个MySQL连接线程池
- * @param opt 连接选项 @See https://github.com/luin/ioredis/blob/HEAD/API.md#new-redisport-host-options
+ * 获得一个MySQL连接池
+ * @param opt 连接选项 @See https://www.npmjs.com/package/mysql#connection-options
  * @return {Promise<Pool>}
  */
 async function getMySQLPool(opt){

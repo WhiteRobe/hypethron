@@ -14,7 +14,7 @@ function HypethronIntroPage() {
         <br/>
 
         <p>
-          hypethron/院庭 是一款基于<code>React</code>和<code>Node.js</code>的人员信息可视化、统计和管理系统。
+          hypethron/院庭 是一款基于<code>React</code>和<code>Node.js</code>的信息可视化、统计和管理系统。
         </p>
 
         <a className="HypethronIntroPage-link" href="https://github.com/WhiteRobe/hypethron"

@@ -31,14 +31,14 @@
 
 ## 介绍 Introduction
 
-"hypethron/院庭"是一款基于React和Node.js的人员信息可视化、统计和管理系统。
+"hypethron/院庭"是一款基于React和Node.js的信息可视化、统计和管理系统。
 
 整体将采用 **React+Node.js(koa)** 前后端分离的开发模式，数据库采用**Redis**+**MySQL**，系统功能将包含以下内容：
 
 - 管理员后台系统
-- 人员信息采集系统
-- 人员信息可视化统计(Echarts实现)
-- 人员信息管理
+- 基本信息采集系统
+- 基本信息可视化统计(Echarts实现)
+- 基本信息管理
 - 高级过滤搜索
 - 数据库导出、备份
 - 多级权限控制
@@ -118,6 +118,7 @@ family | IP版本 | 4
 password | 数据库访问密码 | "password"
 db | 所使用的数据库ID | 0
 connectionName | 连接名 | "default"
+poolOption | 连接池配置 | 参考[此处](https://www.npmjs.com/package/generic-pool)
 
 你可以添加其它的配置，请参考：[ioredis配置](https://github.com/luin/ioredis/blob/HEAD/API.md#new_Redis)。
 
@@ -175,6 +176,8 @@ connectionLimit | 连接池大小 | 10
 ## 项目文档
 
 我们将提供开发过程中的各类文档，请查看我们的[Wiki](https://github.com/WhiteRobe/hypethron/wiki)。
+
+[查看项目依赖](https://github.com/WhiteRobe/hypethron/network/dependencies)
 
 ## 社区指南 Contributing
 

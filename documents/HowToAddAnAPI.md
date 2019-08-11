@@ -33,12 +33,12 @@ const addFunc = require('./Add.js');
 // ....Origin Code Here
 
 apiRouter.get("/addServer", async (ctx, next) =>{
-  ctx.response.body = addFunc(1, 2);
+  ctx.response.body = addFunc(1, 2); // 由于原业务函数非异步函数，因此需以委托模式进行调用
   return next(); // 请一定要注意调用next()方法
 });
 ```
 
-你也可以把`function add(a, b)`编写为一个异步函数，并直接进行注册：
+如果不想以委托模式进行函数调用，你也可以把`function add(a, b)`编写为一个异步函数，并直接进行注册：
 ```
 // 添加业务逻辑
 async function add(ctx, next){
@@ -56,7 +56,9 @@ apiRouter.get("/addServer", add);
 
 ## 表注册
 
-像上文中所提到的那样，先要把业务逻辑作为一个异步函数，然后在`/server/controller/api-router.js`文件中进行表注册。
+- 表注册是一种更简单的约束形API注册方式。它可以简化和规范化上文中[手动注册]的各种步骤。
+
+进行表注册时，像上文中所提到的那样，你需要把业务逻辑作为一个异步函数，然后在`/server/controller/api-router.js`文件中进行表注册。
 
 > 注意：添加异步函数时，一定要在所有函数的出口显式调用`next()`方法。
 
@@ -67,13 +69,12 @@ apiRouter.get("/addServer", add);
 methods|对应的HTTP方法|array| [METHOD_GET, METHOD_POST]
 services|业务对象|array[async function]|async (ctx, next) => {}
 
-注册时采用的键值即为其路由表的地址。
+注册时采用的键值即为其路由表的地址。如：
 
-如：
 ```
 "/apiExample": {
-    methods: [METHOD_GET],
-    service: [async (ctx, next) => {
+    methods: [METHOD_GET], // 绑定GET方法，你也可以添加多个方法
+    service: [async (ctx, next) => { // 具体的业务逻辑
       console.log("/api/apiExample body", ctx.request.body);
       console.log("/api/apiExample query", ctx.request.query);
       ctx.body = ctx.request.body ? ctx.request.body : ctx.request.query;
@@ -85,12 +86,13 @@ services|业务对象|array[async function]|async (ctx, next) => {}
 
 ---
 
-在`/server/util`中我们提供了新的工具包，你只需要导入该工具包，即可以更方便的方式绑定接口：
-`const binder = require("../util/api-binder.js")`
+在`/server/util`中我们提供了新的工具包，你只需要导入该工具包，即可以更方便的方式绑定接口，如: `const binder = require("../util/api-binder.js")`
 
 你现在只需要定义相关业务函数，如`echo.js`：
 
 ```
+const binder = require("/util/api-binder.js");
+
 // 需要以HTTP方法名开头，以下划线作方法名切分
 async function GET_echo(ctx, next) {
   ctx.body = "服务器已收到：" + ctx.request.query ;
@@ -122,10 +124,20 @@ const API_ROUTER_TABLE = {
 
 在 `/server/controller/api-router.js` 的存在两份路由表，其中:
 - `API_ROUTER_TABLE` 将绑定受到JWT保护的服务器地址，所有内容将被映射到`/api`路径下。
-- `PUBLIC_API_ROUTER_TABLE` 公共接口不收JWT保护，所有内容将被映射到`/papi`路径下。
+- `PUBLIC_API_ROUTER_TABLE` 公共接口不受JWT保护，所有内容将被映射到`/papi`路径下。
 
 如果您有二次开发的需要：
 访问控制配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
 映射地址请在[`/server/server-router.js`](/server/server-router.js)中进行自定义。
 
 > 如果您不了解什么是JWT，请参考此处：[https://jwt.io/](https://jwt.io/)
+
+### 路由架构
+
+应用路由架构如下图所示：
+
+<p align="center">
+    <img src="/documents/pics/router-structure.png"/>
+</p>
+
+详见: [文档-前后端路由交叉](/documents/sysdoc/SystemStructure.md#前后端路由交叉)

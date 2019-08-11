@@ -13,8 +13,9 @@ const chalk = require('chalk');  // @See  https://www.npmjs.com/package/chalk
 const path = require('path');
 const fs = require('fs');
 
-const {redisConnectTest} = require('./dao/redis-connector.js');
+const {redisConnectTest, getRedisPool} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
+const {buildTables} = require('./dao/database-init.js');
 
 const {
   SERVER_DEBUG,
@@ -130,10 +131,18 @@ app.keys = COOKIE_KEY_LIST;
     // <<< Ready to start the server <<<
   }
 
-  // Get MySQL connection pool with default options
-  getMySQLPool()
+  // Get MySQL/Redis connection pool with default options
+  await getMySQLPool()
     .then((pool) => {
-      global.mysqlPool = pool;
+      registerMySQLPool(pool);
+      pool.getConnection((err, conn)=>{
+        if (err) throw err;
+        buildTables('./server/dao/hypethron-database.sql', conn); // init mysql-database's tables
+      });
+    });
+  await getRedisPool()
+    .then((pool) =>{
+      registerRedisPool(pool)
     });
 })();
 
@@ -162,4 +171,19 @@ function registerLogger(logger) {
   global.logger = logger;
 }
 
+/**
+ * Register a mysql-connection pool to /utils/global.js
+ * @param pool
+ */
+function registerMySQLPool(pool){
+  global.mysqlPool = pool;
+}
+
+/**
+ * Register a redis-connection pool to /utils/global.js
+ * @param pool
+ */
+function registerRedisPool(pool){
+  global.redisPool = pool;
+}
 

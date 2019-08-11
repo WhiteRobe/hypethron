@@ -1,5 +1,6 @@
 const Redis = require("ioredis");
 const chalk = require('chalk');
+const genericPool = require('generic-pool');
 const REDIS_CONFIG = require("./redis-configure.js");
 
 
@@ -19,6 +20,22 @@ function connectRedis(connectDetail, opt){
     console.log();
   }
   return new Redis(opt);
+}
+
+/**
+ * 获得一个Redis连接池
+ * @param opt 连接选项
+ * @See https://github.com/luin/ioredis/blob/HEAD/API.md#new-redisport-host-options
+ * @See https://www.npmjs.com/package/generic-pool
+ * @return {Promise<Pool>}
+ */
+async function getRedisPool(opt){
+  opt = opt || REDIS_CONFIG;
+  let factory = {
+    create: () => new Redis(opt),
+    destroy: (client) => client.disconnect()
+  };
+  return genericPool.createPool(factory, opt.poolOption);
 }
 
 
@@ -49,5 +66,6 @@ async function redisConnectTest() {
 
 module.exports = {
   connectRedis,
+  getRedisPool,
   redisConnectTest
 };
