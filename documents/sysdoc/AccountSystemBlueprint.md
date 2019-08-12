@@ -47,7 +47,11 @@
 
 账户信息及附属信息(如，头像、Nickname等内容)，仅通过UID进行级联，而不放在同一个表里。
 
-8. 用户权限(Authority)设计
+8. 简化用户转化流程
+
+用户注册时，除所必须的信息(如，登录账号和密码)，其余信息均在注册成功后首次登录后引导用户进行更改，同时应注意生成或给定默认值。
+
+9. 用户权限(Authority)设计
 
 用户权限为一个32位整数值，通过位运算叠加、比对用户的相应权限。
 
@@ -87,7 +91,7 @@ Account|VARCHAR(-)|用户账户
 OpenID|VARCHAR(-)|开放账户
 Password|CHAR(32)|用户密码(Hash)
 Salt|CHAR(-)|用户的盐
-Authority|INT|用户的权限
+Authority|INT UNSIGNED|用户的权限
 
 详细用户账户表设计及用户资料表等附属表，参见：[hypethron-database.sql](/server/dao/hypethron-database.sql)。
 

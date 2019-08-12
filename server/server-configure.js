@@ -35,11 +35,13 @@ const SERVER_DEBUG = true;
 const SKIP_HYPETHRON_INTRO_PAGE = false;
 const STATIC_DIRECTORY = '../build'; // Where the production-spa is
 const SERVER_PRIVATE_KEY = "WhiteRobe/hypethron@Github"; // 服务器私钥
-const MD5_SALT = "WhiteRobe/hypethron@Github"; // MD5 salt
+const SERVER_SALT = "WhiteRobe/hypethron@Github"; // Server salt
 const JWT_PROTECT_UNLESS = [/^\/[\w\.]*$/, /^\/static/, /^\/pages/, /^\/papi/]; // 非JWT控制目录
 const JWT_OPTIONS = {
-  audience: "github",
-  issuer: "WhiteRobe/hypethron@Github"
+  algorithm: "HS256",
+  audience: "hypethron/users",
+  issuer: "WhiteRobe/hypethron@Github",
+  expiresIn: "7d"
 };
 const KOA_JWT_CONFIGURE = { // JWT的解码值将会存放到 ctx.state.jwtData 中，原值将被放到 ctx.state.originToken
   secret: SERVER_PRIVATE_KEY,
@@ -74,7 +76,7 @@ module.exports.SERVER_CONFIG = SERVER_CONFIG;
 module.exports.SKIP_HYPETHRON_INTRO_PAGE = SKIP_HYPETHRON_INTRO_PAGE;
 module.exports.STATIC_DIRECTORY = STATIC_DIRECTORY;
 module.exports.SERVER_PRIVATE_KEY = SERVER_PRIVATE_KEY;
-module.exports.MD5_SALT = MD5_SALT;
+module.exports.SERVER_SALT = SERVER_SALT;
 module.exports.JWT_PROTECT_UNLESS = JWT_PROTECT_UNLESS;
 module.exports.JWT_OPTIONS = JWT_OPTIONS;
 module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;

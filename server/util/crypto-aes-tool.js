@@ -47,5 +47,4 @@ function aesDecrypt(sign, algorithm, key, iv) {
   return src;
 }
 
-
 module.exports = { aesDecrypt, aesEncrypt };

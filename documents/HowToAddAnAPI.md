@@ -141,3 +141,36 @@ const API_ROUTER_TABLE = {
 </p>
 
 详见: [文档-前后端路由交叉](/documents/sysdoc/SystemStructure.md#前后端路由交叉)
+
+### 接口数据管理与开发
+
+1. 你可以使用 `ctx.request.query` 来获取`GET|HEAD|DELETE`方法传入的参数，其值为一个对象(Object)，如： `GET http://...?a=7&b=8`，将会得到:
+
+```
+console.log(ctx.request.query, ctx.request.query.a)
+    =>  {a=7, b=8}, 8
+```
+
+2. 你可以使用 `ctx.request.body` 来获取`POST|PUT|PATCH`方法传入的参数，其值为一个对象(Object)，内容同上。
+
+3. 对于koa与内部异步函数的处理，如mysql的异步查询，可以通过[如下方式](/server/controller/username.js)来进行同步：
+```
+async function GET_username(ctx, next) {
+  let mysql = ...;
+  let username = ctx.request.query.username; // 1. 获取传入的参数
+
+  let result = await new Promise(( resolve, reject )=>{ // 2. 新建一个Promise，并进行await同步
+    mysql.query('SELECT salt FROM user_account WHERE username=?', [username, username], (err, res, )=>{
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res); // 3. 给出结果
+      }
+    });
+  });
+
+  ctx.body = result; // 4. 同步结果并向前端输出
+
+  return next();
+}
+```

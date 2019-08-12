@@ -21,6 +21,7 @@ function buildTables(sqlFileUrl, mysql){
       mysql.query(i+';', (err, res, fields) => {
         if (err) throw err;
         // else console.log(res, fields);
+        // mysql.release();
       });
     }
   } catch (err) {
