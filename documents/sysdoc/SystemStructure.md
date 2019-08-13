@@ -92,7 +92,7 @@ router.use("/pages", staticPageRouter.routes(), staticPageRouter.allowedMethods(
 `Authorization`: `Bearer <token>`，其中 `<token>` 的值由`jsonwebtoken`进行签发。
 该部分内容请参考 [`koa-jwt`的文档](https://www.npmjs.com/package/koa-jwt) 和 [/server/server-configure.js](/server/server-configure.js)。
 
-在默认配置下，服务器路径中所有被映射到`/`、`/static/*`、`/pages/*`、`/papi/*`的资源都是不受JWT保护的，该部分配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
+在默认配置下，服务器路径中所有被映射到`/`、`/static/*`、`/pages/*`、`/papi/*`的资源都是默认不受JWT保护的(你仍可以[手动进行JWT验证](/server/util/tools.js))，该部分配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
 
 
 ### 会话管理

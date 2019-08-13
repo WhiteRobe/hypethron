@@ -6,6 +6,7 @@
 
 - ["/username"](#username)
 - ["/login"](#login)
+- ["/userAccount"](#"/userAccount")
 
 [私有接口](#私有接口)
 
@@ -15,6 +16,8 @@
 > 所有的服务器接口都将返回一个字段 { msg: $String, (如果发生错误)errorDetail:$String }，用以指示本次请求的操作结果细节，下文不再列出。
 
 ### 公共接口
+
+> 公共接口指默认不受JWT保护的地址，但可以进行手动进行JWT加护。
 
 #### "/username"
 
@@ -31,7 +34,16 @@
 **POST**：通过账号进行登录，返回一个登录是否成功的标志和服务器签发的Token
 
 ```
-@input { username: $String, password: $String,  }
+@input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String  }
+@output { success: $Boolean, token: $String }
+```
+
+#### "/userAccount"
+
+**POST**：注册接口，返回一个注册是否成功的标志和服务器签发的Token
+
+```
+@input { username: $String, account: $String,  password:$String, salt:$String }
 @output { success: $Boolean, token: $String }
 ```
 

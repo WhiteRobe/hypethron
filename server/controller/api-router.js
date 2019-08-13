@@ -9,6 +9,7 @@ const binder = require("../util/api-binder.js");
 //_______import your api here________//
 const loginService = require('./login.js');
 const usernameService = require('./username.js');
+const userAccountService = require('./userAccount.js');
 
 //____________________________ ______//
 
@@ -62,7 +63,8 @@ const API_ROUTER_TABLE = {
  */
 const PUBLIC_API_ROUTER_TABLE = {
   "/login": binder(loginService),
-  "/username" :binder(usernameService)
+  "/username" :binder(usernameService),
+  "/userAccount": binder(userAccountService)
 };
 
 

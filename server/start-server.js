@@ -16,6 +16,7 @@ const fs = require('fs');
 const {redisConnectTest, getRedisPool} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
 const {buildTables} = require('./dao/database-init.js');
+const {MySQLPoolManager} = require('./dao/db-manager.js');
 
 const {
   SERVER_DEBUG,
@@ -176,7 +177,7 @@ function registerLogger(logger) {
  * @param pool
  */
 function registerMySQLPool(pool){
-  global.mysqlPool = pool;
+  global.mysqlPoolDM = new MySQLPoolManager(pool);
 }
 
 /**

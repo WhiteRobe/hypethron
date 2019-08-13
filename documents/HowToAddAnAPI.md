@@ -124,7 +124,7 @@ const API_ROUTER_TABLE = {
 
 在 `/server/controller/api-router.js` 的存在两份路由表，其中:
 - `API_ROUTER_TABLE` 将绑定受到JWT保护的服务器地址，所有内容将被映射到`/api`路径下。
-- `PUBLIC_API_ROUTER_TABLE` 公共接口不受JWT保护，所有内容将被映射到`/papi`路径下。
+- `PUBLIC_API_ROUTER_TABLE` 公共接口默认不受JWT保护[手动进行JWT验证](/server/util/tools.js)，所有内容将被映射到`/papi`路径下。
 
 如果您有二次开发的需要：
 访问控制配置可到[`/server/server-configure.js`](/server/server-configure.js)中进行自定义。
@@ -153,7 +153,7 @@ console.log(ctx.request.query, ctx.request.query.a)
 
 2. 你可以使用 `ctx.request.body` 来获取`POST|PUT|PATCH`方法传入的参数，其值为一个对象(Object)，内容同上。
 
-3. 对于koa与内部异步函数的处理，如mysql的异步查询，可以通过[如下方式](/server/controller/username.js)来进行同步：
+3. 对于koa与内部异步函数的处理，如mysql的异步查询，可以通过如下方式来进行同步：
 ```
 async function GET_username(ctx, next) {
   let mysql = ...;

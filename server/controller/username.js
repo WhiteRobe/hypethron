@@ -1,4 +1,5 @@
 const {global, RES_MSG} = require('../util/global.js');
+
 // const {generateSalt} = require('../util/crypto-hash-tool.js');
 
 /**
@@ -7,26 +8,22 @@ const {global, RES_MSG} = require('../util/global.js');
  * @output { exists: $Boolean, salt: $String }
  */
 async function GET_username(ctx, next) {
-  let mysql = global.mysqlPool;
+  let mysql = global.mysqlPoolDM;
   let logger = global.logger;
   let username = ctx.request.query.username;
   try {
-    let result = await new Promise((resolve, reject) => {
-      mysql.query('SELECT salt FROM user_account WHERE username=? or account=? ', [username, username], (err, res, fields) => {
-        if (err) {
-          logger.error(err);
-          // reject(err);
-          throw err;
-        } else {
-          resolve(res);
-        }
-      });
+
+    let cb = await mysql.query(
+      'SELECT salt FROM user_account WHERE username=? or account=? ',
+      [username, username]
+    ).catch(err => {
+      throw err
     });
 
-    if (result.length > 0) {
+    if (cb.result.length > 0) {
       ctx.body = {
         exists: true,
-        salt: result[0].salt,
+        salt: cb.result[0].salt,
         //newSalt: generateSalt(16), // 改由前端生成，节约服务器计算成本
         msg: RES_MSG.OK
       }
@@ -41,8 +38,10 @@ async function GET_username(ctx, next) {
 
   } catch (err) {
     ctx.body = {
+      exists: false,
+      salt: null, // ，节约服务器计算成本
       msg: RES_MSG.DATABASE_ERROR,
-      errorDetail: err.code+":"+err.message // mysql error. @See https://www.npmjs.com/package/mysql#error-handling
+      errorDetail: err.code + ":" + err.message // mysql error. @See https://www.npmjs.com/package/mysql#error-handling
     }
   }
 
