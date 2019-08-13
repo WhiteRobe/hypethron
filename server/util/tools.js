@@ -15,7 +15,7 @@ function timeUsage(func) {
  * 验证一个Token
  * @param token
  * @param key
- * @param options
+ * @param options @See https://www.npmjs.com/package/jsonwebtoken
  * @return {Promise<*>}
  */
 async function jwtVerify(token, key, options) {
@@ -24,7 +24,8 @@ async function jwtVerify(token, key, options) {
   if (!token) {
     throw new TypeError("TokenNotFound");
   }
-  return new Promise((reject, resolve) => {
+  token = token.replace(/^Bearer /, ""); // 移除 koa-jwt的保护字段 "Bearer <token>"
+  return new Promise((resolve, reject) => {
       jwt.verify(token, key, options, (err, decoded) => {
         if (err) {
           reject(err);
@@ -36,7 +37,21 @@ async function jwtVerify(token, key, options) {
   );
 }
 
+
+/**
+ * Is an error is a instance of JsonWebTokenError?
+ * @param err
+ * @return {Promise<boolean>}
+ */
+function isJwtError(err){
+  // Or just -> return err instanceof jwt.JsonWebTokenError;
+  return err instanceof jwt.JsonWebTokenError
+    || err instanceof jwt.NotBeforeError
+    || err instanceof jwt.TokenExpiredError;
+}
+
 module.exports = {
   timeUsage,
-  jwtVerify
+  jwtVerify,
+  isJwtError
 };

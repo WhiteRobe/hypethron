@@ -6,14 +6,14 @@
 
 - ["/username"](#username)
 - ["/login"](#login)
-- ["/userAccount"](#"/userAccount")
+- ["/userAccounts/:uid"](#"/userAccounts/:uid")
 
 [私有接口](#私有接口)
 
 
 ---
 
-> 所有的服务器接口都将返回一个字段 { msg: $String, (如果发生错误)errorDetail:$String }，用以指示本次请求的操作结果细节，下文不再列出。
+- **注意**：所有的服务器接口都将返回一个字段 `{ msg: $String }`，用以指示本次请求的操作结果细节，还将返回 `{ errorDetail:$String }`。
 
 ### 公共接口
 
@@ -38,15 +38,54 @@
 @output { success: $Boolean, token: $String }
 ```
 
-#### "/userAccount"
+#### "/userAccounts/:uid"
 
-**POST**：注册接口，返回一个注册是否成功的标志和服务器签发的Token
+> `${uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
+
+**GET**：用户查询，返回用户的账户信息，对权限有要求。当uid=0时通过过滤模式筛选所有符合要求的人信息。
 
 ```
+When `ctx.params.{uid}` = 0:
+  @input { filter: $Values }
+    => filter: {      page: $int, // 当前页(必填)；从1起
+    max: $int, // 每页最大数据量(必填)；最大为50
+    // 下面两项至少需要一项
+    username: $String, // 用户的 username 或 account 或 openid (支持模糊检索)
+    authority: $int, // 目标用户权限
+  }
+Else:
+  @input { / }
+@output { result:$Array }
+```
+
+**POST**：即注册接口，返回一个注册是否成功的标志和服务器签发的Token
+
+```
+* When do POST, only response on ".../userAccounts/0"
 @input { username: $String, account: $String,  password:$String, salt:$String }
 @output { success: $Boolean, token: $String }
 ```
 
+**PUT**：RESTful 完全更改用户账户信息表的接口，对权限有要求。返回操作是否成功的标志。`ctx.params.{uid}` 为要更改的账号的UID。
+
+```
+@input { username:$String, account:$String, openid:$String, password:$String, salt:$String, authority:$Integer }
+@output { success: $Boolean }
+```
+
+**PATCH**：部分更改用户账户信息表的接口，对权限有要求。返回操作是否成功的标志。`ctx.params.{uid}` 为要更改的账号的UID。
+
+```
+@input { username:$String, account:$String, openid:$String, password:$String, salt:$String, authority:$Integer }
+@output { success: $Boolean }
+```
+
+**DELETE**：删除用户账户信息表(及级联表)的接口，对权限有要求。返回操作是否成功的标志。`ctx.params.{uid}` 为要删除账号的UID。
+
+```
+@input { / }
+@output { success: $Boolean }
+```
 
 ### 私有接口
 

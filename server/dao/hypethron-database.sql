@@ -1,6 +1,6 @@
 /* 用户信息表 */
 CREATE TABLE IF NOT EXISTS user_account(
-    /* 用户标识符 */ uid INTEGER UNSIGNED AUTO_INCREMENT /* 自0起的无符号正整数 */,
+    /* 用户标识符 */ uid INTEGER UNSIGNED AUTO_INCREMENT /* 自1起的无符号正整数 */,
     /* 用户名 */ username VARCHAR(16) UNIQUE NOT NULL /* 长度在6~16(含)的字符，合法字符为英文、数字和下划线 */,
     /* 用户账户 */ account VARCHAR(50) UNIQUE NOT NULL /* 另作定义，原则上为通过正则合法性校验的邮箱、手机号码(含国际区号) */,
     /* 开放账户 */ openid VARCHAR(100) DEFAULT '' /* 另作定义，原则上为一个具有具体含义的Token串 */,

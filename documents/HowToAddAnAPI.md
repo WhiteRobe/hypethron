@@ -2,6 +2,8 @@
 
 
 > 虽然系统采用**RESTful**的形式定义接口，但如果你对RESTful并不熟悉，在二次开发中并不太需要严格死守这条规定。
+>
+> 同时，您可能需要对 [koa-router](https://www.npmjs.com/package/koa-router#module_koa-router--Router+route) 有所了解。
 
 ## 手动注册
 

@@ -20,12 +20,30 @@ const RES_MSG = {
   "UPLOAD_FAIL": "文件上传失败！",
   "DATABASE_ERROR": "数据库错误。",
   "JWT_NOT_FOUND": "缺失TOKEN。",
-  "JWT_TOKEN_INVALID": "JWT验证不通过。"
+  "JWT_TOKEN_INVALID": "JWT验证不通过。",
+  "AUTH_LOW": "用户权限过低",
+  "MISS_PARAMS": "缺失必要参数"
 };
 
+
+/**
+ * 权限表
+ */
+const AUTH = {
+  "BAN": 1, // 封禁用户
+  "ORDINARY":2, // 普通用户
+  "VIP":4, // 付费用户
+  "ADMIN":8, // 管理员
+  "SUPER_ADMIN":16, // 超级管理员
+  "ADMIN_GROUP": 24, // 管理组(8+16)
+  // ------ //
+  "TRAFIC_DATA_READ":2048, // 流量数据分析
+  "USER_DATA_ANALYSIS":4096 // 用户数据分析
+};
 
 
 module.exports = {
   global,
-  RES_MSG
+  RES_MSG,
+  AUTH
 };
