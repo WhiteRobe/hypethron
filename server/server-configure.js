@@ -79,6 +79,15 @@ const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-sessio
   // }
   //Use external session stores only if necessary, avoid using session as a cache, keep the session lean, and store it in a cookie if possible!
 };
+const RATE_LIMIT_CONFIGURE = {  // @See https://github.com/koajs/ratelimit
+  // db: new Redis(),
+  duration: 60000, // (ms)
+  errorMessage: '喝杯咖啡休息一下吧./Sometimes You Just Have to Slow Down.',
+  id: (ctx) => ctx.ip,
+  max: 600,
+  disableHeader: false,
+};
+
 // <<< 服务器运行常量 <<<
 
 
@@ -93,3 +102,4 @@ module.exports.JWT_OPTIONS = JWT_OPTIONS;
 module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
 module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
 module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
+module.exports.RATE_LIMIT_CONFIGURE = RATE_LIMIT_CONFIGURE;

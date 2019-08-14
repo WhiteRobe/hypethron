@@ -1,5 +1,5 @@
 const {global, RES_MSG} = require('../../util/global.js');
-const{generatorCaptcha} = require('../../util/tools.js');
+const {generatorCaptcha} = require('../../util/tools.js');
 
 
 /**
@@ -12,8 +12,15 @@ async function GET_captcha(ctx, next) {
   try {
     let captcha = ctx.request.query.captcha;
 
+    // 不区分大小写
+    let isMatched = ctx.session.captcha && captcha && (captcha.toUpperCase() === ctx.session.captcha.toUpperCase());
+
+    if (isMatched) {
+      ctx.session.captcha = null; // 清空数据
+    }
+
     ctx.body = {
-      success: captcha.toUpperCase() === ctx.session.captcha.toUpperCase() // 不区分大小写
+      success: !!isMatched
     };
 
 

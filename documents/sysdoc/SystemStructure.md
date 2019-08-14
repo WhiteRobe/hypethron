@@ -14,7 +14,7 @@
 - 数据库: `Redis`*(5.0.5)* + `MySQL`*(8.0.16)*
 - 数据库接入: `ioredis`、`mysql`
 - 后端框架: `koa`
-- 主要中间件:  `koa-jwt`(身份验证)、`koa-compress`(数据压缩)、`koa-log4`(服务器日志)、`koa-router`(服务器路由)、`koa-static`(静态文件服务器)
+- 主要中间件:  `koa-jwt`(身份验证)、`koa-compress`(数据压缩)、`koa-log4`(服务器日志)、`koa-router`(服务器路由)、`koa-static`(静态文件服务器)、`koa-ratelimit`(DDOS攻击防护)
 
 - 持续集成测试及统计: `Travis CI` 、 `Coveralls`
 - Git仓库: `github`
@@ -30,6 +30,7 @@
 - "koa-helmet": "^4.2.0"
 - "koa-ip-filter": "^3.0.0"
 - "koa-log4": "^2.3.2"
+- "koa-ratelimit": "^4.2.0",
 - "koa-router": "^7.4.0"
 - "koa-static": "^5.0.0"
 - "koa-jwt": "^3.6.0"

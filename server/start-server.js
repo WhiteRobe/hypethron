@@ -5,6 +5,7 @@ const koa_helmet = require('koa-helmet');
 const koa_convert = require('koa-convert'); // Convert koa legacy generator middleware to modern promise middleware.
 const koa_jwt = require('koa-jwt');
 const koa_session = require('koa-session');
+const ratelimit = require('koa-ratelimit');
 
 const http = require('http');
 const https = require('https');
@@ -13,7 +14,7 @@ const chalk = require('chalk');  // @See  https://www.npmjs.com/package/chalk
 const path = require('path');
 const fs = require('fs');
 
-const {redisConnectTest, getRedisPool} = require('./dao/redis-connector.js');
+const {connectRedis, redisConnectTest, getRedisPool} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
 const {buildTables} = require('./dao/database-init.js');
 const {MySQLPoolManager} = require('./dao/db-manager.js');
@@ -26,7 +27,8 @@ const {
   KOA_JWT_CONFIGURE,
   JWT_PROTECT_UNLESS,
   COOKIE_KEY_LIST,
-  KOA_SESSION_CONFIGURE
+  KOA_SESSION_CONFIGURE,
+  RATE_LIMIT_CONFIGURE
 } = require('./server-configure.js');
 const {log4js, accessLogger} = require("./logger-configure.js");
 const router = require('./server-router.js');
@@ -68,6 +70,7 @@ app.keys = COOKIE_KEY_LIST;
 
   // >>> import middleware and load router >>>
   app
+    .use(ratelimit(Object.assign({db: connectRedis()}, RATE_LIMIT_CONFIGURE)))
     .use(koa_session(KOA_SESSION_CONFIGURE, app)) // Use koa-session with `hypethron:sess` as cookie-key(default)
     .use(accessLogger()) // Use access-logger for koa
     .use(koa_convert(koaIpFilter())) // Ip filter, and 'koa-ip-filter' should be convert
