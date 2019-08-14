@@ -11,6 +11,8 @@ const loginService = require('./account/login.js');
 const usernameService = require('./account/username.js');
 const userAccountsService = require('./account/userAccounts.js');
 const captchaService = require('./general/captcha.js');
+const userProfilesService = require('./account/userProfiles.js');
+const userPrivaciesService = require('./account/userPrivacies.js');
 
 //____________________________ ______//
 
@@ -43,7 +45,7 @@ const publicApiRouter = KoaRouter();
  *  - Always remember to call 'return next();'
  */
 const API_ROUTER_TABLE = {
-  "/apiExample": {
+  /*"/apiExample": {
     methods: [METHOD_GET, METHOD_POST],
     services: [
       async (ctx, next) => {
@@ -55,18 +57,21 @@ const API_ROUTER_TABLE = {
         return next();
       }
     ]
-  }
+  },*/
+  "/userPrivacies/:uid":binder(userPrivaciesService)
 };
+
 
 /**
  * The router table, any service list on this table,
  * will be register to $publicApiRouter.
  */
 const PUBLIC_API_ROUTER_TABLE = {
+  "/captcha": binder(captchaService),
   "/login": binder(loginService),
   "/username": binder(usernameService),
   "/userAccounts/:uid": binder(userAccountsService),
-  "/captcha": binder(captchaService)
+  "/userProfiles/:uid":binder(userProfilesService)
 };
 
 

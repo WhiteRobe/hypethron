@@ -8,9 +8,11 @@
 - ["/login"](#login)
 - ["/username"](#username)
 - ["/userAccounts/:uid"](#useraccountsuid)
+- ["/userProfiles/:uid"](#userprofilesuid)
 
 [私有接口](#私有接口)
 
+- ["/userPrivacies/:uid"](#userprivaciesuid)
 
 ---
 
@@ -67,12 +69,12 @@ Else:
 ```
 When `ctx.params.{uid}` = 0:
   @input { filter: $Values }
-    => filter: {      page: $int, // 当前页(必填)；从1起
-    max: $int, // 每页最大数据量(必填)；最大为50
-    // 下面两项至少需要一项
-    username: $String, // 用户的 username 或 account 或 openid (支持模糊检索)
-    authority: $int, // 目标用户权限
-  }
+    => filter contains :
+      page: $int, // 当前页(必填)；从1起
+      max: $int, // 每页最大数据量(必填)；最大为50
+      // 下面两项至少需要一项
+      username: $String, // 用户的 username 或 account 或 openid (支持模糊检索)
+      authority: $int, // 目标用户权限
 Else:
   @input { / }
 @output { result:$Array }
@@ -107,5 +109,54 @@ Else:
 @output { success: $Boolean }
 ```
 
+### "/userProfiles/:uid"
+
+> `${uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
+
+**GET**：查询用户的资料，权限为管理组或本人时可以跳过隐私设定获取数据。
+```
+When `ctx.params.{uid}` = 0:
+  @input { filter: $Values }
+    => filter contains :
+      page: $int, // 当前页(必填)；从1起
+      max: $int, // 每页最大数据量(必填)；最大为50
+      // 下面几项为可选项
+      nickname: $String, // 支持模糊匹配
+      sex: $String ['f', 'm', '?'],
+      birthdayStart: $String, (含) -> 必须与 birthdayEnd 成对出现，否则不起效
+      birthdayEnd: $String, (不含)
+      company: $String, // 支持模糊匹配
+      location: $String // 支持模糊匹配
+Else:
+  @input { / }
+@output { result:$Array }
+```
+
+
+**PATCH**：更改用户的资料，权限需求为管理组或本人。`ctx.params.{uid}`。
+
+```
+@input { updateData: $Object } // 更改的值
+@output { success: $Boolean }
+```
+
 ## 私有接口
+
+### "/userPrivacies/:uid"
+
+> `${uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
+
+
+**GET**：获取某用户的各项隐私设定，权限需求为管理组或本人。`ctx.params.{uid}`。
+```
+@input { / }
+@output { result: $Array }
+```
+
+**PATCH**：更改用户的隐私设定，权限需求为管理组或本人。`ctx.params.{uid}`。
+
+```
+@input { updateData: $Object } // 更改的值
+@output { success: $Boolean }
+```
 

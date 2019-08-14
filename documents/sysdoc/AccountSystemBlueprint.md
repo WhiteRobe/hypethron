@@ -96,6 +96,8 @@ Authority|INT UNSIGNED|用户的权限
 
 详细用户账户表设计及用户资料表等附属表，参见：[hypethron-database.sql](/server/dao/hypethron-database.sql)。
 
+- 原则上，表段的各列设计不应重名。
+
 > Tip:可以使用[DBVTranslator](https://github.com/WhiteRobe/DBVTranslator)等小工具将`sql`文件转化为表格便于阅读。
 
 ## 应用层

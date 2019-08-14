@@ -30,11 +30,11 @@ CREATE TABLE IF NOT EXISTS user_profile(
 /* 用户资料隐私表 */
 CREATE TABLE IF NOT EXISTS user_privacy(
     /* 用户标识符 */ uid INTEGER UNSIGNED UNIQUE NOT NULL /* 自0起的无符号正整数 */,
-    /* 个人通用资料可见 */ general_profile TINYINT(1) DEFAULT 1 /* 个人资料默认可见 */,
-    /* 性别可见 */ sex TINYINT(1) DEFAULT 1 /* 性别默认可见 */,
-    /* 生日可见 */ birthday TINYINT(1) DEFAULT 1 /* 生日默认可见 */,
-    /* 手机可见 */ phone TINYINT(1) DEFAULT 1 /* 手机号码默认可见 */,
-    /* 邮箱可见 */ email TINYINT(1) DEFAULT 1 /* 邮箱地址默认可见 */,
+    /* 个人通用资料可见 */ privacy_general TINYINT(1) DEFAULT 1 /* 个人资料默认可见 */,
+    /* 性别可见 */ privacy_sex TINYINT(1) DEFAULT 1 /* 性别默认可见 */,
+    /* 生日可见 */ privacy_birthday TINYINT(1) DEFAULT 1 /* 生日默认可见 */,
+    /* 手机可见 */ privacy_phone TINYINT(1) DEFAULT 1 /* 手机号码默认可见 */,
+    /* 邮箱可见 */ privacy_email TINYINT(1) DEFAULT 1 /* 邮箱地址默认可见 */,
     PRIMARY KEY (uid),
     FOREIGN KEY (uid) REFERENCES user_account (uid)
 );

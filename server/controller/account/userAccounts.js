@@ -4,21 +4,22 @@ const {hmac} = require('../../util/crypto-hash-tool.js');
 const jwt = require('jsonwebtoken'); // @See https://www.npmjs.com/package/jsonwebtoken
 const {jwtVerify, isJwtError} = require('../../util/tools.js');
 
+
 /***
  * @Router `ctx.params.{uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
  */
+
 
 /**
  * RESTful 用户查询，返回用户的账户信息，对权限有要求。当uid=0时通过过滤模式筛选所有符合要求的人信息
  * When `ctx.params.{uid}` = 0:
  *  @input { filter: $Values }
- *    => filter: {
+ *    => filter contains :
  *      page: $int, // 当前页(必填)；从1起
  *      max: $int, // 每页最大数据量(必填)；最大为50
  *      // 下面两项至少需要一项
  *      username: $String, // 用户的 username 或 account 或 openid (支持模糊检索)
  *      authority: $int, // 目标用户权限
- *    }
  * Else:
  *  @input { / }
  * @output { result:$Array }
@@ -31,7 +32,7 @@ async function GET_userAccounts(ctx, next) {
     let uid = ctx.params.uid;
     let token = ctx.header.authorization;
     let decode = await jwtVerify(token).catch(err => {
-      throw err
+      throw err;
     });
 
     if ((decode.authority & (AUTH.USER_DATA_ANALYSIS | AUTH.ADMIN_GROUP)) <= 0) {
@@ -222,7 +223,7 @@ async function PUT_userAccounts(ctx, next) {
 
     let token = ctx.header.authorization;
     let decode = await jwtVerify(token).catch(err => {
-      throw err
+      throw err;
     });
 
     if ((decode.authority & AUTH.ADMIN_GROUP) <= 0 && decode.uid !== uid) {
@@ -296,7 +297,7 @@ async function PATCH_userAccounts(ctx, next) {
 
     let token = ctx.header.authorization;
     let decode = await jwtVerify(token).catch(err => {
-      throw err
+      throw err;
     });
 
     if ((decode.authority & AUTH.ADMIN_GROUP) <= 0 && decode.uid !== uid) {
@@ -321,7 +322,7 @@ async function PATCH_userAccounts(ctx, next) {
     };
 
     for (let i in map) {
-      if (map[i]) { // 非空的值就入栈
+      if (map[i]!==undefined) { // 非空的值就入栈
         sql += i;
         values.push(map[i]);
       }
@@ -382,7 +383,7 @@ async function DELETE_userAccounts(ctx, next) {
     let uid = ctx.params.uid;
     let token = ctx.header.authorization;
     let decode = await jwtVerify(token).catch(err => {
-      throw err
+      throw err;
     });
 
     if ((decode.authority & AUTH.ADMIN_GROUP) <= 0) {
