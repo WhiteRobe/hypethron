@@ -138,3 +138,7 @@ console.log(ctx.session.name); // 后台会自动解码
 ![](/documents/pics/router-structure.png)
 
 关于前端页面的路由注册，请参考: [文档-静态服务器](#静态服务器)
+
+---
+
+[返回首页](https://github.com/WhiteRobe/hypethron)

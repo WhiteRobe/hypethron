@@ -1,4 +1,4 @@
-const { aesDecrypt, aesEncrypt } = require("./util/crypto-aes-tool.js");
+const {aesDecrypt, aesEncrypt} = require("./util/crypto-aes-tool.js");
 
 /**
  * Configure Your SERVER
@@ -27,8 +27,19 @@ const SERVER_CONFIG = {
       cert: './server/ssl/certificate.pem'
     }
   }*/
+  /* 你可以通过以下命令生成一份自签名的SSL证书:
+      #1、生成私钥key文件：
+      openssl genrsa -out privateKey.pem 1024
+
+      #2、通过私钥生成CSR证书签名  （需要填一些信息、可直接回车）
+      openssl req -new -key privateKey.pem -out certrequest.csr
+
+      #3、通过私钥和证书签名生成证书文件
+      openssl x509 -req -in privateKey.csr -signkey privateKey.pem -out certificate.pem
+  */
 };
 // <<< 服务器注册配置表 <<<
+
 
 // >>> 服务器运行常量 >>>
 const SERVER_DEBUG = true;
@@ -82,15 +93,3 @@ module.exports.JWT_OPTIONS = JWT_OPTIONS;
 module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
 module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
 module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
-
-/*
-你可以通过以下命令生成一份自签名的SSL证书:
-    #1、生成私钥key文件：
-    openssl genrsa -out privateKey.pem 1024
-
-    #2、通过私钥生成CSR证书签名  （需要填一些信息、可直接回车）
-    openssl req -new -key privateKey.pem -out certrequest.csr
-
-    #3、通过私钥和证书签名生成证书文件
-    openssl x509 -req -in privateKey.csr -signkey privateKey.pem -out certificate.pem
-*/

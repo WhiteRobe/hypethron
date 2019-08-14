@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken'); // @See https://www.npmjs.com/package/jsonwebtoken
 const {SERVER_PRIVATE_KEY, JWT_OPTIONS} = require('../server-configure.js');
+const svgCaptcha = require('svg-captcha'); // @See https://www.npmjs.com/package/captchapng
 
 /**
  * 测试一段代码的运行时间
@@ -10,6 +11,29 @@ function timeUsage(func) {
   func();
   console.timeEnd();
 }
+
+/**
+ * 生成一个验证码
+ * @param type ['', 'math'] 生成验证码的类型[普通串或数学表达式]
+ * @param opt
+ * @return {CaptchaObj} => {data: $SVG, text:$String}
+ */
+function generatorCaptcha(type, opt){
+  opt = opt || {
+    size:4,
+    ignoreChars: '0o1i',
+    noise: 3,
+    color: true,
+    background: '#FCFCFC',
+
+    mathMin:1,
+    mathMax: 90,
+    mathOperator:'+-'
+  };
+  let generator = type === 'math'? svgCaptcha.createMathExpr : svgCaptcha.create;
+  return generator(opt);
+}
+
 
 /**
  * 验证一个Token
@@ -52,6 +76,7 @@ function isJwtError(err){
 
 module.exports = {
   timeUsage,
+  generatorCaptcha,
   jwtVerify,
   isJwtError
 };

@@ -1,8 +1,8 @@
-const {SERVER_PRIVATE_KEY, JWT_OPTIONS, SERVER_SALT} = require('../server-configure.js');
-const {global, RES_MSG, AUTH} = require('../util/global.js');
-const {hmac} = require('../util/crypto-hash-tool.js');
+const {SERVER_PRIVATE_KEY, JWT_OPTIONS, SERVER_SALT} = require('../../server-configure.js');
+const {global, RES_MSG, AUTH} = require('../../util/global.js');
+const {hmac} = require('../../util/crypto-hash-tool.js');
 const jwt = require('jsonwebtoken'); // @See https://www.npmjs.com/package/jsonwebtoken
-const {jwtVerify, isJwtError} = require('../util/tools.js');
+const {jwtVerify, isJwtError} = require('../../util/tools.js');
 
 /***
  * @Router `ctx.params.{uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。

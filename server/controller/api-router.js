@@ -7,9 +7,10 @@ const chalk = require('chalk');
 const binder = require("../util/api-binder.js");
 
 //_______import your api here________//
-const loginService = require('./login.js');
-const usernameService = require('./username.js');
-const userAccountsService = require('./userAccounts.js');
+const loginService = require('./account/login.js');
+const usernameService = require('./account/username.js');
+const userAccountsService = require('./account/userAccounts.js');
+const captchaService = require('./general/captcha.js');
 
 //____________________________ ______//
 
@@ -63,8 +64,9 @@ const API_ROUTER_TABLE = {
  */
 const PUBLIC_API_ROUTER_TABLE = {
   "/login": binder(loginService),
-  "/username" :binder(usernameService),
-  "/userAccounts/:uid": binder(userAccountsService)
+  "/username": binder(usernameService),
+  "/userAccounts/:uid": binder(userAccountsService),
+  "/captcha": binder(captchaService)
 };
 
 
@@ -122,7 +124,7 @@ function registerAPI(table, routerImplement) {
  * @param service 服务 (异步)
  * @param routerImplement 路由器
  */
-function registerAnService(path, method, service, routerImplement){
+function registerAnService(path, method, service, routerImplement) {
   switch (method) {
     case METHOD_GET:
       routerImplement.get(path, service);
@@ -147,6 +149,7 @@ function registerAnService(path, method, service, routerImplement){
       process.exit(FILE_ERROR_CODE);
   }
 }
+
 registerAPI(API_ROUTER_TABLE, apiRouter);
 registerAPI(PUBLIC_API_ROUTER_TABLE, publicApiRouter);
 

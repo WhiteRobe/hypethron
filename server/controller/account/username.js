@@ -1,4 +1,4 @@
-const {global, RES_MSG} = require('../util/global.js');
+const {global, RES_MSG} = require('../../util/global.js');
 
 // const {generateSalt} = require('../util/crypto-hash-tool.js');
 
@@ -37,6 +37,7 @@ async function GET_username(ctx, next) {
     }
 
   } catch (err) {
+    logger.error(err);
     ctx.body = {
       exists: false,
       salt: null, // ，节约服务器计算成本

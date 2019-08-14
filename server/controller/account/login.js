@@ -3,9 +3,9 @@
  */
 
 const jwt = require('jsonwebtoken'); // @See https://www.npmjs.com/package/jsonwebtoken
-const {SERVER_PRIVATE_KEY, JWT_OPTIONS, SERVER_SALT} = require('../server-configure.js');
-const {global, RES_MSG} = require('../util/global.js');
-const {hmac} = require('../util/crypto-hash-tool.js');
+const {SERVER_PRIVATE_KEY, JWT_OPTIONS, SERVER_SALT} = require('../../server-configure.js');
+const {global, RES_MSG} = require('../../util/global.js');
+const {hmac} = require('../../util/crypto-hash-tool.js');
 
 
 /**
