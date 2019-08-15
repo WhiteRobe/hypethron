@@ -64,7 +64,7 @@ const KOA_JWT_CONFIGURE = { // JWT的解码值将会存放到 ctx.state.jwtData 
 const COOKIE_KEY_LIST = [SERVER_PRIVATE_KEY, 'I Like hypethron'];
 const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-session
   key: 'hypethron:sess', // (string) cookie key
-  maxAge: 86400000, // (ms), 1 day -> 86400000
+  maxAge: 10 * 60 * 1000, // (ms), 1 day -> 86400000 { Any adjustment ont this value is not recommended }
   autoCommit: true,
   overwrite: true,
   httpOnly: true, // 防止JS脚本进行修改
@@ -87,6 +87,7 @@ const RATE_LIMIT_CONFIGURE = {  // @See https://github.com/koajs/ratelimit
   max: 600,
   disableHeader: false,
 };
+const DOMAIN_NAME = "http://localhost:3000"; // server domain name
 
 // <<< 服务器运行常量 <<<
 
@@ -103,3 +104,4 @@ module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
 module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
 module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
 module.exports.RATE_LIMIT_CONFIGURE = RATE_LIMIT_CONFIGURE;
+module.exports.DOMAIN_NAME = DOMAIN_NAME;

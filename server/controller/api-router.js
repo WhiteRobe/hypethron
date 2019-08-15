@@ -7,12 +7,15 @@ const chalk = require('chalk');
 const binder = require("../util/api-binder.js");
 
 //_______import your api here________//
-const loginService = require('./account/login.js');
-const usernameService = require('./account/username.js');
-const userAccountsService = require('./account/userAccounts.js');
+
 const captchaService = require('./general/captcha.js');
-const userProfilesService = require('./account/userProfiles.js');
+const emailCaptchaService = require('./account/emailCaptcha.js');
+const loginService = require('./account/login.js');
+const userAccountsService = require('./account/userAccounts.js');
+const userEmailService = require('./account/userEmail.js');
+const usernameService = require('./account/username.js');
 const userPrivaciesService = require('./account/userPrivacies.js');
+const userProfilesService = require('./account/userProfiles.js');
 
 //____________________________ ______//
 
@@ -58,7 +61,7 @@ const API_ROUTER_TABLE = {
       }
     ]
   },*/
-  "/userPrivacies/:uid":binder(userPrivaciesService)
+  "/userPrivacies/:uid": binder(userPrivaciesService)
 };
 
 
@@ -68,10 +71,12 @@ const API_ROUTER_TABLE = {
  */
 const PUBLIC_API_ROUTER_TABLE = {
   "/captcha": binder(captchaService),
+  "/emailCaptcha": binder(emailCaptchaService),
   "/login": binder(loginService),
-  "/username": binder(usernameService),
   "/userAccounts/:uid": binder(userAccountsService),
-  "/userProfiles/:uid":binder(userProfilesService)
+  "/username": binder(usernameService),
+  "/userEmail": binder(userEmailService),
+  "/userProfiles/:uid": binder(userProfilesService)
 };
 
 

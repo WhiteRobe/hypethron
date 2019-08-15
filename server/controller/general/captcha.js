@@ -3,7 +3,7 @@ const {generatorCaptcha} = require('../../util/tools.js');
 
 
 /**
- * 比对验证码，获取比对结果。
+ * 比对验证码，获取比对结果。需要`ctx.session.captcha`。
  * @input { captcha: $String }
  * @output { success: $Boolean }
  */
@@ -40,6 +40,7 @@ async function GET_captcha(ctx, next) {
  * 新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
  * @input { type:$String['', 'math'] }
  * When success:
+ *   @session { captcha: $String }
  *   @output { $svg }
  * Else:
  *   @output { success:$Boolean }

@@ -15,6 +15,7 @@
 - 数据库接入: `ioredis`、`mysql`
 - 后端框架: `koa`
 - 主要中间件:  `koa-jwt`(身份验证)、`koa-compress`(数据压缩)、`koa-log4`(服务器日志)、`koa-router`(服务器路由)、`koa-static`(静态文件服务器)、`koa-ratelimit`(DDOS攻击防护)
+- 邮件系统: `nodemailer`
 
 - 持续集成测试及统计: `Travis CI` 、 `Coveralls`
 - Git仓库: `github`
@@ -108,6 +109,7 @@ console.log(ctx.session.name); // 后台会自动解码
 
 被设置到`ctx.session`中的值会被加密和签名中放到Cookie中。
 默认设置下，你可以通过`ctx.cookies.get('hypethron:sess')`取到原值；通过`ctx.cookies.get('hypethron:sess.sig')`获得签名(SHA256)，然后用其进行验证(后台已经实现了这部分功能，除特别需要，您不必操心)。
+默认情况下，session的生命周期为10分钟。这可能跟部分验证码的有效期有关，请谨慎调整此项。
 
 > 我们推荐您在二次开发时使用JWT来控制访问权限，而不是将此类信息通过session、cookie进行保管和传输。
 

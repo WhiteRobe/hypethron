@@ -33,7 +33,10 @@ async function GET_userPrivacies(ctx, next) {
       throw err;
     });
 
-    ctx.body = {result: res.result};
+    ctx.body = {
+      result: res.result,
+      msg: RES_MSG.OK
+    };
 
   } catch (err) {
     if (err instanceof RangeError) { // 权限不足
@@ -95,7 +98,7 @@ async function PATCH_userPrivacies(ctx, next) {
     };
 
     for (let i in map) {
-      if (map[i]!==undefined) { // 非空的值就入栈
+      if (map[i] !== undefined) { // 非空的值就入栈
         sql += i;
         values.push(map[i]);
       }
@@ -107,10 +110,19 @@ async function PATCH_userPrivacies(ctx, next) {
       throw err;
     });
 
-    ctx.body = {success: res.result.affectedRows > 0};
+    ctx.body = {
+      success: res.result.affectedRows > 0,
+      msg: RES_MSG.OK
+    };
 
   } catch (err) {
-    if (err instanceof RangeError) { // 权限不足
+    if (isJwtError(err)) {
+      ctx.body = {
+        success: false,
+        msg: RES_MSG.JWT_TOKEN_INVALID,
+        errorDetail: `${RES_MSG.JWT_TOKEN_INVALID}:${err.message}`
+      }
+    } else if (err instanceof RangeError) { // 权限不足
       ctx.body = {
         success: false,
         msg: RES_MSG.AUTH_LOW,

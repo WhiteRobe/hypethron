@@ -6,8 +6,9 @@
 
 - ["/captcha"](#captcha)
 - ["/login"](#login)
-- ["/username"](#username)
 - ["/userAccounts/:uid"](#useraccountsuid)
+- ["/userEmail"](#useremail)
+- ["/username"](#username)
 - ["/userProfiles/:uid"](#userprofilesuid)
 
 [私有接口](#私有接口)
@@ -24,7 +25,7 @@
 
 ### "/captcha"
 
-**GET**：比对验证码，获取比对结果。
+**GET**：比对验证码，获取比对结果。需要`ctx.session.captcha`。
 
 ```
 @input { captcha: $String }
@@ -36,6 +37,7 @@
 ```
 @input { type:$String['', 'math'] }
 When success:
+  @session { captcha: $String }
   @output { $svg }
 Else:
   @output { success:$Boolean }
@@ -45,19 +47,20 @@ Else:
 
 > 登录接口特殊，不符合RESTful的设计规范
 
-**POST**：通过账号进行登录，返回一个登录是否成功的标志和服务器签发的Token。
+**POST**：通过账号进行登录，返回一个登录是否成功的标志和服务器签发的Token。同时，username可作为email或phone登录。
 
 ```
 @input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String  }
 @output { success: $Boolean, token: $String }
 ```
 
-### "/username"
+### "/userEmail"
 
-**GET**：输入一个username，返回一个该username是否存在的标志和相应的salt。
+**GET**：输入一个userEmail，返回一个该userEmail是否存在的标志。
+
 ```
-@input { username: $String }
-@output { exists: $Boolean, salt: $String }
+@input { userEmail: $String }
+@output { exists: $Boolean }
 ```
 
 ### "/userAccounts/:uid"
@@ -73,7 +76,7 @@ When `ctx.params.{uid}` = 0:
       page: $int, // 当前页(必填)；从1起
       max: $int, // 每页最大数据量(必填)；最大为50
       // 下面两项至少需要一项
-      username: $String, // 用户的 username 或 account 或 openid (支持模糊检索)
+      username: $String, // 用户的 username 或 email 或 phone 或 openid (支持模糊检索)
       authority: $int, // 目标用户权限
 Else:
   @input { / }
@@ -84,14 +87,14 @@ Else:
 
 ```
 * When do POST, only response on ".../userAccounts/0"
-@input { username: $String, account: $String,  password:$String, salt:$String }
+@input { username: $String, password: $String, salt: $String, captcha: $String }
 @output { success: $Boolean, token: $String }
 ```
 
 **PUT**：完全更改用户账户信息表的接口，对权限有要求。返回操作是否成功的标志。`ctx.params.{uid}` 为要更改的账号的UID。
 
 ```
-@input { username:$String, account:$String, openid:$String, password:$String, salt:$String, authority:$Integer }
+@input {data: $Object => '{ username:$String, openid:$String, password:$String, salt:$String, authority:$Integer }'}
 @output { success: $Boolean }
 ```
 
@@ -107,6 +110,14 @@ Else:
 ```
 @input { / }
 @output { success: $Boolean }
+```
+
+### "/username"
+
+**GET**：输入一个username，返回一个该username是否存在的标志和相应的salt。
+```
+@input { username: $String }
+@output { exists: $Boolean, salt: $String }
 ```
 
 ### "/userProfiles/:uid"

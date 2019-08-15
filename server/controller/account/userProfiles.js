@@ -53,7 +53,10 @@ async function GET_userProfile(ctx, next) {
         throw err;
       });
 
-      ctx.body = {result: ignorePrivacySetting ? res.result : privacyBlock(res.result)};
+      ctx.body = {
+        result: ignorePrivacySetting ? res.result : privacyBlock(res.result),
+        msg: RES_MSG.OK
+      };
 
     } else {
       let filter = ctx.request.query;
@@ -75,7 +78,7 @@ async function GET_userProfile(ctx, next) {
       for (let i in map) {
         if (map[i] !== undefined) { // 非空的值就入栈
           sql += i;
-          values.push(/LIKE \?/.test(i) ? `%${map[i]}%`: map[i]);
+          values.push(/LIKE \?/.test(i) ? `%${map[i]}%` : map[i]);
         }
       }
 
@@ -94,7 +97,10 @@ async function GET_userProfile(ctx, next) {
 
       let totalHit = res.result.length;
       let returnResult = res.result.slice(filter.max * (filter.page - 1), Math.min(totalHit, filter.max * filter.page));
-      ctx.body = {result: ignorePrivacySetting ? returnResult : privacyBlock(returnResult)};
+      ctx.body = {
+        result: ignorePrivacySetting ? returnResult : privacyBlock(returnResult),
+        msg: RES_MSG.OK
+      };
     }
 
   } catch (err) {
@@ -163,8 +169,8 @@ async function PATCH_userProfile(ctx, next) {
       " location = ?,": updateData.location,
       " website = ?,": updateData.website,
       " biography = ?,": updateData.biography,
-      " phone = ?,": updateData.phone,
-      " email = ?,": updateData.email
+      //" phone = ?,": updateData.phone, (绑定内容，需验证)
+      //" email = ?,": updateData.email (绑定内容，需验证)
     };
 
     for (let i in map) {
@@ -180,10 +186,19 @@ async function PATCH_userProfile(ctx, next) {
       throw err;
     });
 
-    ctx.body = {success: res.result.affectedRows > 0};
+    ctx.body = {
+      success: res.result.affectedRows > 0,
+      msg: RES_MSG.OK
+    };
 
   } catch (err) {
-    if (err instanceof RangeError) { // 权限不足
+    if (isJwtError(err)) {
+      ctx.body = {
+        success: false,
+        msg: RES_MSG.JWT_TOKEN_INVALID,
+        errorDetail: `${RES_MSG.JWT_TOKEN_INVALID}:${err.message}`
+      }
+    } else if (err instanceof RangeError) { // 权限不足
       ctx.body = {
         success: false,
         msg: RES_MSG.AUTH_LOW,

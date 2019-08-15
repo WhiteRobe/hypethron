@@ -2,7 +2,6 @@
 CREATE TABLE IF NOT EXISTS user_account(
     /* 用户标识符 */ uid INTEGER UNSIGNED AUTO_INCREMENT /* 自1起的无符号正整数 */,
     /* 用户名 */ username VARCHAR(16) UNIQUE NOT NULL /* 长度在6~16(含)的字符，合法字符为英文、数字和下划线 */,
-    /* 用户账户 */ account VARCHAR(50) UNIQUE NOT NULL /* 另作定义，原则上为通过正则合法性校验的邮箱、手机号码(含国际区号) */,
     /* 开放账户 */ openid VARCHAR(100) DEFAULT '' /* 另作定义，原则上为一个具有具体含义的Token串 */,
     /* 用户密码(Hash) */ password CHAR(32) NOT NULL /* 明文密码为长度在6~16(含)的英文、数字等非制表符混合串，原则上至少需要包含大小写英文、数字和下划线等符号中的两种。在数据库中以32位的Hash串进行存储 */,
     /* 用户的盐 */ salt CHAR(16) NOT NULL /* 用户的盐，定长字符串 */,
@@ -21,8 +20,10 @@ CREATE TABLE IF NOT EXISTS user_profile(
     /* 用户所在地 */ location VARCHAR(50) DEFAULT '' /* (个人通用资料)用户所在地格式: 一级-二级-三级 */,
     /* 用户主页 */ website VARCHAR(300) DEFAULT '' /* (个人通用资料)一个超链接，指向用户自定义的页面 */,
     /* 用户个性签名或经历 */ biography VARCHAR(300) DEFAULT '' /* 用户个性签名或个人经历等 */,
-    /* 用户手机 */ phone CHAR(15) DEFAULT '' /* 用户手机，国际区号+11位号码。如, 86_12345678901 */,
-    /* 用户邮箱 */ email VARCHAR(50) DEFAULT '' /* 用户邮箱 */,
+    /* 用户手机 */ phone CHAR(15) UNIQUE /* (绑定内容，需验证，非空情况下可用作账号登录)用户手机，国际区号+11位号码。如, 86_12345678901 */,
+    /* 用户邮箱 */ email VARCHAR(50) UNIQUE NOT NULL/* (绑定内容，需验证，可用作账号登录)用户邮箱 */,
+    INDEX (phone),
+    INDEX (email),
     PRIMARY KEY (uid),
     FOREIGN KEY (uid) REFERENCES user_account (uid)
 );
@@ -33,8 +34,8 @@ CREATE TABLE IF NOT EXISTS user_privacy(
     /* 个人通用资料可见 */ privacy_general TINYINT(1) DEFAULT 1 /* 个人资料默认可见 */,
     /* 性别可见 */ privacy_sex TINYINT(1) DEFAULT 1 /* 性别默认可见 */,
     /* 生日可见 */ privacy_birthday TINYINT(1) DEFAULT 1 /* 生日默认可见 */,
-    /* 手机可见 */ privacy_phone TINYINT(1) DEFAULT 1 /* 手机号码默认可见 */,
-    /* 邮箱可见 */ privacy_email TINYINT(1) DEFAULT 1 /* 邮箱地址默认可见 */,
+    /* 手机可见 */ privacy_phone TINYINT(1) DEFAULT 0 /* 手机号码默认不可见 */,
+    /* 邮箱可见 */ privacy_email TINYINT(1) DEFAULT 0 /* 邮箱地址默认不可见 */,
     PRIMARY KEY (uid),
     FOREIGN KEY (uid) REFERENCES user_account (uid)
 );

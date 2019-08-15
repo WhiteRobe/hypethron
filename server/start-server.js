@@ -36,7 +36,6 @@ const koaIpFilter = require('./ip-filter-configure.js');
 
 const {global} = require('./util/global.js');
 const errorHandler = require('./util/errorHandler.js');
-const jwt = require('jsonwebtoken');
 
 const app = new Koa();
 app.keys = COOKIE_KEY_LIST;

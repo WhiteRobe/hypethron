@@ -30,3 +30,14 @@ echo   database: 'my_database', >> ./server/dao/mysql-configure.js
 echo   connectionLimit : 10 >> ./server/dao/mysql-configure.js
 echo }; >> ./server/dao/mysql-configure.js
 echo module.exports = MYSQL_CONFIGURE; >> ./server/dao/mysql-configure.js
+
+echo const options = { // @See https://www.npmjs.com/package/nodemailer >> ./server/mailer-configure.js
+echo   host: "example.host.com", // your SMTP host >> ./server/mailer-configure.js
+echo   port: 80, >> ./server/mailer-configure.js
+echo   secure: false, // true for 465(SSL), false for other ports >> ./server/mailer-configure.js
+echo   auth: { >> ./server/mailer-configure.js
+echo     user: 'user@example.com', // your account >> ./server/mailer-configure.js
+echo     pass: 'password' // your password >> ./server/mailer-configure.js
+echo   } >> ./server/mailer-configure.js
+echo }; >> ./server/mailer-configure.js
+echo module.exports = options; >> ./server/mailer-configure.js

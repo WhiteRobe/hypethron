@@ -9,7 +9,8 @@ const {hmac} = require('../../util/crypto-hash-tool.js');
 
 
 /**
- * 通过账号进行登录，返回一个登录是否成功的标志和服务器签发的Token
+ * 通过账号进行登录，返回一个登录是否成功的标志和服务器签发的Token。
+ * 同时，username可作为email或phone登录。
  * @input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String  }
  * @output { success: $Boolean, token: $String }
  */
@@ -23,8 +24,9 @@ async function POST_login(ctx, next) {
 
   try {
     let res = await mysql.query(
-      'SELECT * FROM user_account WHERE (username=? or account=?) and password=? and salt=?;',
-      [username, username, hmac(SERVER_SALT, password, {alg: "md5", repeat: 1}), salt]
+      'SELECT a.* FROM user_account AS a LEFT JOIN user_profile AS b ON a.uid=b.uid' +
+      ' WHERE (a.username=? or b.email=? or b.phone=?) and password=? and salt=?;',
+      [username, username, username, hmac(SERVER_SALT, password, {alg: "md5", repeat: 1}), salt]
     ).catch(err => {
       throw err;
     });

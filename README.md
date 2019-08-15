@@ -44,12 +44,13 @@
 - 多级权限控制
 - 群发邮件通知
 - 服务器日志
-- 黑名单ip过滤
+- 黑名单ip过滤/DDOS防范
 
 一些Feature:
 
-- 支持Https和Http
-- 多端口访问
+- 支持Https和Http及多端口访问
+- SQL注入防范
+- XSS攻击防范
 - RESTful
 - 数据压缩传送
 - JWT访问控制
@@ -86,9 +87,9 @@
 
 - **Step 2** 配置环境 Initialization
 
-> **(Windows)** 执行 `/InitEnvironment(windows).bat` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建。
+> **(Windows)** 执行 `/InitEnvironment(windows).bat` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建(见下文)。
 >
-> **(Linux)** 执行 `/InitEnvironment(linux).sh` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建。
+> **(Linux)** 执行 `/InitEnvironment(linux).sh` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建(见下文)。
 
 - **Step 3** 打包应用 Pack *(非必需 not-necessary)*
 
@@ -143,7 +144,21 @@ connectionLimit | 连接池大小 | 10
 
 > 如果您在 `/server/dao` 目录下没有自动找到【mysql-configure.js】文件，可以到`/documents/examples`目录中获取。
 
-- **Step 3** 配置Koa服务器 Configure the server
+- **Step 3** 配置Mail服务器 Configure the smtp-mail-server
+
+在 `/server` 目录中，编辑【mailer-configure.js】文件，其中各字段意义如下:
+
+字段|意义|例值
+:-:|:-:|:-:
+host | 邮件服务器 | 'smtpdm.aliyun.com'
+port | 服务器访问端口 | 80
+secure | 是否启用SSL(端口465时起效) | false
+auth.user | 邮箱账号 | '`example@hypethron.com`'
+auth.pass | 邮箱密码 | 'password'
+
+> 如果您在 `/server/` 目录下没有自动找到【mailer-configure.js】文件，可以到`/documents/examples`目录中获取。
+
+- **Step 4** 配置Koa服务器 Configure the server
 
 由于hypethron是一个支持多端口、多接入的Web应用，你可以通过配置相关文件来新增一个服务器。
 
@@ -173,7 +188,7 @@ connectionLimit | 连接池大小 | 10
 
 完整界面演示请参考：[暂未编写]
 
-## 项目文档
+## 项目文档 Documents
 
 我们将提供开发过程中的各类文档，请查看我们的[Wiki](https://github.com/WhiteRobe/hypethron/wiki)。
 

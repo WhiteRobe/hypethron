@@ -21,8 +21,10 @@ const RES_MSG = {
   "DATABASE_ERROR": "数据库错误。",
   "JWT_NOT_FOUND": "缺失TOKEN。",
   "JWT_TOKEN_INVALID": "JWT验证不通过。",
-  "AUTH_LOW": "用户权限过低",
-  "MISS_PARAMS": "缺失必要参数"
+  "AUTH_LOW": "用户权限过低。",
+  "MISS_PARAMS": "缺失必要参数。",
+  "CAPTCHA_MISS_MATCH": "验证码不匹配。",
+  "SEND_MAIL_FAIL": "发送邮件失败。"
 };
 
 
