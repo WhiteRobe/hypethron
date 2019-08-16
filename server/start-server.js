@@ -34,15 +34,15 @@ const {log4js, accessLogger} = require("./logger-configure.js");
 const router = require('./server-router.js');
 const koaIpFilter = require('./ip-filter-configure.js');
 
-const {global} = require('./util/global.js');
-const errorHandler = require('./util/errorHandler.js');
+const {global, AUTH} = require('./util/global.js');
+const {errorHandler, afterErrorHandler} = require('./util/errorHandler.js');
 
 const app = new Koa();
 app.keys = COOKIE_KEY_LIST;
 
 
 (async function () { // 启动服务器
-                     // Add an logger, and bind it to this server
+  // Add an logger, and bind it to this server
   const logger = log4js.getLogger('application');
   logger.addContext('loggerName', 'Hypethron');
   registerLogger(logger);
@@ -67,8 +67,29 @@ app.keys = COOKIE_KEY_LIST;
     });
   // <<< test redis/mysql connection <<<
 
+  // >>> Get MySQL/Redis connection pool with default options >>>
+  await getMySQLPool()
+    .then((pool) => {
+      registerMySQLPool(pool);
+      pool.getConnection((err, conn) => {
+        if (err) throw err;
+        buildTables('./server/dao/hypethron-database.sql', conn); // init mysql-database's tables
+      });
+    });
+  await getRedisPool()
+    .then((pool) => {
+      registerRedisPool(pool)
+    });
+  // <<< Get MySQL/Redis connection pool with default options <<<
+
   // >>> import middleware and load router >>>
   app
+    .use((ctx, next) => { // Register global-values
+      ctx.global = global;
+      ctx.AUTH = AUTH;
+      ctx.SERVER_DEBUG = SERVER_DEBUG;
+      return next();
+    })
     .use(ratelimit(Object.assign({db: connectRedis()}, RATE_LIMIT_CONFIGURE)))
     .use(koa_session(KOA_SESSION_CONFIGURE, app)) // Use koa-session with `hypethron:sess` as cookie-key(default)
     .use(accessLogger()) // Use access-logger for koa
@@ -85,7 +106,13 @@ app.keys = COOKIE_KEY_LIST;
     )
     .use(koa_static(path.join(__dirname, STATIC_DIRECTORY), {
       defer: true // Allowing any downstream middleware to respond first, work with koa-router
-    }));
+    }))
+    .use((ctx, next) => { //
+      return next().catch(err => { // Handling exceptions manually
+        errorHandler(err, ctx);
+        ctx.app.emit('error', err, ctx);
+      })
+    });
 
   if (SKIP_HYPETHRON_INTRO_PAGE) {
     app.use(async (ctx, next) => {
@@ -101,14 +128,11 @@ app.keys = COOKIE_KEY_LIST;
     .use(router.allowedMethods());
   // <<< import middleware and load router<<<
 
-
-  app.on('error', (err, ctx) => {
-    if (SERVER_DEBUG) {
-      console.error(chalk.red('[Debug]Server Error'), err/*, ctx*/);
-    } else {
-      errorHandler(err);
-    }
+  // >>> import error-handler >>>
+  app.on('error', async (err, ctx) => {
+    afterErrorHandler(err, ctx);
   });
+  // <<< import error-handler <<<
 
   for (let i in SERVER_CONFIG) {
     // >>> params >>>
@@ -133,20 +157,6 @@ app.keys = COOKIE_KEY_LIST;
     }
     // <<< Ready to start the server <<<
   }
-
-  // Get MySQL/Redis connection pool with default options
-  await getMySQLPool()
-    .then((pool) => {
-      registerMySQLPool(pool);
-      pool.getConnection((err, conn)=>{
-        if (err) throw err;
-        buildTables('./server/dao/hypethron-database.sql', conn); // init mysql-database's tables
-      });
-    });
-  await getRedisPool()
-    .then((pool) =>{
-      registerRedisPool(pool)
-    });
 })();
 
 
@@ -178,7 +188,7 @@ function registerLogger(logger) {
  * Register a mysql-connection pool to /utils/global.js
  * @param pool
  */
-function registerMySQLPool(pool){
+function registerMySQLPool(pool) {
   global.mysqlPoolDM = new MySQLPoolManager(pool);
 }
 
@@ -186,7 +196,7 @@ function registerMySQLPool(pool){
  * Register a redis-connection pool to /utils/global.js
  * @param pool
  */
-function registerRedisPool(pool){
+function registerRedisPool(pool) {
   global.redisPool = pool;
 }
 

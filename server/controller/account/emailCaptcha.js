@@ -1,8 +1,6 @@
 const mailerSend = require('../../mail/mailer.js');
-const {global, RES_MSG} = require('../../util/global.js');
 const fs = require('fs');
 const {generatorCaptcha} = require('../../util/tools.js');
-const {DOMAIN_NAME} = require('../../server-configure.js');
 const mailerOption = require('../../mailer-configure.js');
 
 async function GET_emailCaptcha(ctx, next) {
@@ -15,49 +13,56 @@ async function GET_emailCaptcha(ctx, next) {
 }
 
 /**
- * @input { email: $String }
+ * 发送一个邮箱验证码
+ * @need-session { captcha: $String }
+ * @input { email: $String, captcha: $String }
  * @session { emailForBind: $String, captchaForBind: $String }
  * @output { success: $Boolean}
  */
 async function POST_emailCaptcha(ctx, next) {
-  try {
-    let targetEmail = ctx.request.body.email;
+  let logger = ctx.global.logger;
 
-    let captcha = generatorCaptcha('String', {size: 6, charPreset: '1234567890'});
+  let targetEmail = ctx.request.body.email;
+  let captchaClient = ctx.request.body.captcha;
+  let captchaServer = ctx.session.captcha;
 
-    let template = fs.readFileSync("./server/mail/register.template.html").toString();
-    template = template.replace("${captcha}", '' + captcha.text)
-      .replace("${contactLink}", `${DOMAIN_NAME}/pages/contact_cs`); // 客服页面
+  ctx.assert(captchaServer, 400, '@session-params:captcha is required. Try to regenerate it.');
+  ctx.assert(targetEmail, 400, '@params:targetEmail is required.');
+  ctx.assert(captchaClient, 400, '@params:captcha is required.');
 
-    let mail = {
-      from: `Hypethron ^_^<${mailerOption.auth.user}>`, // 发件人，默认为邮箱系统的登录账号
-      to: targetEmail,
-      subject: `账户安全中心-注册信息验证`,
-      html: template
-    };
+  // 不区分大小写的匹配
+  ctx.assert(captchaServer.toUpperCase() === captchaClient.toUpperCase(), 409, 'Captcha doesn\'t match.');
 
-    await mailerSend(mail).catch(err => {
-      throw err;
-    });
+  let captchaForBind = generatorCaptcha('String', {size: 6, charPreset: '1234567890'});
 
-    ctx.session.emailForBind = targetEmail;
-    ctx.session.captchaForBind = captcha.text;
+  let template = fs.readFileSync("./server/mail/register.template.html").toString();
+  template = template.replace("${captcha}", '' + captchaForBind.text)
+    .replace("${contactLink}", `${ctx.protocol}://${ctx.host}/pages/contact_cs`); // 客服页面
 
-    ctx.body = {
-      success: true,
-      msg: RES_MSG.OK
-    };
+  let mail = {
+    from: `Hypethron ^_^<${mailerOption.auth.user}>`, // 发件人，默认为邮箱系统的登录账号
+    to: targetEmail,
+    subject: `账户安全中心-注册信息验证`,
+    html: template
+  };
 
-  } catch (err) {
-    ctx.session.emailForBind = null;
-    ctx.session.captchaForBind = null;
+  let mailID = await mailerSend(mail).catch(err => {
+    throw err;
+  });
 
-    ctx.body = {
-      success: false,
-      msg: RES_MSG.SEND_MAIL_FAIL,
-      errorDetail: `${RES_MSG.SEND_MAIL_FAIL}:${err.message}`
-    }
-  }
+  logger.info(`${mailID} was sent to <${targetEmail}>.`);
+
+  // Save captcha to session.
+  ctx.session.emailForBind = targetEmail;
+  ctx.session.captchaForBind = captchaForBind.text;
+
+  // Clean session cached-captcha
+  ctx.session.captcha = null;
+
+  ctx.body = {
+    success: true
+  };
+
   return next();
 }
 

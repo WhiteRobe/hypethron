@@ -9,23 +9,23 @@ const global = {
 };
 
 
-/**
- * 操作响应状态
- */
-const RES_MSG = {
-  "OK": "OK", // (通用)操作成功
-  "FAIL": "(通用)操作失败！",
-  "FAIL_DUPLICATE": "字段重复",
-  "REJECTION": "请求被拒绝！请确保有足够的权限。",
-  "UPLOAD_FAIL": "文件上传失败！",
-  "DATABASE_ERROR": "数据库错误。",
-  "JWT_NOT_FOUND": "缺失TOKEN。",
-  "JWT_TOKEN_INVALID": "JWT验证不通过。",
-  "AUTH_LOW": "用户权限过低。",
-  "MISS_PARAMS": "缺失必要参数。",
-  "CAPTCHA_MISS_MATCH": "验证码不匹配。",
-  "SEND_MAIL_FAIL": "发送邮件失败。"
-};
+// /**
+//  * 操作响应状态
+//  */
+// const RES_MSG = {
+//   "OK": "OK", // (通用)操作成功
+//   "FAIL": "(通用)操作失败！",
+//   "FAIL_DUPLICATE": "字段重复",
+//   "REJECTION": "请求被拒绝！请确保有足够的权限。",
+//   "UPLOAD_FAIL": "文件上传失败！",
+//   "DATABASE_ERROR": "数据库错误。",
+//   "JWT_NOT_FOUND": "缺失TOKEN。",
+//   "JWT_TOKEN_INVALID": "JWT验证不通过。",
+//   "AUTH_LOW": "用户权限过低。",
+//   "MISS_PARAMS": "缺失必要参数。",
+//   "CAPTCHA_MISS_MATCH": "验证码不匹配。",
+//   "SEND_MAIL_FAIL": "发送邮件失败。"
+// };
 
 
 /**
@@ -46,6 +46,6 @@ const AUTH = {
 
 module.exports = {
   global,
-  RES_MSG,
+  // RES_MSG,
   AUTH
 };

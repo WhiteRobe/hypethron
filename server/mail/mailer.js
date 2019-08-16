@@ -26,7 +26,7 @@ async function send(mail) {
     // send mail with defined transport object
     let info = await transporter.sendMail(mail);
 
-    return `Message sent: ${info.messageId}`;
+    return `${info.messageId}`;
     // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
   } catch (err) {
     console.log(err);

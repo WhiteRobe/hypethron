@@ -10,10 +10,10 @@ const binder = require("../util/api-binder.js");
 
 const captchaService = require('./general/captcha.js');
 const emailCaptchaService = require('./account/emailCaptcha.js');
-const loginService = require('./account/login.js');
+const authorizationTokenService = require('./account/authorizationToken.js');
 const userAccountsService = require('./account/userAccounts.js');
-const userEmailService = require('./account/userEmail.js');
-const usernameService = require('./account/username.js');
+const userEmailExistenceService = require('./account/userEmailExistence.js');
+const usernameExistenceService = require('./account/usernameExistence.js');
 const userPrivaciesService = require('./account/userPrivacies.js');
 const userProfilesService = require('./account/userProfiles.js');
 
@@ -70,12 +70,12 @@ const API_ROUTER_TABLE = {
  * will be register to $publicApiRouter.
  */
 const PUBLIC_API_ROUTER_TABLE = {
+  "/authorizationToken": binder(authorizationTokenService),
   "/captcha": binder(captchaService),
   "/emailCaptcha": binder(emailCaptchaService),
-  "/login": binder(loginService),
   "/userAccounts/:uid": binder(userAccountsService),
-  "/username": binder(usernameService),
-  "/userEmail": binder(userEmailService),
+  "/usernameExistence": binder(usernameExistenceService),
+  "/userEmailExistence": binder(userEmailExistenceService),
   "/userProfiles/:uid": binder(userProfilesService)
 };
 

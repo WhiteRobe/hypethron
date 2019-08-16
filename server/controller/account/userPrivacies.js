@@ -1,5 +1,4 @@
-const {global, RES_MSG, AUTH} = require('../../util/global.js');
-const {jwtVerify, isJwtError} = require('../../util/tools.js');
+const {jwtVerify} = require('../../util/tools.js');
 
 
 /***
@@ -8,141 +7,100 @@ const {jwtVerify, isJwtError} = require('../../util/tools.js');
 
 
 /**
- * 获取某用户的各项隐私设定，权限需求为管理组或本人。`ctx.params.{uid}`。
+ * 获取某用户的各项隐私设定，权限需求为管理组或本人。
+ * @params { uid: $Int }
  * @input { / }
  * @output { result: $Array }
  */
 async function GET_userPrivacies(ctx, next) {
-  let mysql = global.mysqlPoolDM;
-  let logger = global.logger;
+  let mysql = ctx.global.mysqlPoolDM;
+  let AUTH = ctx.AUTH;
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  try {
+  ctx.assert(uid > 0, 400, "@params:uid should be positive.");
 
-    let token = ctx.header.authorization;
-    let decode = await jwtVerify(token).catch(err => {
-      throw err;
-    });
+  let token = ctx.header.authorization;
+  let decode = await jwtVerify(token).catch(err => {
+    throw err;
+  });
 
-    if ((decode.authority & AUTH.ADMIN_GROUP) <= 0 && decode.uid !== uid) {
-      throw new RangeError("只有管理组或本人才能调取这个接口.");
-    }
+  ctx.assert(
+    (decode.authority & AUTH.ADMIN_GROUP) > 0 || decode.uid === uid, 403,
+    {detail: "只有管理组或本人才能调取这个接口."}
+  );
 
-    let res = await mysql.query('SELECT * FROM user_privacy WHERE uid=?;', [uid]).catch(err => {
-      throw err;
-    });
+  let res = await mysql.query('SELECT * FROM user_privacy WHERE uid=?;', [uid]).catch(err => {
+    throw err;
+  });
 
-    ctx.body = {
-      result: res.result,
-      msg: RES_MSG.OK
-    };
-
-  } catch (err) {
-    if (err instanceof RangeError) { // 权限不足
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.AUTH_LOW,
-        errorDetail: `${RES_MSG.AUTH_LOW}:${err.message}`
-      }
-    } else {
-      logger.error(err);
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.DATABASE_ERROR,
-        errorDetail: err.code + ":" + err.message // mysql error. @See https://www.npmjs.com/package/mysql#error-handling
-      }
-    }
-  }
+  ctx.body = {
+    result: res.result
+  };
 
   return next();
 }
 
 /**
- * 更改用户的隐私设定，权限需求为管理组或本人。`ctx.params.{uid}`。
+ * 更改用户的隐私设定，权限需求为管理组或本人。
+ * @params { uid: $Int }
  * @input { updateData: $Object } // 更改的值
  * @output { success: $Boolean }
  */
 async function PATCH_userPrivacies(ctx, next) {
-  let mysql = global.mysqlPoolDM;
-  let logger = global.logger;
+  let mysql = ctx.global.mysqlPoolDM;
+  let AUTH = ctx.AUTH;
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  try {
+  ctx.assert(uid > 0, 400, "@params:uid should be positive.");
 
-    let token = ctx.header.authorization;
-    let decode = await jwtVerify(token).catch(err => {
-      throw err;
-    });
+  let token = ctx.header.authorization;
+  let decode = await jwtVerify(token).catch(err => {
+    throw err;
+  });
 
-    if ((decode.authority & AUTH.ADMIN_GROUP) <= 0 && decode.uid !== uid) {
-      throw new RangeError("只有管理组或本人才能调取这个接口.");
-    }
+  ctx.assert(
+    (decode.authority & AUTH.ADMIN_GROUP) > 0 || decode.uid === uid, 403,
+    {detail: "只有管理组或本人才能调取这个接口."}
+  );
 
-    let updateData = ctx.request.body.updateData;
+  let updateData = ctx.request.body.updateData;
 
-    if (!updateData) {
-      throw new TypeError("缺失必要的参数，请至少填入一个需要更新的值.");
-    }
+  ctx.assert(updateData, 400, "@params:updateData is null.");
 
-    let values = [];
-    let sql = "";
+  let values = [];
+  let sql = "";
 
-    let map = {
-      " privacy_general = ?,": updateData.privacyGeneral,
-      " privacy_sex = ?,": updateData.privacySex,
-      " privacy_birthday = ?,": updateData.privacyBirthday,
-      " privacy_phone = ?,": updateData.privacyPhone,
-      " privacy_email = ?,": updateData.privacyEmail
-    };
+  let map = {
+    " privacy_general = ?,": updateData.privacyGeneral,
+    " privacy_sex = ?,": updateData.privacySex,
+    " privacy_birthday = ?,": updateData.privacyBirthday,
+    " privacy_phone = ?,": updateData.privacyPhone,
+    " privacy_email = ?,": updateData.privacyEmail
+  };
 
-    for (let i in map) {
-      if (map[i] !== undefined) { // 非空的值就入栈
-        sql += i;
-        values.push(map[i]);
-      }
-    }
-
-    values.push(uid);
-    sql = sql.replace(/,$/, "");
-    let res = await mysql.query(`UPDATE user_privacy SET ${sql} WHERE uid=?;`, values).catch(err => {
-      throw err;
-    });
-
-    ctx.body = {
-      success: res.result.affectedRows > 0,
-      msg: RES_MSG.OK
-    };
-
-  } catch (err) {
-    if (isJwtError(err)) {
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.JWT_TOKEN_INVALID,
-        errorDetail: `${RES_MSG.JWT_TOKEN_INVALID}:${err.message}`
-      }
-    } else if (err instanceof RangeError) { // 权限不足
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.AUTH_LOW,
-        errorDetail: `${RES_MSG.AUTH_LOW}:${err.message}`
-      }
-    } else if (err instanceof TypeError) { // 缺失参数
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.MISS_PARAMS,
-        errorDetail: `${RES_MSG.MISS_PARAMS}:${err.message}`
-      }
-    } else {
-      logger.error(err);
-      ctx.body = {
-        success: false,
-        msg: RES_MSG.DATABASE_ERROR,
-        errorDetail: err.code + ":" + err.message // mysql error. @See https://www.npmjs.com/package/mysql#error-handling
-      }
+  for (let i in map) {
+    if (map[i] !== undefined) { // 非空的值就入栈
+      sql += i;
+      values.push(map[i]);
     }
   }
+
+  ctx.assert(values.length > 0, 400, "@params:updateData is an empty object.");
+
+  values.push(uid);
+  sql = sql.replace(/,$/, "");
+  let res = await mysql.query({
+    sql: `UPDATE user_privacy SET ${sql} WHERE uid=?;`,
+    timeout: 10000
+  }, values).catch(err => {
+    throw err;
+  });
+
+  ctx.body = {
+    success: res.result.affectedRows > 0
+  };
 
   return next();
 }

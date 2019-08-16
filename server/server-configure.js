@@ -42,7 +42,6 @@ const SERVER_CONFIG = {
 
 
 // >>> 服务器运行常量 >>>
-const SERVER_DEBUG = true;
 const SKIP_HYPETHRON_INTRO_PAGE = false;
 const STATIC_DIRECTORY = '../build'; // Where the production-spa is
 const SERVER_PRIVATE_KEY = "WhiteRobe/hypethron@Github"; // 服务器私钥
@@ -87,12 +86,11 @@ const RATE_LIMIT_CONFIGURE = {  // @See https://github.com/koajs/ratelimit
   max: 600,
   disableHeader: false,
 };
-const DOMAIN_NAME = "http://localhost:3000"; // server domain name
 
 // <<< 服务器运行常量 <<<
 
 
-module.exports.SERVER_DEBUG = SERVER_DEBUG;
+module.exports.SERVER_DEBUG = (process.env.DEBUG === undefined ? false : process.env.DEBUG.toUpperCase() === "TRUE");
 module.exports.SERVER_CONFIG = SERVER_CONFIG;
 module.exports.SKIP_HYPETHRON_INTRO_PAGE = SKIP_HYPETHRON_INTRO_PAGE;
 module.exports.STATIC_DIRECTORY = STATIC_DIRECTORY;
@@ -104,4 +102,3 @@ module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
 module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
 module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
 module.exports.RATE_LIMIT_CONFIGURE = RATE_LIMIT_CONFIGURE;
-module.exports.DOMAIN_NAME = DOMAIN_NAME;
