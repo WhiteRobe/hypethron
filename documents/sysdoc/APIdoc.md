@@ -7,6 +7,7 @@
 - ["/authorizationToken"](#authorizationtoken)
 - ["/captcha"](#captcha)
 - ["/emailCaptcha"](#emailcaptcha)
+- ["/restfulStatus"](#restfulstatus)
 - ["/userAccounts/:uid"](#useraccountsuid)
 - ["/userEmailExistence"](#useremailexistence)
 - ["/usernameExistence"](#usernameexistence)
@@ -28,7 +29,7 @@
 
 ```
 @input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String }
-@set-cookies { @Authorization: authorizationToken }
+@set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
 @output { token: $String }
 ```
 
@@ -37,7 +38,7 @@
 **GET**：比对验证码，获取比对结果。比对成功将清除所记录的captcha。
 
 ```
-@need-session { captcha: $String }
+@need-session { captcha: <token@subject:captcha> => captcha: $String }
 @input { captcha: $String }
 @output { success: $Boolean }
 ```
@@ -46,21 +47,28 @@
 
 ```
 @input { type:$String['', 'math'] }
-@session { captcha: $String }
+@session { captcha: <token@subject:captcha> => captcha: $String }
 @output { $svg }
 ```
 
 ### "/emailCaptcha"
 
-**POST**：发送一个邮箱验证码。
+**POST**：发送一个邮箱验证码，该验证码和对应的邮箱将被注册到`ctx.session.emailCaptcha`中。
 
 ```
-@need-session { captcha: $String }
+@need-session { captcha: <token@subject:captcha> => captcha: $String }
 @input { email: $String, captcha: $String }
-@session { emailForBind: $String, captchaForBind: $String }
+@session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
 @output { success: $Boolean}
 ```
 
+### "/restfulStatus"
+
+**GET**：获取状态码的说明.
+
+```
+@output { result:$JSON-String }
+```
 
 ### "/userEmailExistence"
 
@@ -96,9 +104,9 @@ Else:
 
 ```
 * When do POST, only response on ".../userAccounts/0"
-@need-session { captcha: $String, captchaForBind: $String }
+@need-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
 @input { username: $String, password: $String, salt: $String, captcha: $String }
-@set-cookies { @Authorization: authorizationToken }
+@set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
 @output { token: $String }
 ```
 

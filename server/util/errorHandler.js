@@ -12,7 +12,7 @@ const {ReplyError} = require('ioredis');
  * @param ctx
  */
 function errorHandler(err, ctx) {
-  ctx.status = err.status;
+  ctx.status = typeof err.status ===  "number" ? err.status : 500;
   ctx.body = err.detail ? `${err.message}\n${err.detail}` : err.message;
 
   let logger = global.logger;

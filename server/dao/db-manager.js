@@ -106,8 +106,10 @@ class SyncTransactionConnection {
   }
 
   set connection(connection) {
-    try{
-      this.rollback().catch(err => {throw err});
+    try {
+      this.rollback().catch(err => {
+        throw err
+      });
       this.release();
     } catch (err) {
       console.error(err);
@@ -132,9 +134,9 @@ class SyncTransactionConnection {
   commit() {
     return new Promise((resolve, reject) => {
       this.connection.commit((err, res) => {
-        if(err){
+        if (err) {
           reject(err)
-        } else{
+        } else {
           resolve(res);
         }
       });
@@ -144,9 +146,9 @@ class SyncTransactionConnection {
   rollback() {
     return new Promise((resolve, reject) => {
       this.connection.rollback((err, res) => {
-        if(err){
+        if (err) {
           reject(err)
-        } else{
+        } else {
           resolve(res);
         }
       });
@@ -154,14 +156,14 @@ class SyncTransactionConnection {
   }
 
   release() {
-    try{
+    try {
       this.connection.release();
     } catch (err) {
       throw err;
     }
   }
 
-  async trySyncCommitAndRelease(){
+  async trySyncCommitAndRelease() {
     let that = this;
     await that.commit().catch(err => {
       that.rollback().catch(err => {
@@ -174,6 +176,81 @@ class SyncTransactionConnection {
   }
 }
 
+
+/**
+ * Redis连接池管理类:based on `generic-pool`
+ */
+class RedisPoolManager {
+  constructor(pool) {
+    this._pool = pool;
+
+    this.get = this.get.bind(this);
+    this.set = this.set.bind(this);
+    this.del = this.del.bind(this);
+  }
+
+  get pool() {
+    return this._pool;
+  }
+
+  set pool(pool) {
+    this._pool = pool;
+  }
+
+  get(...args) {
+    let pool = this.pool;
+    return new Promise((resolve, reject) => {
+      pool.acquire()
+        .then(client => {
+          client.get(args, (err, res) => {
+            pool.release(client);
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          })
+        }).catch(error => reject(error))
+    });
+
+  }
+
+  set(...args) {
+    let pool = this.pool;
+    return new Promise((resolve, reject) => {
+      pool.acquire()
+        .then(client => {
+          client.set(args, (err, res) => {
+            pool.release(client);
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          })
+        }).catch(error => reject(error));
+    });
+  }
+
+  del(...args){
+    let pool = this.pool;
+    return new Promise((resolve, reject) => {
+      pool.acquire()
+        .then(client => {
+          client.del(args, (err, res) => {
+            pool.release(client);
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          })
+        }).catch(error => reject(error));
+    });
+  }
+}
+
 module.exports = {
-  MySQLPoolManager
+  MySQLPoolManager,
+  RedisPoolManager
 };

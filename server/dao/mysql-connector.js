@@ -11,7 +11,8 @@ const MYSQL_CONFIG = require("./mysql-configure.js");
  */
 function connectMySQL(connectDetail, opt) {
   // 连接提示
-  opt = opt || MYSQL_CONFIG;
+  let DEFAULT = Object.assign({}, MYSQL_CONFIG);
+  opt = Object.assign(DEFAULT, opt);
   if (connectDetail) {
     console.log(chalk.bold("-----[" + new Date() + "]-----"));
     console.log(chalk.bold("Trying to connect to MySQL with config:"));
@@ -29,8 +30,9 @@ function connectMySQL(connectDetail, opt) {
  * @param opt 连接选项 @See https://www.npmjs.com/package/mysql#connection-options
  * @return {Promise<Pool>}
  */
-async function getMySQLPool(opt){
-  opt = opt || MYSQL_CONFIG;
+async function getMySQLPool(opt) {
+  let DEFAULT = Object.assign({}, MYSQL_CONFIG);
+  opt = Object.assign(DEFAULT, opt);
   return mysql.createPool(opt);
 }
 
@@ -40,20 +42,23 @@ async function getMySQLPool(opt){
  */
 async function mysqlConnectTest() {
   let mysql = connectMySQL(true /*connect with default params, but put detail*/);
-  mysql.query('SELECT 1 + 1 AS solution',)
-    .on('error', err => {
-      let errorMsg = "Fail to connect to MySQL[Error]: " + err;
-      console.log(chalk.red(errorMsg));
-    })
-    .on('result', row => {
-      console.log(chalk.green("[Hypethron]MySQL Connect Test:", 'Success!', '\n'));
-    })
-    .on('end', () => {
-      mysql.end();
-    });
-  return {
-    message: "[Hypethron]Connect To MySQL!"
-  }
+  return new Promise((resolve, reject) => {
+    mysql.query('SELECT 1 + 1 AS solution',)
+      .on('error', err => {
+        let errorMsg = "Fail to connect to MySQL[Error]: " + err;
+        console.log(chalk.red(errorMsg));
+        reject(err);
+      })
+      .on('result', row => {
+        console.log(chalk.green("[Hypethron]MySQL Connect Test:", 'Success!', '\n'));
+        resolve({
+          message: "[Hypethron]Connect To MySQL!"
+        })
+      })
+      .on('end', () => {
+        mysql.end();
+      });
+  });
 }
 
 module.exports = {

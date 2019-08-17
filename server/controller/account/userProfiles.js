@@ -1,6 +1,6 @@
-const {jwtVerify, isJwtError} = require('../../util/tools.js');
+const {jwtVerify} = require('../../util/tools.js');
 const {TokenExpiredError} = require('jsonwebtoken');
-
+const {JWT_OPTIONS} = require('../../server-configure.js');
 
 /***
  * @Router `ctx.params.{uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
@@ -36,9 +36,9 @@ async function GET_userProfile(ctx, next) {
 
   let token = ctx.header.authorization;
   if (token) { // 本人或管理组可以跳过隐私设定
-    let decode = await jwtVerify(token).catch(err => {
+    let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
       if (err instanceof TokenExpiredError) {
-        throw err; // 若为过期TOKEN，抛出错误以给前台一个反馈
+        ctx.throw(409, err.message); // 若为过期TOKEN，抛出错误以给前台一个反馈
       } else {
         ignorePrivacySetting = false;
       }
@@ -125,8 +125,11 @@ async function PATCH_userProfile(ctx, next) {
 
 
   let token = ctx.header.authorization;
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+
+  ctx.assert(token, 401);
+
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert(
@@ -208,3 +211,20 @@ module.exports = {
   GET_userProfile,
   PATCH_userProfile
 };
+
+
+/**
+ * 根据ip和主题生成/验证一个专属的captcha-token
+ * @param subject
+ * @param ip
+ * @return {{expiresIn: string, audience: *, subject: string, issuer: string, algorithm: string}}
+ */
+function jwtOptions(subject, ip) {
+  return {
+    algorithm: JWT_OPTIONS.algorithm,
+    audience: ip,
+    subject: `hypethron/users/${subject}`,
+    issuer: JWT_OPTIONS.issuer,
+    expiresIn: "7d" // 7 天
+  }
+}

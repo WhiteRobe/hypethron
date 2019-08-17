@@ -27,9 +27,7 @@
 - "koa": "^2.7.0"
 - "koa-body": "^4.1.0"
 - "koa-compress": "^3.0.0"
-- "koa-convert": "^1.2.0"
 - "koa-helmet": "^4.2.0"
-- "koa-ip-filter": "^3.0.0"
 - "koa-log4": "^2.3.2"
 - "koa-ratelimit": "^4.2.0",
 - "koa-router": "^7.4.0"

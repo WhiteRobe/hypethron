@@ -7,7 +7,7 @@ const {hmac} = require('../../util/crypto-hash-tool.js');
  * 通过账号进行登录，返回一个登录是否成功的标志即服务器签发的Token，并尝试写入cookies。
  * 同时，username可作为email或phone登录。
  * @input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String }
- * @set-cookies { @Authorization: authorizationToken }
+ @set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
  * @output { token: $String }
  */
 async function POST_authorizationToken(ctx, next) {
@@ -50,17 +50,22 @@ async function POST_authorizationToken(ctx, next) {
     let authorizationToken = jwt.sign({
       uid: res.result[0].uid,
       authority: res.result[0].authority
-    }, SERVER_PRIVATE_KEY, JWT_OPTIONS);
+    }, SERVER_PRIVATE_KEY, jwtOptions('authorization', ctx.ip));
 
     ctx.body = {
-      token: jwt.sign({uid: res.result[0].uid, authority: res.result[0].authority}, SERVER_PRIVATE_KEY, JWT_OPTIONS)
+      token: authorizationToken
     };
 
     logger.info(`${res.result[0].uid} login with password:${password} ${salt}.`);
 
     // 尝试写入cookies
     try {
-      ctx.cookies.set('Authorization', authorizationToken, {maxAge: 7 * 24 * 60 * 60 * 1000/*7 days*/, signed: true});
+      ctx.cookies.set('Authorization', authorizationToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000 /*7 days*/,
+        signed: false,
+        overwrite: true,
+        httpOnly: false
+      });
     } catch (e) {
       /*ignore err*/
     }
@@ -75,3 +80,20 @@ async function POST_authorizationToken(ctx, next) {
 module.exports = {
   POST_authorizationToken
 };
+
+
+/**
+ * 根据ip和主题生成/验证一个专属的captcha-token
+ * @param subject
+ * @param ip
+ * @return {{expiresIn: string, audience: *, subject: string, issuer: string, algorithm: string}}
+ */
+function jwtOptions(subject, ip) {
+  return {
+    algorithm: JWT_OPTIONS.algorithm,
+    audience: ip,
+    subject: `hypethron/users/${subject}`,
+    issuer: JWT_OPTIONS.issuer,
+    expiresIn: "7d" // 7 天
+  }
+}

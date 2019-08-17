@@ -1,7 +1,7 @@
 const {SERVER_PRIVATE_KEY, JWT_OPTIONS, SERVER_SALT} = require('../../server-configure.js');
 const {hmac} = require('../../util/crypto-hash-tool.js');
 const jwt = require('jsonwebtoken'); // @See https://www.npmjs.com/package/jsonwebtoken
-const {jwtVerify, isJwtError} = require('../../util/tools.js');
+const {jwtVerify} = require('../../util/tools.js');
 
 
 /***
@@ -30,14 +30,14 @@ async function GET_userAccounts(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0;
 
-  ctx.assert(uid >= 0, 404, '@url-params:uid should be positive.');
+  ctx.assert(uid >= 0, 400, '@url-params:uid should be positive.');
 
   let token = ctx.header.authorization;
 
   ctx.assert(token, 401);
 
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert(
@@ -100,9 +100,9 @@ async function GET_userAccounts(ctx, next) {
 /**
  * RESTful 注册接口，返回一个注册是否成功的标志即服务器签发的Token，并尝试写入session-cookies。
  * When do POST, response on ".../userAccounts/0"
- * @need-session { captcha: $String, captchaForBind: $String }
+ * @need-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
  * @input { username: $String, password: $String, salt: $String, captcha: $String }
- * @set-cookies { @Authorization: authorizationToken }
+ * @set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
  * @output { token: $String }
  */
 async function POST_userAccounts(ctx, next) {
@@ -113,19 +113,26 @@ async function POST_userAccounts(ctx, next) {
   let password = ctx.request.body.password; // 经过前端慢计算的哈希密码
   let salt = ctx.request.body.salt; // 慢计算用盐
 
-  let email = ctx.session.emailForBind; // 绑定的邮箱名(此时默认email已从邮箱绑定接口注册到session中)
-  let captchaServer = '' + ctx.session.captchaForBind; // 注册时的验证码(服务端) 应为6位字符长(强制转字符串)
-  let captchaClient = '' + ctx.request.body.captcha; // 注册时的验证码(客户端)
+  // let email = ctx.session.emailForCaptcha; // 绑定的邮箱名(此时默认email已从邮箱绑定接口注册到session中)
+  let captchaServer = ctx.session.emailCaptcha; // 注册时的验证码captcha(服务端) 应为6位字符长 | 同时绑定email字段
+  let captchaClient = ctx.request.body.captcha; // 注册时的验证码(客户端)
 
   ctx.assert(username, 400, `@params:username is required.`);
   ctx.assert(password, 400, `@params:password is required.`);
   ctx.assert(salt, 400, `@params:salt is required.`);
-  ctx.assert(email, 400, `@session-params:email is required. Try to regenerate it.`);
-  ctx.assert(captchaServer, 400, `@session-params:captchaServer is required. Try to regenerate it.`);
+  ctx.assert(captchaServer, 400, `@session-params:emailCaptcha is required. Try to regenerate it.`);
   ctx.assert(captchaClient, 400, `@params:captchaClient is required.`);
 
+  let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions(`emailCaptcha`, ctx.ip))
+    .catch(err => {
+      ctx.session.emailCaptcha = null; // 清空过期或被篡改的数据
+      ctx.throw(409, err.message);
+    });
+
   // 不区分验证码的大小写(尽管这里应该是6位数字)
-  ctx.assert(captchaServer.toUpperCase() === captchaClient.toUpperCase(), 409, 'Captcha doesn\'t match.');
+  ctx.assert(decode.captcha.toUpperCase() === `${captchaClient}`.toUpperCase(), 409, 'Captcha doesn\'t match.');
+
+  let email = decode.email; // 绑定的邮箱名
 
   let connection = await mysql.beginTransaction().catch(err => {// 获取一个事务实例
     throw err;
@@ -175,7 +182,7 @@ async function POST_userAccounts(ctx, next) {
       });
 
       await connection.commit().catch(err => {
-        throw err
+        throw err;
       });
 
       logger.info(`User ${res.result[0].uid} register success, his/her email is [${email}].`);
@@ -183,7 +190,7 @@ async function POST_userAccounts(ctx, next) {
       let authorizationToken = jwt.sign({
         uid: res.result[0].uid,
         authority: res.result[0].authority
-      }, SERVER_PRIVATE_KEY, JWT_OPTIONS);
+      }, SERVER_PRIVATE_KEY, jwtOptions('authorization', ctx.ip));
 
       ctx.body = { // 注册成功，签发Token {uid, authority}
         token: authorizationToken
@@ -191,16 +198,21 @@ async function POST_userAccounts(ctx, next) {
 
       // 尝试写入cookies
       try {
-        ctx.cookies.set('Authorization', authorizationToken, {maxAge: 7 * 24 * 60 * 60 * 1000/*7 days*/, signed: true});
+        ctx.cookies.set('Authorization', authorizationToken, {
+          maxAge: 7 * 24 * 60 * 60 * 1000/*7 days*/,
+          signed: false,
+          overwrite: true,
+          httpOnly: false
+        });
       } catch (e) {
         /*ignore err*/
       }
 
       // 清空session
-      ctx.session.emailForBind = null;
-      ctx.session.captchaForBind = null;
+      ctx.session.emailCaptcha = null;
+
     } else {
-      ctx.throw(409);
+      ctx.throw(409, 'register fail', {detail:`注册失败，请稍后重试.`});
     }
   } catch (err) {
     await connection.rollback() // 发生错误则事务回撤
@@ -235,8 +247,8 @@ async function PATCH_userAccounts(ctx, next) {
 
   ctx.assert(token, 401);
 
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert(
@@ -297,14 +309,14 @@ async function DELETE_userAccounts(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0;
 
-  ctx.assert(ctx.params.uid > 0, 404, '@url-params:uid should be positive.');
+  ctx.assert(ctx.params.uid > 0, 400, '@url-params:uid should be positive.');
 
   let token = ctx.header.authorization;
 
   ctx.assert(token, 401);
 
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert((decode.authority & AUTH.ADMIN_GROUP) > 0, 403, {detail: "只有管理组才能调取这个接口."});
@@ -352,3 +364,20 @@ module.exports = {
   PATCH_userAccounts,
   DELETE_userAccounts
 };
+
+
+/**
+ * 根据ip和主题生成/验证一个专属的captcha-token
+ * @param subject
+ * @param ip
+ * @return {{expiresIn: string, audience: *, subject: string, issuer: string, algorithm: string}}
+ */
+function jwtOptions(subject, ip) {
+  return {
+    algorithm: JWT_OPTIONS.algorithm,
+    audience: ip,
+    subject: `hypethron/users/${subject}`,
+    issuer: JWT_OPTIONS.issuer,
+    expiresIn: "7d" // 7 天
+  }
+}

@@ -5,7 +5,7 @@
 const global = {
   logger: null,// 日志对象
   mysqlPoolDM: null, // MySQL连接池管理对象
-  redisPool: null // Redis连接池
+  redisPoolDM: null // Redis连接池管理对象
 };
 
 

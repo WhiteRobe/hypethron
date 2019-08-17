@@ -1,5 +1,5 @@
 const {jwtVerify} = require('../../util/tools.js');
-
+const {JWT_OPTIONS} = require('../../server-configure.js');
 
 /***
  * @Router `ctx.params.{uid}` 为用户的统一标识符，是一个大于1的整数；部分动词只对特殊的UID进行响应。
@@ -21,8 +21,11 @@ async function GET_userPrivacies(ctx, next) {
   ctx.assert(uid > 0, 400, "@params:uid should be positive.");
 
   let token = ctx.header.authorization;
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+
+  ctx.assert(token, 401);
+
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert(
@@ -56,8 +59,11 @@ async function PATCH_userPrivacies(ctx, next) {
   ctx.assert(uid > 0, 400, "@params:uid should be positive.");
 
   let token = ctx.header.authorization;
-  let decode = await jwtVerify(token).catch(err => {
-    throw err;
+
+  ctx.assert(token, 401);
+
+  let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
+    ctx.throw(409, err.message);
   });
 
   ctx.assert(
@@ -109,3 +115,20 @@ module.exports = {
   GET_userPrivacies,
   PATCH_userPrivacies
 };
+
+
+/**
+ * 根据ip和主题生成/验证一个专属的captcha-token
+ * @param subject
+ * @param ip
+ * @return {{expiresIn: string, audience: *, subject: string, issuer: string, algorithm: string}}
+ */
+function jwtOptions(subject, ip) {
+  return {
+    algorithm: JWT_OPTIONS.algorithm,
+    audience: ip,
+    subject: `hypethron/users/${subject}`,
+    issuer: JWT_OPTIONS.issuer,
+    expiresIn: "7d" // 7 天
+  }
+}

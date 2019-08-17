@@ -2,7 +2,6 @@ const Koa = require('koa');
 const koa_static = require('koa-static');
 const koa_compress = require('koa-compress');
 const koa_helmet = require('koa-helmet');
-const koa_convert = require('koa-convert'); // Convert koa legacy generator middleware to modern promise middleware.
 const koa_jwt = require('koa-jwt');
 const koa_session = require('koa-session');
 const ratelimit = require('koa-ratelimit');
@@ -13,11 +12,12 @@ const https = require('https');
 const chalk = require('chalk');  // @See  https://www.npmjs.com/package/chalk
 const path = require('path');
 const fs = require('fs');
+const ipFilter = require('ip-filter'); // @See https://github.com/tunnckoCore/ip-filter
 
-const {connectRedis, redisConnectTest, getRedisPool} = require('./dao/redis-connector.js');
+const {connectRedis, redisConnectTest, getRedisPool, createRedisSession} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
 const {buildTables} = require('./dao/database-init.js');
-const {MySQLPoolManager} = require('./dao/db-manager.js');
+const {MySQLPoolManager, RedisPoolManager} = require('./dao/db-manager.js');
 
 const {
   SERVER_DEBUG,
@@ -32,10 +32,12 @@ const {
 } = require('./server-configure.js');
 const {log4js, accessLogger} = require("./logger-configure.js");
 const router = require('./server-router.js');
-const koaIpFilter = require('./ip-filter-configure.js');
+const IP_FILTER_CONFIGURE = require('./ip-filter-configure.js');
 
 const {global, AUTH} = require('./util/global.js');
 const {errorHandler, afterErrorHandler} = require('./util/errorHandler.js');
+
+// ------------------  //
 
 const app = new Koa();
 app.keys = COOKIE_KEY_LIST;
@@ -80,21 +82,29 @@ app.keys = COOKIE_KEY_LIST;
     .then((pool) => {
       registerRedisPool(pool)
     });
+
+  let redisSession = KOA_SESSION_CONFIGURE.store === true ? await createRedisSession() : KOA_SESSION_CONFIGURE.store;
+  let ratelimitRedis = connectRedis({db: 1});
   // <<< Get MySQL/Redis connection pool with default options <<<
+
+  const STATIC_RATE_LIMIT_CONFIGURE = Object.assign({db: ratelimitRedis}, RATE_LIMIT_CONFIGURE);
+  const STATIC_KOA_SESSION_CONFIGURE = Object.assign(KOA_SESSION_CONFIGURE, {store: redisSession});
+  //
 
   // >>> import middleware and load router >>>
   app
     .use((ctx, next) => { // Register global-values
+      ctx.IP_FILTER_CONFIGURE = IP_FILTER_CONFIGURE;
       ctx.global = global;
       ctx.AUTH = AUTH;
       ctx.SERVER_DEBUG = SERVER_DEBUG;
       return next();
     })
-    .use(ratelimit(Object.assign({db: connectRedis()}, RATE_LIMIT_CONFIGURE)))
-    .use(koa_session(KOA_SESSION_CONFIGURE, app)) // Use koa-session with `hypethron:sess` as cookie-key(default)
-    .use(accessLogger()) // Use access-logger for koa
-    .use(koa_convert(koaIpFilter())) // Ip filter, and 'koa-ip-filter' should be convert
+    .use(IpFilter(logger))
+    .use(ratelimit(STATIC_RATE_LIMIT_CONFIGURE))
+    .use(koa_session(STATIC_KOA_SESSION_CONFIGURE, app)) // Use koa-session with `hypethron:sess` as cookie-key(default)
     .use(koa_helmet()) // Use module 'helmet' to provide important security headers
+    .use(accessLogger()) // Use access-logger for koa
     .use(koa_compress({
       // filter: (content_type) => { return /text/i.test(content_type) },
       threshold: 2048, // 大于2kb时进行压缩
@@ -197,6 +207,36 @@ function registerMySQLPool(pool) {
  * @param pool
  */
 function registerRedisPool(pool) {
-  global.redisPool = pool;
+  global.redisPoolDM = new RedisPoolManager(pool);
 }
 
+
+/**
+ * @middleware IP过滤器
+ * @param logger 日志类
+ * @context 依赖上下文 `ctx.IP_FILTER_CONFIGURE`
+ * @return {Function}
+ */
+function IpFilter(logger) {
+  logger = logger || {info: (msg) => console.log(msg)};
+  return async function (ctx, next) { // Ip filter
+    let config = ctx.IP_FILTER_CONFIGURE || {
+      filter: [],
+      whitelist: [],
+      forbiddenMsg: '403: Forbidden'
+    };
+
+    if (ipFilter(ctx.ip, config.filter, {strict: false})) { // in black list
+      for (let s of config.whitelist) { // is it in whitelist?
+        if (ctx.ip.indexOf(s) >= 0) {
+          return next(); // yes, request go.
+        }
+      }
+      if (!ctx.app.silent) {
+        logger.info(`Black user [${ctx.ip}] try to login but been blocked.`);
+      }
+      ctx.throw(403, config.forbiddenMsg);
+    }
+    return next();
+  }
+}

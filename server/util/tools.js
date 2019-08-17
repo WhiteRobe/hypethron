@@ -44,19 +44,24 @@ function generatorCaptcha(type, opt){
 /**
  * 验证一个Token
  * @param token
- * @param key
- * @param options @See https://www.npmjs.com/package/jsonwebtoken
+ * @param key:String(opt)
+ * @param options:Object(opt) @See https://www.npmjs.com/package/jsonwebtoken
  * @return {Promise<*>}
  */
 async function jwtVerify(token, key, options) {
+  if(typeof key !== "string"){
+    options = key;
+    key = undefined;
+  }
   key = key || SERVER_PRIVATE_KEY;
-  options = options || JWT_OPTIONS;
+  let jwtOpt = Object.assign({}, JWT_OPTIONS);
+  jwtOpt = Object.assign(jwtOpt, options);
   if (!token) {
     throw new TypeError("TokenNotFound");
   }
   token = token.replace(/^Bearer /, ""); // 移除 koa-jwt的保护字段 "Bearer <token>"
   return new Promise((resolve, reject) => {
-      jwt.verify(token, key, options, (err, decoded) => {
+      jwt.verify(token, key, jwtOpt, (err, decoded) => {
         if (err) {
           reject(err);
         } else {

@@ -8,9 +8,10 @@ const binder = require("../util/api-binder.js");
 
 //_______import your api here________//
 
-const captchaService = require('./general/captcha.js');
-const emailCaptchaService = require('./account/emailCaptcha.js');
 const authorizationTokenService = require('./account/authorizationToken.js');
+const captchaService = require('./general/captcha.js');
+const emailCaptchaService = require('./general/emailCaptcha.js');
+const restfulStatusService = require('./general/restfulStatus.js');
 const userAccountsService = require('./account/userAccounts.js');
 const userEmailExistenceService = require('./account/userEmailExistence.js');
 const usernameExistenceService = require('./account/usernameExistence.js');
@@ -73,6 +74,7 @@ const PUBLIC_API_ROUTER_TABLE = {
   "/authorizationToken": binder(authorizationTokenService),
   "/captcha": binder(captchaService),
   "/emailCaptcha": binder(emailCaptchaService),
+  "/restfulStatus": binder(restfulStatusService),
   "/userAccounts/:uid": binder(userAccountsService),
   "/usernameExistence": binder(usernameExistenceService),
   "/userEmailExistence": binder(userEmailExistenceService),

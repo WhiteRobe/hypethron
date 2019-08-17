@@ -49,7 +49,8 @@ const SERVER_SALT = "WhiteRobe/hypethron@Github"; // Server salt
 const JWT_PROTECT_UNLESS = [/^\/[\w\.]*$/, /^\/static/, /^\/pages/, /^\/papi/]; // 非JWT控制目录
 const JWT_OPTIONS = {
   algorithm: "HS256",
-  audience: "hypethron/users",
+  // audience: (ctx) => ctx.ip, // 这两个值不应在此处被设置
+  // subject: "hypethron/users",
   issuer: "WhiteRobe/hypethron@Github",
   expiresIn: "7d"
 };
@@ -57,13 +58,14 @@ const KOA_JWT_CONFIGURE = { // JWT的解码值将会存放到 ctx.state.jwtData 
   secret: SERVER_PRIVATE_KEY,
   key: 'jwtData',
   tokenKey: "originToken",
-  audience: JWT_OPTIONS.audience,
+  // audience: (ctx) => ctx.ip, // 这两个值不应在此处被设置
+  // subject: JWT_OPTIONS.subject,
   issuer: JWT_OPTIONS.issuer
 };
 const COOKIE_KEY_LIST = [SERVER_PRIVATE_KEY, 'I Like hypethron'];
 const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-session
   key: 'hypethron:sess', // (string) cookie key
-  maxAge: 10 * 60 * 1000, // (ms), 1 day -> 86400000 { Any adjustment ont this value is not recommended }
+  maxAge: 86400000, // (ms), 1 day -> 86400000 { Any adjustment ont this value is not recommended }
   autoCommit: true,
   overwrite: true,
   httpOnly: true, // 防止JS脚本进行修改
@@ -73,8 +75,9 @@ const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-sessio
   encode: (data) => aesEncrypt(JSON.stringify(data)), // 不采用Base64进行加解密，而使用AES。
   decode: (data) => JSON.parse(aesDecrypt(data)),
   // 启用本属性以使用 External Session Stores，性能分析@See https://www.npmjs.com/package/koa-redis#benchmark
+  // 或设置 store: true 采用本项目封装好的`/server/dao/redis-connect.js:createRedisSession()`
   // store: {
-  //  配置，如: new require('koa-redis')();
+  //  配置，如: new require('koa-redis')(); //@example https://github.com/eggjs/egg-session-redis/blob/master/app.js#L12
   // }
   //Use external session stores only if necessary, avoid using session as a cache, keep the session lean, and store it in a cookie if possible!
 };
