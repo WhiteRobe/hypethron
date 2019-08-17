@@ -88,6 +88,8 @@ const RATE_LIMIT_CONFIGURE = {  // @See https://github.com/koajs/ratelimit
   id: (ctx) => ctx.ip,
   max: 600,
   disableHeader: false,
+  // blacklist: ctx => false,
+  throw: true
 };
 
 // <<< 服务器运行常量 <<<

@@ -38,7 +38,7 @@ const {global, AUTH} = require('./util/global.js');
 const {errorHandler, afterErrorHandler} = require('./util/errorHandler.js');
 
 // ------------------  //
-
+const BLACK_LIST = []; // Dynamic black list, will be rest on 00:00:00 every day.
 const app = new Koa();
 app.keys = COOKIE_KEY_LIST;
 
@@ -87,17 +87,27 @@ app.keys = COOKIE_KEY_LIST;
   let ratelimitRedis = connectRedis({db: 1});
   // <<< Get MySQL/Redis connection pool with default options <<<
 
-  const STATIC_RATE_LIMIT_CONFIGURE = Object.assign({db: ratelimitRedis}, RATE_LIMIT_CONFIGURE);
+  const STATIC_RATE_LIMIT_CONFIGURE = Object.assign({
+    db: ratelimitRedis,
+    blacklist: (ctx) => {
+      if (ctx.BLACK_LIST) {
+        return ctx.BLACK_LIST.indexOf(ctx.ip) >= 0
+      }
+      return false;
+    }
+  }, RATE_LIMIT_CONFIGURE);
   const STATIC_KOA_SESSION_CONFIGURE = Object.assign(KOA_SESSION_CONFIGURE, {store: redisSession});
   //
 
   // >>> import middleware and load router >>>
   app
     .use((ctx, next) => { // Register global-values
+      ctx.BLACK_LIST = BLACK_LIST; // blacklist
       ctx.IP_FILTER_CONFIGURE = IP_FILTER_CONFIGURE;
       ctx.global = global;
       ctx.AUTH = AUTH;
       ctx.SERVER_DEBUG = SERVER_DEBUG;
+      tryReleaseIPOnBlacklist(ctx).then().catch(err => console.error(err));
       return next();
     })
     .use(IpFilter(logger))
@@ -208,6 +218,16 @@ function registerMySQLPool(pool) {
  */
 function registerRedisPool(pool) {
   global.redisPoolDM = new RedisPoolManager(pool);
+}
+
+/**
+ * async try release IP on blacklist at 00:00:00 every day.
+ * @param ctx
+ */
+async function tryReleaseIPOnBlacklist(ctx) {
+  if (new Date().getHours() === 0) { // 每天零点释放动态黑名单用户
+    ctx.BLACK_LIST.splice(0, ctx.BLACK_LIST.length);
+  }
 }
 
 

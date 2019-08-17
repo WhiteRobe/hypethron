@@ -41,6 +41,9 @@ function afterErrorHandler(err, ctx){
   } else if (parseInt(err.status) >= 500){
     /* When server is not under debug mode, only log server-errors.*/
     logger.error(err + (err.detail ? `\n${err.detail}` : ''));
+  } else if(err.status === 429){
+    logger.warn(`user[${ctx.ip}] send too many requests.`); // 这个用户访问频率异常高
+    ctx.BLACK_LIST.push(`${ctx.ip}`); // 加入动态黑名单
   } else {
     /* do nothing to general-error */
   }
