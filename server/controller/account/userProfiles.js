@@ -32,7 +32,7 @@ async function GET_userProfile(ctx, next) {
   let ignorePrivacySetting = false;
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  ctx.assert(uid >= 0, 400, '@params:uid is invalid.');
+  ctx.assert(uid >= 0, 400, '@url-params:uid is invalid.');
 
   let token = ctx.header.authorization;
   if (token) { // 本人或管理组可以跳过隐私设定
@@ -63,7 +63,7 @@ async function GET_userProfile(ctx, next) {
   } else {
     let filter = ctx.request.query;
 
-    ctx.assert(filter.page && filter.max, 400, "@params:page and @params:max is required.");
+    ctx.assert(filter.page && filter.max, 400, "@input:page and @input:max is required.");
 
     let sql = '';
     let values = [];
@@ -121,7 +121,7 @@ async function PATCH_userProfile(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  ctx.assert(uid > 0, 400, '@params:uid should be positive.');
+  ctx.assert(uid > 0, 400, '@url-params:uid should be positive.');
 
 
   let token = ctx.header.authorization;
@@ -139,7 +139,7 @@ async function PATCH_userProfile(ctx, next) {
 
   let updateData = ctx.request.body.updateData;
 
-  ctx.assert(updateData, 400, "@params:updateData is null.");
+  ctx.assert(updateData, 400, "@input:updateData is null.");
 
   let values = [];
   let sql = "";
@@ -164,7 +164,7 @@ async function PATCH_userProfile(ctx, next) {
     }
   }
 
-  ctx.assert(values.length > 0, 400, "@params:updateData is an empty object.");
+  ctx.assert(values.length > 0, 400, "@input:updateData is an empty object.");
 
   values.push(uid);
   sql = sql.replace(/,$/, "");

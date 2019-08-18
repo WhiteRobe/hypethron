@@ -11,7 +11,7 @@ const opt = require('../mailer-configure.js');
  *    from: 'Hypethron 😀 <register@noreply.hypethron.com>', // sender address
  *    to: "example@host.com", // list of receivers
  *    subject: "Hello ", // Subject line
- *    html: "Hello World!" // fs.readFileSync("./server/mail/register.template.html") // html body
+ *    html: "Hello World!" // fs.readFileSync("./server/mail/general.template.html") // html body
  *  }).catch(err => {
  *    throw  err;
  *  });

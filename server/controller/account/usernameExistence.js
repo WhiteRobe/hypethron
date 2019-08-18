@@ -10,7 +10,7 @@ async function GET_usernameExistence(ctx, next) {
   let mysql = global.mysqlPoolDM;
   let username = ctx.request.query.username;
 
-  ctx.assert(username, 400, 'need @params:username');
+  ctx.assert(username, 400, '@input:username is required.');
 
   let cb = await mysql.query(
     {sql: 'SELECT salt FROM user_account WHERE username=? ;', timeout: 10000}, [username]

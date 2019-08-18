@@ -44,7 +44,7 @@ const SERVER_CONFIG = {
 // >>> 服务器运行常量 >>>
 const SKIP_HYPETHRON_INTRO_PAGE = false;
 const STATIC_DIRECTORY = '../build'; // Where the production-spa is
-const SERVER_PRIVATE_KEY = "WhiteRobe/hypethron@Github"; // 服务器私钥
+const SERVER_PRIVATE_KEY = "WhiteRobe/hypethron@Github"; // Server private key
 const SERVER_SALT = "WhiteRobe/hypethron@Github"; // Server salt
 const JWT_PROTECT_UNLESS = [/^\/[\w\.]*$/, /^\/static/, /^\/pages/, /^\/papi/]; // 非JWT控制目录
 const JWT_OPTIONS = {
@@ -63,8 +63,12 @@ const KOA_JWT_CONFIGURE = { // JWT的解码值将会存放到 ctx.state.jwtData 
   issuer: JWT_OPTIONS.issuer
 };
 const COOKIE_KEY_LIST = [SERVER_PRIVATE_KEY, 'I Like hypethron'];
+const SESSION_AES_KEY = {
+  key: "hypethron@Github", // length should be 16
+  iv: "hypethron@Github", // length should be 16
+};
 const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-session
-  key: 'hypethron:sess', // (string) cookie key
+  key: 'hypethron:sess', // (string) as cookie-key
   maxAge: 86400000, // (ms), 1 day -> 86400000 { Any adjustment ont this value is not recommended }
   autoCommit: true,
   overwrite: true,
@@ -72,8 +76,9 @@ const KOA_SESSION_CONFIGURE = { // @See https://www.npmjs.com/package/koa-sessio
   signed: true,
   rolling: false,
   renew: true,
-  encode: (data) => aesEncrypt(JSON.stringify(data)), // 不采用Base64进行加解密，而使用AES。
-  decode: (data) => JSON.parse(aesDecrypt(data)),
+  // 不采用Base64进行加解密，而使用AES。
+  encode: (data) => aesEncrypt(JSON.stringify(data), 'aes-128-cbc', SESSION_AES_KEY.key, SESSION_AES_KEY.iv),
+  decode: (data) => JSON.parse(aesDecrypt(data, 'aes-128-cbc', SESSION_AES_KEY.key, SESSION_AES_KEY.iv)),
   // 启用本属性以使用 External Session Stores，性能分析@See https://www.npmjs.com/package/koa-redis#benchmark
   // 或设置 store: true 采用本项目封装好的`/server/dao/redis-connect.js:createRedisSession()`
   // store: {
@@ -104,6 +109,7 @@ module.exports.SERVER_SALT = SERVER_SALT;
 module.exports.JWT_PROTECT_UNLESS = JWT_PROTECT_UNLESS;
 module.exports.JWT_OPTIONS = JWT_OPTIONS;
 module.exports.KOA_JWT_CONFIGURE = KOA_JWT_CONFIGURE;
+module.exports.SESSION_AES_KEY = SESSION_AES_KEY;
 module.exports.COOKIE_KEY_LIST = COOKIE_KEY_LIST;
 module.exports.KOA_SESSION_CONFIGURE = KOA_SESSION_CONFIGURE;
 module.exports.RATE_LIMIT_CONFIGURE = RATE_LIMIT_CONFIGURE;

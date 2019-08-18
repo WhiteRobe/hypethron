@@ -53,7 +53,9 @@ JWT_PROTECT_UNLESS | array[Reg] | 不受JWT保护的目录 | [/^\/static/]
 JWT_OPTIONS | object | jsonwebtoken的配置 | [参考](https://www.npmjs.com/package/jsonwebtoken)
 KOA_JWT_CONFIGURE | object | koa-jwt的配置 | [参考](https://www.npmjs.com/package/koa-jwt)
 COOKIE_KEY_LIST | array[string] | cookie签名的key列表 | [参考](https://www.npmjs.com/package/keygrip)
-RATE_LIMIT_CONFIGURE | object | 访问频率 | [参考](https://github.com/koajs/ratelimit#options)
+SESSION_AES_KEY | object | session的AES加密密钥 | 应该为16位长的字符串
+KOA_SESSION_CONFIGURE | | object | koa-session的配置 | [参考](https://github.com/koajs/session)
+RATE_LIMIT_CONFIGURE | object | 访问频率限制 | [参考](https://github.com/koajs/ratelimit#options)
 
 ## 环境变量
 

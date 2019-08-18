@@ -1,12 +1,35 @@
 # 后端API文档
 
+**名词解释**
+
+- **@input** 参数输入
+- **@output** 参数输出
+- **@params** 地址参数输入，等价于"@url-params"
+- **@set-params** 尝试向url设置一个参数
+- **@redirect** 重定向到地址
+- **@set-cookies** 服务器尝试设置一个cookies
+- **@need-cookies** 服务器尝试读一个cookies
+- **@set-session**  接口向服务器session中存入一个的值
+- **@need-session** 接口需要读服务器session中存储的值
+- **@set-head**  接口将会设置一个response-head
+- **@need-head** 接口需要读一个response-head
+- **<token>@subject/...=>value** 指示，标记一个JWT Token的某项约束值
+- **$String/Object/JSON-String...** 指示，标记某个字段的值类型
+- **<opt>** 指示，标记一个可选的参数项
+- **<opt@domain:±n>** 指示，标记domain中几个互斥的的参数项，至多(+)/至少(-)只能有n个
+- **<random-value:id>** 指示，标记一个随机的值及其在上下文中的id
+
+---
+
 **目录**
 
 [公共接口](#公共接口)
 
 - ["/authorizationToken"](#authorizationtoken)
+- ["/apiDocument"](#apidocument)
 - ["/captcha"](#captcha)
 - ["/emailCaptcha"](#emailcaptcha)
+- ["/passwordRetrieveCert"](#passwordretrievecert)
 - ["/restfulStatus"](#restfulstatus)
 - ["/userAccounts/:uid"](#useraccountsuid)
 - ["/userEmailExistence"](#useremailexistence)
@@ -33,6 +56,15 @@
 @output { token: $String }
 ```
 
+### "/apiDocument"
+
+**GET**：输出后端接口文档
+
+```
+@input { / }
+@output { html/text }
+```
+
 ### "/captcha"
 
 **GET**：比对验证码，获取比对结果。比对成功将清除所记录的captcha。
@@ -47,7 +79,7 @@
 
 ```
 @input { type:$String['', 'math'] }
-@session { captcha: <token@subject:captcha> => captcha: $String }
+@set-session { captcha: <token@subject:captcha> => captcha: $String }
 @output { $svg }
 ```
 
@@ -57,9 +89,30 @@
 
 ```
 @need-session { captcha: <token@subject:captcha> => captcha: $String }
-@input { email: $String, captcha: $String }
-@session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
+@input { email: $String, captcha: $String, type:$String<@get-from:http.options> }
+@set-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
 @output { success: $Boolean}
+```
+
+### "/passwordRetrieveCert"
+
+
+**POST**：申请找回密码，向绑定的邮箱发送一份邮件，以获得相应的认证`retrievePWCert`。
+
+```
+@input { email: $String, captcha: $String }
+@need-session { captcha: <token@subject:captcha> => captcha: $String }
+@set-params { retrievePWCert: $String=<random-value:1> }
+@set-session { <random-value:1>: <token@subject:retrievePWCert> => uid: $Int }
+@output { success: $Boolean }
+```
+
+**PATCH**：根据`retrievePWCert`的值从session中获得相应的jwt-token证明并验证身份，若通过则重设密码。
+
+```
+@input { password: $String, salt: $String, retrievePWCert: $String }
+@need-session { <random-value:@input[retrievePWCert]>: <token@subject:retrievePWCert> => uid: $Int }
+@output { success: $Boolean }
 ```
 
 ### "/restfulStatus"

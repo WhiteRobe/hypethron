@@ -71,7 +71,7 @@
 
 “hypethron/院庭”依赖于Node.js环境，所以您应当先在本机配置Node.js环境。
 
-您可以通过指令`node -v`查看你的系统是否已经安装Node.js环境及其版本号是否在10.8.x以上。
+您可以通过指令`node -v`查看你的系统是否已经安装Node.js环境及其版本号。我们推荐的Node版本为`10.8.x`以上。
 
 否则，您应该按照[这篇文章的指引](/documents/HowToInstallNode.md)安装或重新安装相应版本的Node.js环境。
 
@@ -87,102 +87,24 @@
 
 - **Step 2** 配置环境 Initialization
 
-> **(Windows)** 执行 `/InitEnvironment(windows).bat` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建(见下文)。
+> **(Windows)** 执行 `/InitEnvironment(windows).bat` 脚本，从淘宝镜像源拉取项目依赖。
 >
-> **(Linux)** 执行 `/InitEnvironment(linux).sh` 脚本，从淘宝镜像源拉取项目依赖，并完成相应配置文件的创建(见下文)。
-
-- **Step 3** 打包应用 Pack *(非必需 not-necessary)*
-
-> 执行命令行 `npm run build` 打包、发布生产环境的应用。
->
-> 应用将被编译、打包到项目目录下的 `/build` 中。随后，你可以将该目录部署到后端的控制域内。详见下文-[启动项目|Usage](https://github.com/WhiteRobe/hypethron#%E2%85%B3-%E5%90%AF%E5%8A%A8%E9%A1%B9%E7%9B%AE-usage)。
-
+> **(Linux)** 执行 `/InitEnvironment(linux).sh` 脚本，从淘宝镜像源拉取项目依赖。
 
 #### ② 直接使用发行版(Install with release-version)
 
 (暂未取得发行版)
 
-
 ### Ⅲ 服务器配置 Configuration
 
-- **Step 1** Redis数据库安装与配置 Configure the Redis
+服务器需要连接MySQL、Redis数据库及SMTP服务器，在已经安装相应软件的基础下，这可能需要花费3~5分钟。
 
-如果您还没有Redis数据库，您需要在正确的环境下安装Redis数据库，详见[如何正确安装Redis数据库](documents/HowToInstallRedis.md)。
-
-在 `/server/dao` 目录中，编辑【redis-configure.js】文件，其中各字段意义如下:
-
-字段|意义|例值
-:-:|:-:|:-:
-port | 服务器访问端口 | 6379
-host | 服务器IP/域名 | "127.0.0.1"
-family | IP版本 | 4
-password | 数据库访问密码 | "password"
-db | 所使用的数据库ID | 0
-connectionName | 连接名 | "default"
-poolOption | 连接池配置 | 参考[此处](https://www.npmjs.com/package/generic-pool)
-
-你可以添加其它的配置，请参考：[ioredis配置](https://github.com/luin/ioredis/blob/HEAD/API.md#new_Redis)。
-
-> 如果您在 `/server/dao` 目录下没有自动找到【redis-configure.js】文件，可以到`/documents/examples`目录中获取。
-
-- **Step 2** MySQL数据库的安装 Configure the MySQL
-
-如果您还没有MySQL数据库，您需要在正确的环境下安装MySQL数据库，详见[如何正确安装MySQL数据库](/documents/HowToInstallMySQL.md)。
-
-在 `/server/dao` 目录中，编辑【mysql-configure.js】文件，其中各字段意义如下:
-
-字段|意义|例值
-:-:|:-:|:-:
-host | 服务器IP/域名 | '127.0.0.1'
-port | 服务器访问端口 | 3306
-user | 数据库访问账号 | 'root'
-password | 数据库访问密码 | 'password'
-database | 所使用的数据库 | 'my_database'
-connectionLimit | 连接池大小 | 10
-
-你可以添加其它的配置，请参考：[mysql配置](https://www.npmjs.com/package/mysql#connection-options)。
-
-> 如果您在 `/server/dao` 目录下没有自动找到【mysql-configure.js】文件，可以到`/documents/examples`目录中获取。
-
-- **Step 3** 配置Mail服务器 Configure the smtp-mail-server
-
-在 `/server` 目录中，编辑【mailer-configure.js】文件，其中各字段意义如下:
-
-字段|意义|例值
-:-:|:-:|:-:
-host | 邮件服务器 | 'smtpdm.aliyun.com'
-port | 服务器访问端口 | 80
-secure | 是否启用SSL(端口465时起效) | false
-auth.user | 邮箱账号 | '`example@hypethron.com`'
-auth.pass | 邮箱密码 | 'password'
-
-> 如果您在 `/server/` 目录下没有自动找到【mailer-configure.js】文件，可以到`/documents/examples`目录中获取。
-
-- **Step 4** 配置Koa服务器 Configure the server
-
-由于hypethron是一个支持多端口、多接入的Web应用，你可以通过配置相关文件来新增一个服务器。
-
-如果您只准备通过默认设置启动(HTTP协议+3000端口)服务器，您可以跳过这一节；否则，请参考：[如何注册一个服务器](documents/HowToRegisterAServer.md)。
-
+您可以参考[配置文档](/documents/HowToDoConfiguretion.md)进行这些常量值的配置。
 
 ### Ⅳ 启动项目 Usage
 
-> 如果你利用Git获取了该项目的代码，你需要进行以下**任一**启动步骤；
->
-> 否则，请直接执行 `npm run server-start` 以启动Web应用和Http服务器。
-
-#### ① 按默认配置编译并启动
-
-1. 在完备的Node.js开发环境下：`npm run compile-start` 。
-2. 默认配置下，在浏览器打开 `http://localhost:3000` 以查看项目。
-
-#### ② 自定义配置编译并启动
-
-1. 按照[服务器配置|Configuration](https://github.com/WhiteRobe/hypethron#%E2%85%B2-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-configuration)，对服务器进行配置。
-2. 某些情况下，需要按照 [安装应用(打包应用)|Installation(Pack)](https://github.com/WhiteRobe/hypethron#-%E4%BB%8Egithub%E5%AE%89%E8%A3%85intall-with-git) 中的指引进行编译、打包。
-3. 以生产环境的模式启动：`npm run server-start` 。
-4. 按照你的配置在浏览器打开Web应用以查看项目。
-
+1. (第一次启动时)执行`npm run build`打包、发布SPA应用到`/build`目录下。
+2. 在完备的Node.js开发环境下，进入项目根目录，通过 `npm run server-start` 指令启动服务器。
 
 ## 项目演示 Example
 
@@ -190,9 +112,7 @@ auth.pass | 邮箱密码 | 'password'
 
 ## 项目文档 Documents
 
-我们将提供开发过程中的各类文档，请查看我们的[Wiki](https://github.com/WhiteRobe/hypethron/wiki)。
-
-[查看项目依赖](https://github.com/WhiteRobe/hypethron/network/dependencies)
+我们将提供开发过程中的各类文档，请查看我们的[Wiki](https://github.com/WhiteRobe/hypethron/wiki)。另外，到此[查看项目依赖](https://github.com/WhiteRobe/hypethron/network/dependencies)。
 
 ## 社区指南 Contributing
 
@@ -207,7 +127,7 @@ auth.pass | 邮箱密码 | 'password'
 
 >For more detail? @See [CONTRIBUTING.md](.github/CONTRIBUTING.md)。
 
-## 作者 Authors
+## 作者 Collaborators
 <table>
 	<tr>
 		<td>

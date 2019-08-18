@@ -17,14 +17,14 @@ async function POST_authorizationToken(ctx, next) {
   let username = ctx.request.body.username; // 用以登录的用户名
   let password = ctx.request.body.password; // 经过前端慢计算的哈希密码
   let salt = ctx.request.body.salt; // 慢计算用盐
-  let newPassword = ctx.request.body.newPassword;
-  let newSalt = ctx.request.body.newSalt;
+  let newPassword = ctx.request.body.newPassword; // 下一次登录时的哈希密码
+  let newSalt = ctx.request.body.newSalt; // 下一次登录时的盐
 
-  ctx.assert(username, 400, `@params:username is required.`);
-  ctx.assert(password, 400, `@params:password is required.`);
-  ctx.assert(salt, 400, `@params:salt is required.`);
-  ctx.assert(newPassword, 400, `@params:newPassword is required.`);
-  ctx.assert(newSalt, 400, `@params:newSalt is required.`);
+  ctx.assert(username, 400, `@input:username is required.`);
+  ctx.assert(password, 400, `@input:password is required.`);
+  ctx.assert(salt, 400, `@input:salt is required.`);
+  ctx.assert(newPassword, 400, `@input:newPassword is required.`);
+  ctx.assert(newSalt, 400, `@input:newSalt is required.`);
 
   let res = await mysql.query(
     {

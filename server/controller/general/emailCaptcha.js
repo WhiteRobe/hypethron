@@ -18,8 +18,8 @@ async function GET_emailCaptcha(ctx, next) {
 /**
  * 发送一个邮箱验证码，该验证码和对应的邮箱将被注册到`ctx.session.emailCaptcha`中。
  * @need-session { captcha: <token@subject:captcha> => captcha: $String }
- * @input { email: $String, captcha: $String }
- * @session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
+ * @input { email: $String, captcha: $String, type:$String<@get-from:http.options> }
+ * @set-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
  * @output { success: $Boolean}
  */
 async function POST_emailCaptcha(ctx, next) {
@@ -27,11 +27,13 @@ async function POST_emailCaptcha(ctx, next) {
 
   let targetEmail = ctx.request.body.email;
   let captchaClient = ctx.request.body.captcha;
+  let type = ctx.request.body.type;
   let captchaServer = ctx.session.captcha;
 
-  ctx.assert(captchaServer, 400, '@session-params:captcha is required. Try to regenerate it.');
-  ctx.assert(targetEmail, 400, '@params:targetEmail is required.');
-  ctx.assert(captchaClient, 400, '@params:captcha is required.');
+  ctx.assert(captchaServer, 400, '@session:captcha is required. Try to regenerate it.');
+  ctx.assert(targetEmail, 400, '@input:targetEmail is required.');
+  ctx.assert(type, 400, '@input:type is required.');
+  ctx.assert(captchaClient, 400, '@input:captcha is required.');
 
   let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions(`captcha`, ctx.ip))
     .catch(err => {
@@ -44,14 +46,15 @@ async function POST_emailCaptcha(ctx, next) {
 
   let emailCaptchaCache = generatorCaptcha('String', {size: 6, charPreset: '1234567890'});
 
-  let template = fs.readFileSync("./server/mail/register.template.html").toString();
+  let template = fs.readFileSync("./server/mail/general.template.html").toString();
   template = template.replace("${captcha}", '' + emailCaptchaCache.text)
+    .replace("${serviceName}", typeofService(type))
     .replace("${contactLink}", `${ctx.protocol}://${ctx.host}/pages/contact_cs`); // 客服页面
 
   let mail = {
     from: `Hypethron ^_^<${mailerOption.auth.user}>`, // 发件人，默认为邮箱系统的登录账号
     to: targetEmail,
-    subject: `账户安全中心-注册信息验证`,
+    subject: `账户安全中心-邮箱验证`,
     html: template
   };
 
@@ -77,9 +80,16 @@ async function POST_emailCaptcha(ctx, next) {
   return next();
 }
 
+async function OPTIONS_emailCaptcha(ctx, next) {
+  ctx.response.set('Allow', 'GET POST OPTIONS');
+  ctx.body = serviceType;
+  return next();
+}
+
 module.exports = {
   GET_emailCaptcha,
-  POST_emailCaptcha
+  POST_emailCaptcha,
+  OPTIONS_emailCaptcha
 };
 
 
@@ -98,3 +108,17 @@ function jwtOptions(subject, ip) {
     expiresIn: "10m" // 10 分钟有效期
   }
 }
+
+
+function typeofService(type) {
+  let res = serviceType[type];
+  return res ? res : '业务服务';
+}
+
+
+const serviceType = {
+  'register': '注册服务',
+  'changeEmail': '绑定邮箱更换服务',
+  'bindEmail': '邮箱绑定服务',
+  'others': '业务服务'
+};

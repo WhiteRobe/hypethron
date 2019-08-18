@@ -28,7 +28,10 @@ const {
   JWT_PROTECT_UNLESS,
   COOKIE_KEY_LIST,
   KOA_SESSION_CONFIGURE,
-  RATE_LIMIT_CONFIGURE
+  RATE_LIMIT_CONFIGURE,
+  SERVER_PRIVATE_KEY,
+  SERVER_SALT,
+  SESSION_AES_KEY
 } = require('./server-configure.js');
 const {log4js, accessLogger} = require("./logger-configure.js");
 const router = require('./server-router.js');
@@ -193,6 +196,7 @@ function _serverStartTip(NAME, PORT, ssl) {
   console.log(chalk.cyan(`Local-HOST Start At:\t ${protocol}://localhost:${PORT}/\n`));
   console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
   console.log(chalk.bold("---------------------------------------------------------"));
+  checkServerKeyIsTooWeak();
 }
 
 
@@ -258,5 +262,29 @@ function IpFilter(logger) {
       ctx.throw(403, config.forbiddenMsg);
     }
     return next();
+  }
+}
+
+/**
+ * Check Whether the Server-Keys Is Too Weak
+ */
+function checkServerKeyIsTooWeak() {
+  if(SERVER_DEBUG) return;
+  if (SERVER_PRIVATE_KEY === SERVER_SALT) {
+    console.warn(chalk.yellow('You should use different value as $SERVER_PRIVATE_KEY and $SERVER_SALT in `/server/server-configure.js`!'));
+  }
+  if (SERVER_PRIVATE_KEY === 'WhiteRobe/hypethron@Github') {
+    console.warn(chalk.yellow('You should change the value of $SERVER_PRIVATE_KEY in `/server/server-configure.js`!'));
+  }
+  if (SERVER_SALT === 'WhiteRobe/hypethron@Github') {
+    console.warn(chalk.yellow('You should change the value of $SERVER_SALT in `/server/server-configure.js`!'));
+  }
+  if (SESSION_AES_KEY.key === 'hypethron@Github' || SESSION_AES_KEY.key.length !== 16) {
+    console.warn(chalk.yellow('You should change the value of $SESSION_AES_KEY.key in `/server/server-configure.js`,' +
+      ' and make it\'s length as 16.'));
+  }
+  if (SESSION_AES_KEY.iv === 'hypethron@Github' || SESSION_AES_KEY.iv.length !== 16) {
+    console.warn(chalk.yellow('You should change the value of $SESSION_AES_KEY.iv in `/server/server-configure.js`,' +
+      ' and make it\'s length as 16.'));
   }
 }

@@ -14,7 +14,7 @@ async function GET_captcha(ctx, next) {
   let captcha = ctx.request.query.captcha;
   let captchaServer = ctx.session.captcha;
 
-  ctx.assert(captcha, 400, '@params:captcha is required.');
+  ctx.assert(captcha, 400, '@input:captcha is required.');
   ctx.assert(captchaServer, 400, '@session:captcha is undefined. Consider to regenerate it.');
 
   let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions('captcha', ctx.ip))
@@ -41,7 +41,7 @@ async function GET_captcha(ctx, next) {
 /**
  * 新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
  * @input { type:$String['', 'math'] }
- * @session { captcha: <token@subject:captcha> => captcha: $String }
+ * @set-session { captcha: <token@subject:captcha> => captcha: $String }
  * @output { $svg }
  */
 async function POST_captcha(ctx, next) {

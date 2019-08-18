@@ -14,7 +14,7 @@ let iv_16 = "WhiTeEDz2jW1caY9"; // Initial Vector(16位长)
  * @param iv Initial Vector
  * @return {string}
  */
-function aesEncrypt(src, algorithm ,key, iv) {
+function aesEncrypt(src, algorithm, key, iv) {
   //console.log("原来输入", src);
   key = Buffer.from(key || key_16, 'utf8');
   iv = Buffer.from(iv || iv_16, 'utf8');
@@ -47,4 +47,4 @@ function aesDecrypt(sign, algorithm, key, iv) {
   return src;
 }
 
-module.exports = { aesDecrypt, aesEncrypt };
+module.exports = {aesDecrypt, aesEncrypt};

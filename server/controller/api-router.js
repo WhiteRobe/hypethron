@@ -9,8 +9,10 @@ const binder = require("../util/api-binder.js");
 //_______import your api here________//
 
 const authorizationTokenService = require('./account/authorizationToken.js');
+const apiDocumentService = require('./general/apiDocument.js');
 const captchaService = require('./general/captcha.js');
 const emailCaptchaService = require('./general/emailCaptcha.js');
+const passwordRetrieveCertService = require('./account/passwordRetrieveCert.js');
 const restfulStatusService = require('./general/restfulStatus.js');
 const userAccountsService = require('./account/userAccounts.js');
 const userEmailExistenceService = require('./account/userEmailExistence.js');
@@ -31,6 +33,7 @@ const METHOD_DELETE = "DELETE";
 const METHOD_POST = "POST";
 const METHOD_PUT = "PUT";
 const METHOD_PATCH = "PATCH";
+const METHOD_OPTIONS = "OPTIONS";
 
 /**
  * All of the service(RESTful-api) register to $apiRouter,
@@ -72,8 +75,10 @@ const API_ROUTER_TABLE = {
  */
 const PUBLIC_API_ROUTER_TABLE = {
   "/authorizationToken": binder(authorizationTokenService),
+  "/apiDocument": binder(apiDocumentService),
   "/captcha": binder(captchaService),
   "/emailCaptcha": binder(emailCaptchaService),
+  "/passwordRetrieveCert": binder(passwordRetrieveCertService),
   "/restfulStatus": binder(restfulStatusService),
   "/userAccounts/:uid": binder(userAccountsService),
   "/usernameExistence": binder(usernameExistenceService),
@@ -155,6 +160,9 @@ function registerAnService(path, method, service, routerImplement) {
       break;
     case METHOD_PATCH:
       routerImplement.patch(path, koaBody(), service);
+      break;
+    case METHOD_OPTIONS:
+      routerImplement.options(path, service);
       break;
     default:
       console.error(chalk.red("api-router.js: Error/Unknown HTTP Method!"));

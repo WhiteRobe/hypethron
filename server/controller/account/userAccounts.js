@@ -58,9 +58,9 @@ async function GET_userAccounts(ctx, next) {
   } else {
     let filter = ctx.request.query;
 
-    ctx.assert(filter.page && filter.max, 400, "@params:page and @params:max is required.");
-    ctx.assert(filter.page > 0, 400, "@params:page should be positive.");
-    ctx.assert(filter.max <= 50, 400, "@params:max should be less then 50.");
+    ctx.assert(filter.page && filter.max, 400, "@input:page and @input:max is required.");
+    ctx.assert(filter.page > 0, 400, "@input:page should be positive.");
+    ctx.assert(filter.max <= 50, 400, "@input:max should be less then 50.");
 
     let values = [];
     let sql = '';
@@ -74,7 +74,7 @@ async function GET_userAccounts(ctx, next) {
       sql += ' AND a.authority = ? ';
     }
 
-    // ctx.assert(values.length > 0, 400, "@params:username or @params:authority should not be all undefined.");
+    // ctx.assert(values.length > 0, 400, "@input:username or @input:authority should not be all undefined.");
 
     let res = await mysql.query(
       {
@@ -117,11 +117,11 @@ async function POST_userAccounts(ctx, next) {
   let captchaServer = ctx.session.emailCaptcha; // 注册时的验证码captcha(服务端) 应为6位字符长 | 同时绑定email字段
   let captchaClient = ctx.request.body.captcha; // 注册时的验证码(客户端)
 
-  ctx.assert(username, 400, `@params:username is required.`);
-  ctx.assert(password, 400, `@params:password is required.`);
-  ctx.assert(salt, 400, `@params:salt is required.`);
-  ctx.assert(captchaServer, 400, `@session-params:emailCaptcha is required. Try to regenerate it.`);
-  ctx.assert(captchaClient, 400, `@params:captchaClient is required.`);
+  ctx.assert(username, 400, `@input:username is required.`);
+  ctx.assert(password, 400, `@input:password is required.`);
+  ctx.assert(salt, 400, `@input:salt is required.`);
+  ctx.assert(captchaServer, 400, `@session:emailCaptcha is required. Try to regenerate it.`);
+  ctx.assert(captchaClient, 400, `@input:captchaClient is required.`);
 
   let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions(`emailCaptcha`, ctx.ip))
     .catch(err => {
@@ -241,7 +241,7 @@ async function PATCH_userAccounts(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  ctx.assert(uid > 0, 400, '@params:uid should be positive.');
+  ctx.assert(uid > 0, 400, '@url-params:uid should be positive.');
 
   let token = ctx.header.authorization;
 
@@ -258,7 +258,7 @@ async function PATCH_userAccounts(ctx, next) {
 
   let updateData = ctx.request.body.updateData;
 
-  ctx.assert(updateData, 400, "@params:updateData is required.");
+  ctx.assert(updateData, 400, "@input:updateData is required.");
 
   let values = [];
   let sql = '';
@@ -277,7 +277,7 @@ async function PATCH_userAccounts(ctx, next) {
     }
   }
 
-  ctx.assert(values.length > 0, 400, "@params:updateData is an empty object.");
+  ctx.assert(values.length > 0, 400, "@input:updateData is an empty object.");
 
   sql = sql.replace(/,$/, ""); // 移除末尾的逗号
   values.push(uid);

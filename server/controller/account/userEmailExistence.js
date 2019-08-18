@@ -7,7 +7,7 @@ async function GET_userEmailExistence(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
   let userEmail = ctx.request.query.userEmail;
 
-  ctx.assert(userEmail, 400, 'need @params:userEmail');
+  ctx.assert(userEmail, 400, '@input:userEmail is required.');
 
   let cb = await mysql.query(
     {sql: 'SELECT email FROM user_profile WHERE email=? ;', timeout: 10000}, [userEmail]

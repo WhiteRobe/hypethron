@@ -18,7 +18,7 @@ async function GET_userPrivacies(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  ctx.assert(uid > 0, 400, "@params:uid should be positive.");
+  ctx.assert(uid > 0, 400, "@url-params:uid should be positive.");
 
   let token = ctx.header.authorization;
 
@@ -56,7 +56,7 @@ async function PATCH_userPrivacies(ctx, next) {
 
   let uid = parseInt(ctx.params.uid) || 0; // 保证是个整数值
 
-  ctx.assert(uid > 0, 400, "@params:uid should be positive.");
+  ctx.assert(uid > 0, 400, "@url-params:uid should be positive.");
 
   let token = ctx.header.authorization;
 
@@ -73,7 +73,7 @@ async function PATCH_userPrivacies(ctx, next) {
 
   let updateData = ctx.request.body.updateData;
 
-  ctx.assert(updateData, 400, "@params:updateData is null.");
+  ctx.assert(updateData, 400, "@input:updateData is null.");
 
   let values = [];
   let sql = "";
@@ -93,7 +93,7 @@ async function PATCH_userPrivacies(ctx, next) {
     }
   }
 
-  ctx.assert(values.length > 0, 400, "@params:updateData is an empty object.");
+  ctx.assert(values.length > 0, 400, "@input:updateData is an empty object.");
 
   values.push(uid);
   sql = sql.replace(/,$/, "");
