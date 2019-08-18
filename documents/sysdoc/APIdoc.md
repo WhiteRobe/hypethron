@@ -67,20 +67,21 @@
 
 ### "/captcha"
 
-**GET**：比对验证码，获取比对结果。比对成功将清除所记录的captcha。
-
-```
-@need-session { captcha: <token@subject:captcha> => captcha: $String }
-@input { captcha: $String }
-@output { success: $Boolean }
-```
-
-**POST**：新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
+**GET**：新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
 
 ```
 @input { type:$String['', 'math'] }
 @set-session { captcha: <token@subject:captcha> => captcha: $String }
 @output { $svg }
+```
+
+
+**POST**：比对验证码，获取比对结果。比对成功将清除所记录的captcha。
+
+```
+@need-session { captcha: <token@subject:captcha> => captcha: $String }
+@input { captcha: $String }
+@output { success: $Boolean }
 ```
 
 ### "/emailCaptcha"
