@@ -18,7 +18,7 @@ const LOGGER_CONFIGURE = {
       layout: {
         type: 'pattern',
         // pattern: '[%d{yyyy-MM-dd-hh:mm:ss}] %h - [%p] : %m %n in file[%l:%o] | %f %n %s' // 似乎enableCallStack 不起效，就很迷
-        pattern: '[%d{yyyy-MM-dd-hh:mm:ss}]%X{serverName}:%h - [%p] : %m %n ',
+        pattern: '[%d{yyyy-MM-dd-hh:mm:ss}]%X{loggerName}:%h - [%p] : %m %n ',
       }
     },
     out: {

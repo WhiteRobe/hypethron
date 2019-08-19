@@ -1,6 +1,6 @@
 # 如何连接Redux
 
-> 请参考[演示DEMO](https://github.com/WhiteRobe/hypethron/blob/master/src/components/ReduxDemo/ReduxDemo.js)进行理解。
+> 请参考[演示DEMO](/src/components/ReduxDemo/ReduxDemo.js)进行理解。
 > 
 > - [Redux 中文文档](https://www.redux.org.cn/)
 
@@ -19,7 +19,7 @@
 
 ## 视图组件与数据容器组件
 
-参考[演示DEMO](https://github.com/WhiteRobe/hypethron/blob/master/src/components/ReduxDemo/ReduxDemo.js)，我们定义一个视图组件：
+参考[演示DEMO](/src/components/ReduxDemo/ReduxDemo.js)，我们定义一个视图组件：
 ```
 function H1View(props) {
   console.log(props);
@@ -86,3 +86,6 @@ export default connect(
 )(ReduxDemo);
 ```
 
+---
+
+[返回首页](https://github.com/WhiteRobe/hypethron)

@@ -12,10 +12,15 @@ const tokenState = {
   token: null
 };
 
+const keyState = {
+  secretKey: 'hypethron@github:WhiteRobe'
+};
+
 /**
  * 2. 导出你所定义的全局状态
  */
 export {
   demoState,
-  tokenState
+  tokenState,
+  keyState
 };

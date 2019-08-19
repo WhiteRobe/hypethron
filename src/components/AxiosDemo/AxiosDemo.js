@@ -20,7 +20,7 @@ class AxiosDemo extends React.Component{
   sendGET(){
     let that = this;
     axios
-      .get("/api/apiTest/", {
+      .get("/api/apiExample", {
         params: {
           msg: "你发送的GET数据"
         }
@@ -29,23 +29,25 @@ class AxiosDemo extends React.Component{
       that.setState({
         getResult: JSON.stringify(res.data)
       });
-    }).catch((res) => {
-      console.error("get", res);
+    }).catch((err) => {
+      console.error("get err", err.response.status);
+      console.error(err);
     });
   }
 
   sendPOST(){
     let that = this;
     axios
-      .post("/api/apiTest/", {
+      .post("/api/apiExample", {
         msg: "你发送的POST数据"
       }).then((res) => {
 
       that.setState({
         postResult: JSON.stringify(res.data)
       });
-    }).catch((res) => {
-      console.error("post", res);
+    }).catch((err) => {
+      console.error("post err", err.response.status);
+      console.error(err);
     });
   }
 

@@ -2,7 +2,8 @@ import { combineReducers } from 'redux';
 
 import {
   demoState,
-  tokenState
+  tokenState,
+  keyState
 } from './HypethronState.js'
 
 import {
@@ -53,6 +54,11 @@ function tokenStateManager(state = tokenState, action) {
   }
 }
 
+function keyStateManager(state = keyState, action) {
+  // 只读全局状态库
+  return state;
+}
+
 //----------------------------------//
 
 /**
@@ -60,7 +66,8 @@ function tokenStateManager(state = tokenState, action) {
  */
 const reducer = combineReducers({
   demoStateManager,
-  tokenStateManager
+  tokenStateManager,
+  keyStateManager
 });
 
 export default reducer;
