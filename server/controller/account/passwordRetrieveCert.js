@@ -27,6 +27,13 @@ async function POST_PasswordRetrieve(ctx, next) {
   ctx.assert(captcha, 400, '@input:captcha is required.');
   ctx.assert(serverCaptcha, 400, '@session:captcha is required.');
 
+  let decode = await jwtVerify(`${serverCaptcha}`, SERVER_PRIVATE_KEY, jwtOptions('captcha', ctx.ip))
+    .catch(err => {
+      ctx.throw(409, err.message);
+    });
+
+  ctx.assert(captcha.toUpperCase() === decode.captcha.toUpperCase(), 409, 'Captcha doesn\'t match.');
+
   let res = await mysql.query({
     sql: 'SELECT a.uid FROM user_account AS a LEFT JOIN user_profile AS b ON a.uid=b.uid WHERE b.email=?',
     timeout: 10000
