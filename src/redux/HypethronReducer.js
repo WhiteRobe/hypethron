@@ -8,7 +8,7 @@ import {
 
 import {
   MODIFY_DEMO_VALUE,
-  ADD_TOKEN,
+  SET_TOKEN,
   REMOVE_TOKEN
 } from './ActionTypes.js';
 
@@ -41,7 +41,7 @@ function demoStateManager(state = demoState, action) {
 
 function tokenStateManager(state = tokenState, action) {
   switch (action.type) {
-    case ADD_TOKEN:
+    case SET_TOKEN:
       return Object.assign({}, state, {
         token: action.token
       });

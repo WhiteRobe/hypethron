@@ -7,8 +7,8 @@ class AppHeader extends React.Component {
   render() {
     return (
       <div>
-        <hr/>
         <div> 标题栏</div>
+        <hr/>
       </div>
     )
   }

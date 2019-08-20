@@ -12,7 +12,7 @@ async function GET_userEmailExistence(ctx, next) {
   let cb = await mysql.query(
     {sql: 'SELECT email FROM user_profile WHERE email=? ;', timeout: 10000}, [userEmail]
   ).catch(err => {
-    throw err
+    throw err;
   });
 
   ctx.body = {

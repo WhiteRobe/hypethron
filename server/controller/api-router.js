@@ -19,6 +19,7 @@ const userEmailExistenceService = require('./account/userEmailExistence.js');
 const usernameExistenceService = require('./account/usernameExistence.js');
 const userPrivaciesService = require('./account/userPrivacies.js');
 const userProfilesService = require('./account/userProfiles.js');
+const userSaltsService = require('./account/userSalts.js');
 
 //____________________________ ______//
 
@@ -83,7 +84,8 @@ const PUBLIC_API_ROUTER_TABLE = {
   "/userAccounts/:uid": binder(userAccountsService),
   "/usernameExistence": binder(usernameExistenceService),
   "/userEmailExistence": binder(userEmailExistenceService),
-  "/userProfiles/:uid": binder(userProfilesService)
+  "/userProfiles/:uid": binder(userProfilesService),
+  "/userSalts": binder(userSaltsService)
 };
 
 
