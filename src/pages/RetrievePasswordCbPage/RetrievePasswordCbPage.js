@@ -116,14 +116,15 @@ class CustomForm extends React.Component {
    */
   updatePassword() {
     let that = this;
-    let salt = generateSalt(8);
+    let salt = generateSalt(16);
     let originPw = this.props.form.getFieldValue('password');
     let returnRes, returnErr;
-    this.props.beforeSubmit();
+    this.props.beforeSubmit(that.props.form);
+    // this.props.reduxState.secretKey
     axios
       .patch("/papi/passwordRetrieveCert", {
-        password: hmac(this.props.reduxState.secretKey, originPw, {alg: 'sha256', repeat: 100}), // 慢加密
-        salt: salt,
+        password: hmac(salt, originPw, {alg: 'sha256', repeat: 100}), // 慢加密
+        salt,
         retrievePWCert: that.state.retrievePWCert
       })
       .then((res) => {
@@ -167,7 +168,7 @@ class CustomForm extends React.Component {
             {getFieldDecorator('password', {
               rules: [
                 {required: true, message: '请输入新密码', min: 6, max: 16},
-                {min: 6, max: 16, message: '密码应为为长度在6~16(含)的'},
+                {min: 6, max: 16, message: '密码长度应为6~16(含)'},
                 {type: 'string', pattern: /\d+/, message: '密码应至少包含一位数字'},
                 {type: 'string', pattern: /[a-zA-Z]+/, message: '密码应至少包含一位大小写英文'},
                 {type: 'string', pattern: /^\w+$/, message: '密码应为英文、数字等非制表符混合串'}
@@ -187,7 +188,7 @@ class CustomForm extends React.Component {
               rules: [
                 {required: true, message: '请确认密码!'},
                 {
-                  validator: this.compareToFirstPassword,
+                  validator: this.compareToFirstPassword
                 }
               ]
             })(

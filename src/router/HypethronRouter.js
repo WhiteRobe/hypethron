@@ -12,6 +12,7 @@ import appFooter from "../components/AppFooter/AppFooter.js";
 // 页面
 import hypethronIntroPage from "../pages/HypethronIntroPage/HypethronIntroPage.js";
 import homePage from "../pages/HomePage/HomePage.js";
+import loginPage from "../pages/LoginPage/LoginPage.js";
 import retrievePasswordCbPage from "../pages/RetrievePasswordCbPage/RetrievePasswordCbPage.js";
 import retrievePasswordPage from "../pages/RetrievePasswordPage/RetrievePasswordPage.js";
 
@@ -33,6 +34,8 @@ class HypethronRouter extends React.Component {
           <Route path="/pages/AxiosDemo" component={axiosDemo}/>
           <Route path="/pages/ReduxDemo" component={reduxDemo}/>
 
+          {/*登录页面*/}
+          <Route path="/pages/login" component={loginPage}/>
           {/*找回密码页面*/}
           <Route path="/pages/retrieve_password" component={retrievePasswordPage}/>
           {/*找回密码填写新密码页面*/}

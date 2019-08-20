@@ -14,6 +14,7 @@ const path = require('path');
 const fs = require('fs');
 const ipFilter = require('ip-filter'); // @See https://github.com/tunnckoCore/ip-filter
 
+const smtpTest = require('./mail/smtp-test.js');
 const {connectRedis, redisConnectTest, getRedisPool, createRedisSession} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
 const {buildTables} = require('./dao/database-init.js');
@@ -52,7 +53,7 @@ app.keys = COOKIE_KEY_LIST;
   logger.addContext('loggerName', 'Hypethron');
   registerLogger(logger);
 
-  // >>> test mysql/redis connection >>>
+  // >>> test mysql/redis/SMTP connection >>>
   await mysqlConnectTest()
     .then(res => {
       logger.info(res.message);
@@ -70,7 +71,17 @@ app.keys = COOKIE_KEY_LIST;
       logger.error(`Fail to connect to Redis[Error]: ${err.message}`);
       process.exit(3); // 如果连不上数据库直接终止进程
     });
-  // <<< test redis/mysql connection <<<
+
+  await smtpTest()
+    .then(res => {
+      logger.info(res.message);
+    })
+    .catch(err => {
+      logger.error(`Fail to connect to SMTP[Error]: ${err.message}`);
+      process.exit(4); // 如果连不上数据库直接终止进程
+    });
+
+  // <<< test redis/mysql/SMTP connection <<<
 
   // >>> Get MySQL/Redis connection pool with default options >>>
   await getMySQLPool()
@@ -87,7 +98,7 @@ app.keys = COOKIE_KEY_LIST;
     });
 
   let redisSession = KOA_SESSION_CONFIGURE.store === true ? await createRedisSession() : KOA_SESSION_CONFIGURE.store;
-  let ratelimitRedis = connectRedis({db: 1});
+  let ratelimitRedis = connectRedis(false, {db: 1});
   // <<< Get MySQL/Redis connection pool with default options <<<
 
   const STATIC_RATE_LIMIT_CONFIGURE = Object.assign({
@@ -196,6 +207,7 @@ function _serverStartTip(NAME, PORT, ssl) {
   console.log(chalk.cyan(`Local-HOST Start At:\t ${protocol}://localhost:${PORT}/\n`));
   console.log(chalk.yellow("Tip:If you are using a command, press [Ctrl+C] or [Ctrl+Z] to exit.\n"));
   console.log(chalk.bold("---------------------------------------------------------"));
+  console.log();
   checkServerKeyIsTooWeak();
 }
 
@@ -269,22 +281,29 @@ function IpFilter(logger) {
  * Check Whether the Server-Keys Is Too Weak
  */
 function checkServerKeyIsTooWeak() {
-  if(SERVER_DEBUG) return;
+  if (SERVER_DEBUG) {
+    return console.log(chalk.blue('Info: You are in debug mode. Use `SET DEBUG=false` to turn off.'));
+  } else {
+    console.log(chalk.blue('Info: Server run on production mode. Use `SET DEBUG=true` to turn on debug mode.'));
+  }
   if (SERVER_PRIVATE_KEY === SERVER_SALT) {
-    console.warn(chalk.yellow('You should use different value as $SERVER_PRIVATE_KEY and $SERVER_SALT in `/server/server-configure.js`!'));
+    console.warn(chalk.yellow('Warning: You should use different values of $SERVER_PRIVATE_KEY and $SERVER_SALT in ' +
+      '`/server/server-configure.js`, if you want to deploy your server in production environment.'));
   }
   if (SERVER_PRIVATE_KEY === 'WhiteRobe/hypethron@Github') {
-    console.warn(chalk.yellow('You should change the value of $SERVER_PRIVATE_KEY in `/server/server-configure.js`!'));
+    console.warn(chalk.yellow('Warning: You should change the value of $SERVER_PRIVATE_KEY in ' +
+      '`/server/server-configure.js`, if you want to deploy your server in production environment.'));
   }
   if (SERVER_SALT === 'WhiteRobe/hypethron@Github') {
-    console.warn(chalk.yellow('You should change the value of $SERVER_SALT in `/server/server-configure.js`!'));
+    console.warn(chalk.yellow('Warning: You should change the value of $SERVER_SALT in `/server/server-configure.js`,' +
+      ' if you want to deploy your server in production environment.'));
   }
   if (SESSION_AES_KEY.key === 'hypethron@Github' || SESSION_AES_KEY.key.length !== 16) {
-    console.warn(chalk.yellow('You should change the value of $SESSION_AES_KEY.key in `/server/server-configure.js`,' +
-      ' and make it\'s length as 16.'));
+    console.warn(chalk.yellow('Warning: You should change the value of $SESSION_AES_KEY.key in `/server/server-configure.js`' +
+      ' and make it\'s length equal to  16, if you want to deploy your server in production environment.'));
   }
   if (SESSION_AES_KEY.iv === 'hypethron@Github' || SESSION_AES_KEY.iv.length !== 16) {
-    console.warn(chalk.yellow('You should change the value of $SESSION_AES_KEY.iv in `/server/server-configure.js`,' +
-      ' and make it\'s length as 16.'));
+    console.warn(chalk.yellow('Warning: You should change the value of $SESSION_AES_KEY.iv in `/server/server-configure.js`' +
+      ' and make it\'s length equal to 16, if you want to deploy your server in production environment.'));
   }
 }

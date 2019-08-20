@@ -35,6 +35,7 @@
 - ["/userEmailExistence"](#useremailexistence)
 - ["/usernameExistence"](#usernameexistence)
 - ["/userProfiles/:uid"](#userprofilesuid)
+- ["/userSalts"](#usersalts)
 
 [私有接口](#私有接口)
 
@@ -182,7 +183,7 @@ Else:
 
 ### "/usernameExistence"
 
-**GET**：输入一个username，返回一个该username是否存在的标志和相应的salt。
+**GET**：输入一个username，返回一个该username是否存在的标志。
 ```
 @input { username: $String }
 @output { exists: $Boolean, salt: $String }
@@ -220,6 +221,16 @@ Else:
 @input { updateData: $Object } // 更改的值
 @output { success: $Boolean }
 ```
+
+### "/userSalts"
+
+**GET**：输入一个 username，返回一个该username的盐。username还可以是email或phone。
+
+```
+@input { username: $String }
+@output { salt: $String }
+```
+
 
 ## 私有接口
 

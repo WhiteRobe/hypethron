@@ -1,6 +1,6 @@
 import {
   MODIFY_DEMO_VALUE,
-  ADD_TOKEN,
+  SET_TOKEN,
   REMOVE_TOKEN
 } from './ActionTypes.js';
 
@@ -15,9 +15,9 @@ export function modifyDemoValue(value) {
   }
 }
 
-export function addToken(token) {
+export function setToken(token) {
   return{
-    type: ADD_TOKEN,
+    type: SET_TOKEN,
     token
   }
 }
