@@ -1,5 +1,5 @@
 import React from "react";
-
+import qcode from './qcode.png';
 
 class AppFooter extends React.Component {
   // 在此注册页面级别的内容
@@ -8,9 +8,8 @@ class AppFooter extends React.Component {
     return (
       <div>
         <hr/>
-        <div> 底部信息 </div>
+        <img src={qcode} alt="qcode" style={{width: '150px', height: '150px'}}/>
       </div>
-
     )
   }
 }

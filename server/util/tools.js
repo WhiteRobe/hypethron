@@ -15,7 +15,7 @@ function timeUsage(func) {
 
 /**
  * 生成一个验证码
- * @param type ['', 'math'] 生成验证码的类型[普通串或数学表达式]
+ * @param type ['text', 'math'] 生成验证码的类型[普通串或数学表达式]
  * @param opt 生成可选参数项 @See https://github.com/lemonce/svg-captcha#api
  * @return {CaptchaObj} => {data: $SVG, text:$String}
  */

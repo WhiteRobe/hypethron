@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-import {hmac, generateSalt} from '../../util/crypto-hash-tool.js';
+import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
-import {Form, Icon, Input, Button, Checkbox, Divider, Col, Row} from 'antd';
+import {Form, Icon, Input, Button, Checkbox, Divider} from 'antd';
 import 'antd/es/divider/style/index.css';
 import 'antd/es/checkbox/style/index.css';
 import 'antd/es/input/style/index.css';
@@ -12,6 +12,7 @@ import 'antd/es/icon/style/index.css';
 import 'antd/es/style/index.css'; // col & row
 import 'antd/es/layout/style/index.css';
 
+import Captcha from '../../components/util/Captcha.js';
 
 /**
  * @function beforeSubmit(form)
@@ -21,13 +22,13 @@ class LoginFormComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      captchaSeed: `/papi/captcha?seed=0`,
       captchaPass: false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.getUserSalt = this.getUserSalt.bind(this);
     this.login = this.login.bind(this);
     this.refreshCaptcha = this.refreshCaptcha.bind(this);
+    this.setCaptchaRef = this.setCaptchaRef.bind(this);
     this.asyncCaptchaValidator = this.asyncCaptchaValidator.bind(this);
   }
 
@@ -70,12 +71,12 @@ class LoginFormComponent extends React.Component {
       salt = salt.data.salt;
     }
     let newSalt = generateSalt(16);
-    let newPassword = hmac(newSalt, password, {alg: 'sha256', repeat: 100});
+    let newPassword = slowHash(newSalt, password);
 
     axios
       .post("/papi/authorizationToken", {
         username,
-        password: hmac(salt, password, {alg: 'sha256', repeat: 100}),
+        password: slowHash(salt, password),
         salt,
         newSalt,
         newPassword
@@ -92,19 +93,18 @@ class LoginFormComponent extends React.Component {
           that.setState({
             captchaPass: false,
           });
-          that.refreshCaptcha();
+          this.refreshCaptcha();
         }
         that.props.afterSubmit(that.props.form, returnRes, returnErr);
       });
   }
 
-  /**
-   * 刷新验证码
-   */
-  refreshCaptcha() {
-    this.setState({
-      captchaSeed: `/papi/captcha?seed=${Math.random()}`
-    });
+  setCaptchaRef(element){
+    this.captcha = element;
+  }
+
+  refreshCaptcha(){
+    this.captcha.refreshCaptcha(); // @See '../../components/util/Captcha.js'
   }
 
   asyncCaptchaValidator(rule, value, callback) {
@@ -195,11 +195,10 @@ class LoginFormComponent extends React.Component {
             <Form.Item>
               <div align="center">
                 <b style={{'float': 'left'}}>验证码：</b>
-                <a href="#" style={{'float': 'right'}} onClick={this.refreshCaptcha}>
+                <button className={'link-button'} style={{'float': 'right'}} onClick={this.refreshCaptcha}>
                   点击刷新
-                </a>
-                <img src={this.state.captchaSeed} onClick={this.refreshCaptcha} alt="captcha"
-                     width="150px" height="40px" style={{"border": "1px solid silver"}}/>
+                </button >
+                <Captcha ref={this.setCaptchaRef}/>
               </div>
 
             </Form.Item>

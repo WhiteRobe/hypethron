@@ -71,7 +71,7 @@
 **GET**：新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
 
 ```
-@input { type:$String['', 'math'] }
+@input { type:$String['text', 'math'], captchaLength<opt>: $Int }
 @set-session { captcha: <token@subject:captcha> => captcha: $String }
 @output { $svg }
 ```

@@ -12,6 +12,8 @@ import 'antd/es/button/style/index.css';
 
 import 'antd/es/style/index.css'; // col & row
 
+import Captcha from '../../components/util/Captcha.js';
+
 import logo from "../HypethronIntroPage/logo.png";
 
 const {Search} = Input;
@@ -98,23 +100,11 @@ class RetrievePasswordPage extends React.Component {
 class CustomForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      captchaSeed: '/papi/captcha?seed=0'
-    };
 
-    this.refreshCaptcha = this.refreshCaptcha.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  /**
-   * 刷新验证码
-   */
-  refreshCaptcha() {
-    this.setState({
-      captchaSeed: `/papi/captcha?seed=${Math.random()}`
-    });
-  }
 
   /**
    * 调用发送邮件的接口
@@ -144,30 +134,13 @@ class CustomForm extends React.Component {
 
   handleSubmit() {
     let that = this;
-    this.checkForm()
-      .then(() => {
-        that.sendEmail();
-      })
-      .catch(err => {
+    this.props.form.validateFieldsAndScroll((err/*, values*/) => {
+      if (err) {
         console.error(err);
-      });
-  }
-
-  /**
-   * 表单校验
-   * @return {Promise<any>}
-   */
-  checkForm() {
-    let that = this;
-    return new Promise((resolve, reject) => {
-      that.props.form.validateFieldsAndScroll((err, values) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(values);
-        }
-      });
-    })
+      } else {
+        that.sendEmail();
+      }
+    });
   }
 
   render() {
@@ -183,8 +156,7 @@ class CustomForm extends React.Component {
                    maxlength="4"
                    style={{"width": "200px", "margin": "5px 20px 0 0"}}/>
           )}
-          <img src={this.state.captchaSeed} onClick={this.refreshCaptcha} alt="captcha"
-               width="150px" height="40px" style={{"border": "1px solid silver"}}/>
+          <Captcha />
         </Form.Item>
 
         <Form.Item>

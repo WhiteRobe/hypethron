@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
-import {Card, Form, notification, Spin, Tabs} from 'antd';
+import {Card, Form, notification, Spin} from 'antd';
 
 import 'antd/es/card/style/index.css';
 import 'antd/es/spin/style/index.css';
@@ -51,7 +51,6 @@ class LoginPage extends React.Component {
     let rememberFlag = form.getFieldValue('remember');
     console.log(rememberFlag);
     if (res) { // 登录成功
-      console.log("yes");
       let rememberFlag = form.getFieldValue('remember');
       let token = res.data.token;
       this.props.setToken(token); // 保存token到SPA的Store中
@@ -112,12 +111,14 @@ class LoginPage extends React.Component {
   }
 }
 
+const WrappedLoginFormComponent = Form.create({name: 'normal_login_form'})(LoginFormComponent);
+
 /**
  * 定义Redux状态到视图容器的映射方法
  */
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    reduxState: state.tokenState
+    reduxState: state.tokenStateManager
   }
 };
 
@@ -126,9 +127,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
  */
 const mapDispatchToProps = {setToken};
 
-const WrappedLoginFormComponent = Form.create({name: 'normal_login_form'})(LoginFormComponent);
-
-export default connect({
+export default connect(
   mapStateToProps,
   mapDispatchToProps
-})(LoginPage);
+)(LoginPage);

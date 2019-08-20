@@ -5,13 +5,14 @@ const {SERVER_PRIVATE_KEY, JWT_OPTIONS} = require('../../server-configure.js');
 
 /**
  * 新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
- * @input { type:$String['', 'math'] }
+ * @input { type:$String['', 'math'], captchaLength<opt>: $Int }
  * @set-session { captcha: <token@subject:captcha> => captcha: $String }
  * @output { $svg }
  */
 async function GET_captcha(ctx, next) {
   try {
-    let captcha = generatorCaptcha(ctx.request.query.type);
+    let captchaLength = ctx.request.query.captchaLength;
+    let captcha = generatorCaptcha(ctx.request.query.type, {size: captchaLength || 4});
 
     ctx.session.captcha = jwt.sign({ // 保存到session中
       captcha: captcha.text,

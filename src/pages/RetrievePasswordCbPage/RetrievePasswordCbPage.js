@@ -2,7 +2,7 @@ import React from 'react';
 import querystring from 'querystring';
 import axios from 'axios';
 import {connect} from 'react-redux';
-import {hmac, generateSalt} from '../../util/crypto-hash-tool.js';
+import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
 import {Row, Col, Input, Spin, Form, notification, Result, Button, Icon} from 'antd';
 import 'antd/es/layout/style/index.css';
@@ -123,7 +123,7 @@ class CustomForm extends React.Component {
     // this.props.reduxState.secretKey
     axios
       .patch("/papi/passwordRetrieveCert", {
-        password: hmac(salt, originPw, {alg: 'sha256', repeat: 100}), // 慢加密
+        password: slowHash(salt, originPw), // 慢加密
         salt,
         retrievePWCert: that.state.retrievePWCert
       })
