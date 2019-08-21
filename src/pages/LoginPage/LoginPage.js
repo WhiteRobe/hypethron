@@ -1,15 +1,17 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
-import {Card, Form, notification, Spin} from 'antd';
 
-import 'antd/es/card/style/index.css';
-import 'antd/es/spin/style/index.css';
-import 'antd/es/notification/style/index.css';
+import {Form, Card, notification, Spin} from 'antd';
+
 import 'antd/es/form/style/index.css';
-import 'antd/es/tabs/style/index.css';
-import 'antd/es/layout/style/index.css';
-import 'antd/es/style/index.css';
+import 'antd/es/card/style/index.css';
+import 'antd/es/tabs/style/index.css'; // as tab-card
+import 'antd/es/notification/style/index.css';
+import 'antd/es/spin/style/index.css';
+
+import 'antd/es/col/style/css'; // col & row
+import 'antd/es/row/style/css'; // col & row
 
 import LoginFormComponent from './LoginFormComponent.js';
 
@@ -48,8 +50,6 @@ class LoginPage extends React.Component {
   }
 
   handleSubmitResult(form, res, err) {
-    let rememberFlag = form.getFieldValue('remember');
-    console.log(rememberFlag);
     if (res) { // 登录成功
       let rememberFlag = form.getFieldValue('remember');
       let token = res.data.token;
@@ -61,7 +61,15 @@ class LoginPage extends React.Component {
         // remove cookie
         document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       }
-      console.log(this.props.reduxState.token);
+      // console.log(`用户已登录:${this.props.reduxState.token}`);
+      notification.info({
+        message: '登录成功',
+        description: `两秒后自动跳转到首页！`,
+        duration: 1.5
+      });
+      setTimeout(() => { // 跳转到首页
+        this.props.history.push("/pages/home");
+      }, 2000);
     } else {
       // @See https://ant.design/components/notification-cn
       notification.warn({
@@ -70,8 +78,8 @@ class LoginPage extends React.Component {
         duration: 5
       });
       console.error(err.message, err.response.data);
+      this.toggleLoadingState(); // 登陆失败时解除Spin状态(成功时会自动跳转)
     }
-    this.toggleLoadingState();
   }
 
   findContent(key) {

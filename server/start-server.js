@@ -48,6 +48,7 @@ app.keys = COOKIE_KEY_LIST;
 
 
 (async function () { // 启动服务器
+  console.log(chalk.magenta(`Welcome to Hypethron. @see https://github.com/WhiteRobe/hypethron for more detail.\n`));
   // Add an logger, and bind it to this server
   const logger = log4js.getLogger('application');
   logger.addContext('loggerName', 'Hypethron');
@@ -116,7 +117,7 @@ app.keys = COOKIE_KEY_LIST;
   // >>> import middleware and load router >>>
   app
     .use((ctx, next) => { // Register global-values
-      ctx.BLACK_LIST = BLACK_LIST; // blacklist
+      ctx.BLACK_LIST = BLACK_LIST; // dynamic-blacklist
       ctx.IP_FILTER_CONFIGURE = IP_FILTER_CONFIGURE;
       ctx.global = global;
       ctx.AUTH = AUTH;

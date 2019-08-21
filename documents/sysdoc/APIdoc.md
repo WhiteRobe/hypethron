@@ -7,17 +7,23 @@
 - **@params** 地址参数输入，等价于"@url-params"
 - **@set-params** 尝试向url设置一个参数
 - **@redirect** 重定向到地址
-- **@set-cookies** 服务器尝试设置一个cookies
-- **@need-cookies** 服务器尝试读一个cookies
-- **@set-session**  接口向服务器session中存入一个的值
-- **@need-session** 接口需要读服务器session中存储的值
-- **@set-head**  接口将会设置一个response-head
-- **@need-head** 接口需要读一个response-head
-- **<token>@subject/...=>value** 指示，标记一个JWT Token的某项约束值
+- **@set-cookies** 服务器尝试设置一个`cookies`
+- **@need-cookies** 服务器尝试读一个`cookies`
+- **@set-session**  接口向服务器`session`中存入一个的值
+- **@need-session** 接口需要读服务器`session`中存储的值
+- **@set-head**  接口将会设置一个`response-head`
+- **@need-head** 接口需要读一个`request-head`
+- **@random-value<id>** 指示，标记一个随机的值及其在上下文中的`id`
+- **@throw** 指示，标记可能抛出的错误码和原因(400错误默认不进行标记)
+- **@throws** 指示，接口函数可能抛出的异常`Exception`
+- **@annotation[key]** 指示，从注解(annotation)中取`key`所指示的值
+- **@get-from** 指示，告知该值的取值范围从何API处获得
+- **key:value** 标记一个键值对
 - **$String/Object/JSON-String...** 指示，标记某个字段的值类型
-- **<opt>** 指示，标记一个可选的参数项
-- **<opt@domain:±n>** 指示，标记domain中几个互斥的的参数项，至多(+)/至少(-)只能有n个
-- **<random-value:id>** 指示，标记一个随机的值及其在上下文中的id
+- **$Type/Key<const-value>** (补充上条)指示，一个指定的类型(Type)或字段(Key)的常量值`const-value`
+- **<opt>$Params** 指示，标记一个可选的参数项Params
+- **<opt@domain:±n>** (扩展上条)指示，标记domain中几个互斥的的参数项，至多(+)/至少(-)只能有n个
+- **<token>@subject/...=>value** 指示，标记一个JWT Token的某项约束值，如`subject`
 
 ---
 
@@ -49,12 +55,14 @@
 
 ### "/authorizationToken"
 
-**POST**：通过账号进行登录，返回一个登录是否成功的标志即服务器签发的Token，并尝试写入cookies。同时，username可作为email或phone登录。
+**POST**：通过账号进行登录，返回一个登录是否成功的标志即服务器签发的Token，并尝试写入cookies。同时，username可作为email或phone登录。每次调用都会清空session里的captcha。
 
 ```
-@input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String }
+@input { username: $String, password: $String, salt:$String, newSalt:$String, newPassword:$String, captcha: $String }
+@need-session { captcha: <token@subject:captcha> => captcha: $String }
 @set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
 @output { token: $String }
+@throw {403: 认证不通过, 404:session数据丢失, 406: 验证码不匹配, 409: session验证码jwt检验不通过 }
 ```
 
 ### "/apiDocument"
@@ -73,27 +81,39 @@
 ```
 @input { type:$String['text', 'math'], captchaLength<opt>: $Int }
 @set-session { captcha: <token@subject:captcha> => captcha: $String }
-@output { $svg }
+@output { $svg } 一个svg数据 <img src=".../captcha"/>
+@throw { 409: 生成验证码失败 }
 ```
 
 
-**POST**：比对验证码，获取比对结果。比对成功将清除所记录的captcha。
+**POST**：比对验证码，获取比对结果。比对成功将清除所记录的captcha，可设置$keepAlive=true使其不被清除。
 
 ```
 @need-session { captcha: <token@subject:captcha> => captcha: $String }
-@input { captcha: $String }
-@output { success: $Boolean }
+@input { captcha: $String, <opt>keepAlive: $Boolean }
+@output { match: $Boolean }
+@throw { 404:session数据丢失, 409: session验证码jwt检验不通过 }
 ```
 
 ### "/emailCaptcha"
 
-**POST**：发送一个邮箱验证码，该验证码和对应的邮箱将被注册到`ctx.session.emailCaptcha`中。
+**GET**：校验一个邮箱验证码是否正确。除非设置keepAlive为true，否则验证通过后将会销毁这个email-captcha。如果给出email地址，还会进行严格模式的校验，即校验email是否发生变动。
+
+```
+@input { emailCaptcha: $String, <opt>email:$String, <opt>keepAlive: $Boolean }
+@need-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
+@output { match: $Boolean }
+@throw { 404:session数据丢失, 406: 与该emailCaptcha对应的email不是同一个地址, 409: session验证码jwt检验不通过 }
+```
+
+**POST**：发送一个邮箱验证码，该验证码和对应的邮箱将被注册到`ctx.session.emailCaptcha`中。操作成功后captcha会被清除。
 
 ```
 @need-session { captcha: <token@subject:captcha> => captcha: $String }
-@input { email: $String, captcha: $String, type:$String<@get-from:http.options> }
+@input { email: $String, captcha: $String, <opt>type:$String<@get-from:http.options> }
 @set-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
-@output { success: $Boolean}
+@output { success: $Boolean<true> }
+@throw { 404:session数据丢失, 409: session验证码jwt检验不通过, 502: 发送邮件失败 }
 ```
 
 ### "/passwordRetrieveCert"
@@ -104,17 +124,19 @@
 ```
 @input { email: $String, captcha: $String }
 @need-session { captcha: <token@subject:captcha> => captcha: $String }
-@set-params { retrievePWCert: $String=<random-value:1> }
-@set-session { <random-value:1>: <token@subject:retrievePWCert> => uid: $Int }
-@output { success: $Boolean }
+@set-params { retrievePWCert: $String<@random-value<1>> }
+@set-session { @set-params[retrievePWCert]: <token@subject:retrievePWCert> => uid: $Int }
+@output { success: $Boolean<true> }
+@throw {403: 认证不通过(无此账号), 404:session数据丢失, 406: 验证码不匹配, 409: session验证码jwt检验不通过, 502: 发送邮件失败 }
 ```
 
-**PATCH**：根据`retrievePWCert`的值从session中获得相应的jwt-token证明并验证身份，若通过则重设密码。
+**PATCH**：根据`retrievePWCert`的值从session中获得相应的jwt-token证明并验证身份，若通过则重设密码。操作后，200状态下retrievePWCert会被清除。
 
 ```
 @input { password: $String, salt: $String, retrievePWCert: $String }
-@need-session { <random-value:@input[retrievePWCert]>: <token@subject:retrievePWCert> => uid: $Int }
+@need-session { @input[retrievePWCert]: <token@subject:retrievePWCert> => uid: $Int }
 @output { success: $Boolean }
+@throw { 404:session数据丢失, 409: session数据jwt检验不通过 }
 ```
 
 ### "/restfulStatus"
@@ -153,16 +175,18 @@ When `ctx.params.{uid}` = 0:
 Else:
   @input { / }
 @output { result:$Array }
+@throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
 ```
 
-**POST**：即注册接口，返回一个注册是否成功的标志即服务器签发的Token，并尝试写入session-cookies。
+**POST**：即注册接口，返回一个注册是否成功的标志即服务器签发的Token，并尝试写入session-cookies。注册成功后清空session
 
 ```
 * When do POST, only response on ".../userAccounts/0"
 @need-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
-@input { username: $String, password: $String, salt: $String, captcha: $String }
+@input { username: $String, password: $String, salt: $String, emailCaptcha: $String }
 @set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
 @output { token: $String }
+@throw { 403: 权限不足, 404: 缺失session数据, 406: 验证码不匹配, 409: jwt验证不通过, 502: 未知原因导致的写表错误 }
 ```
 
 **PATCH**：部分更改用户账户信息表的接口，对权限有要求。返回操作是否成功的标志。
@@ -171,6 +195,7 @@ Else:
 @params { uid: $String }
 @input { updateData: $Object => '{ username:$String, openid:$String, password:$String, salt:$String, authority:$Integer }'}
 @output { success: $Boolean }
+@throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
 ```
 
 **DELETE**：删除用户账户信息表(及级联表)的接口，对权限有要求。返回操作是否成功的标志。
@@ -178,7 +203,8 @@ Else:
 ```
 @params { uid: $Int }
 @input { / }
-@output { success: $Boolean }
+@output { success: $Boolean<true> }
+@throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
 ```
 
 ### "/usernameExistence"
@@ -186,7 +212,7 @@ Else:
 **GET**：输入一个username，返回一个该username是否存在的标志。
 ```
 @input { username: $String }
-@output { exists: $Boolean, salt: $String }
+@output { exists: $Boolean }
 ```
 
 ### "/userProfiles/:uid"
@@ -211,6 +237,7 @@ When `ctx.params.{uid}` = 0:
 Else:
   @input { / }
 @output { result:$Array }
+@throw { 409: 认证token的jwt检验不通过 }
 ```
 
 
@@ -220,6 +247,7 @@ Else:
 @params { uid: $Int }
 @input { updateData: $Object } // 更改的值
 @output { success: $Boolean }
+@throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
 ```
 
 ### "/userSalts"
@@ -229,6 +257,7 @@ Else:
 ```
 @input { username: $String }
 @output { salt: $String }
+@throw { 403: 用户不存在 }
 ```
 
 
@@ -244,6 +273,7 @@ Else:
 @params { uid: $Int }
 @input { / }
 @output { result: $Array }
+@throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
 ```
 
 **PATCH**：更改用户的隐私设定，权限需求为管理组或本人。
@@ -252,5 +282,6 @@ Else:
 @params { uid: $Int }
 @input { updateData: $Object } // 更改的值
 @output { success: $Boolean }
+@throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
 ```
 

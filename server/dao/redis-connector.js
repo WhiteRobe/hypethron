@@ -45,7 +45,7 @@ async function getRedisPool(opt) {
  * 数据库接入测试
  */
 async function redisConnectTest() {
-  let redis = connectRedis(true /*connect with default params, but put detail*/);
+  let redis = connectRedis(!process.env.HIDE_CONNECT_DETAIL /*connect with default params, but put detail*/);
   await redis.set("hypethron.redis-connect-test", "Success!");
   try {
     await redis.get("hypethron.redis-connect-test", (err, result) => {

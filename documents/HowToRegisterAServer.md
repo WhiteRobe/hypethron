@@ -62,6 +62,7 @@ RATE_LIMIT_CONFIGURE | object | 访问频率限制 | [参考](https://github.com
 字段|类型|意义|例值
 :-:|:-:|:-:|:-:
 DEBUG | boolean | debug模式 | false
+HIDE_CONNECT_DETAIL | any | 隐藏启动服务器时的参数配置输出 | null
 
 ---
 

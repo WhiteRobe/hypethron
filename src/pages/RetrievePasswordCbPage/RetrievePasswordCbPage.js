@@ -4,8 +4,8 @@ import axios from 'axios';
 import {connect} from 'react-redux';
 import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
-import {Row, Col, Input, Spin, Form, notification, Result, Button, Icon} from 'antd';
-import 'antd/es/layout/style/index.css';
+import {Input, Spin, Form, notification, Result, Button, Icon, Row, Col} from 'antd';
+
 import 'antd/es/input/style/index.css';
 import 'antd/es/spin/style/index.css';
 import 'antd/es/form/style/index.css';
@@ -13,7 +13,10 @@ import 'antd/es/notification/style/index.css';
 import 'antd/es/result/style/index.css';
 import 'antd/es/button/style/index.css';
 import 'antd/es/icon/style/index.css';
-import 'antd/es/style/index.css'; // col & row
+
+import 'antd/es/col/style/css'; // col & row
+import 'antd/es/row/style/css'; // col & row
+
 
 import logo from "../HypethronIntroPage/logo.png";
 
@@ -38,8 +41,8 @@ class RetrievePasswordCbPage extends React.Component {
   handleSubmitResult(form, res, err) {
     if (res) { // 提交成功
       this.setState({
-        success: true
-      })
+        success: true // 为true时将会变为结果页
+      });
     } else {
       // @See https://ant.design/components/notification-cn
       notification.warn({
@@ -102,8 +105,11 @@ class RetrievePasswordCbPage extends React.Component {
 class CustomForm extends React.Component {
   constructor(props) {
     super(props);
+    this.props.beforeSubmit = this.props.beforeSubmit || function(){};
+    this.props.afterSubmit = this.props.afterSubmit || function(){};
+
     this.state = {
-      retrievePWCert: querystring.decode(props.location.search.replace("?", "")).retrievePWCert
+      retrievePWCert: querystring.decode(props.location.search.replace("?", "")).retrievePWCert // 解码获得url参数
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -167,7 +173,7 @@ class CustomForm extends React.Component {
           <Form.Item>
             {getFieldDecorator('password', {
               rules: [
-                {required: true, message: '请输入新密码', min: 6, max: 16},
+                {required: true, message: '请输入新密码'},
                 {min: 6, max: 16, message: '密码长度应为6~16(含)'},
                 {type: 'string', pattern: /\d+/, message: '密码应至少包含一位数字'},
                 {type: 'string', pattern: /[a-zA-Z]+/, message: '密码应至少包含一位大小写英文'},
@@ -193,7 +199,7 @@ class CustomForm extends React.Component {
               ]
             })(
               <Input.Password
-                prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                prefix={<Icon type="retweet" style={{color: 'rgba(0,0,0,.25)'}}/>}
                 type="password"
                 style={{"width":"350px"}}
                 placeholder="请确认密码"

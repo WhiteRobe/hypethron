@@ -11,6 +11,7 @@ const {JWT_OPTIONS} = require('../../server-configure.js');
  * @params { uid: $Int }
  * @input { / }
  * @output { result: $Array }
+ * @throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
  */
 async function GET_userPrivacies(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -49,6 +50,7 @@ async function GET_userPrivacies(ctx, next) {
  * @params { uid: $Int }
  * @input { updateData: $Object } // 更改的值
  * @output { success: $Boolean }
+ * @throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
  */
 async function PATCH_userPrivacies(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;

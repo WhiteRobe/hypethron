@@ -25,6 +25,7 @@ const {JWT_OPTIONS} = require('../../server-configure.js');
  * Else:
  *   @input { / }
  * @output { result:$Array }
+ * @throw { 409: 认证token的jwt检验不通过 }
  */
 async function GET_userProfile(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -114,6 +115,7 @@ async function GET_userProfile(ctx, next) {
  * @params { uid: $Int }
  * @input { updateData: $Object } // 更改的值
  * @output { success: $Boolean }
+ * @throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
  */
 async function PATCH_userProfile(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -186,15 +188,16 @@ async function PATCH_userProfile(ctx, next) {
  * @param result 结果集的Array( 含隐私设定 )
  */
 function privacyBlock(result) {
+  let secret = '因隐私设定而保密';
   for (let i of result) {
     // 利用掩码调整输出到前端的内容
-    i.company = i.privacy_general === 1 ? i.company : '保密';
-    i.location = i.privacy_general === 1 ? i.location : '保密';
-    i.website = i.privacy_general === 1 ? i.website : '保密';
-    i.sex = i.privacy_sex === 1 ? i.sex : '保密';
-    i.birthday = i.privacy_birthday === 1 ? i.birthday : '保密';
-    i.phone = i.privacy_phone === 1 ? i.phone : '保密';
-    i.email = i.privacy_email === 1 ? i.email : '保密';
+    i.company = i.privacy_general === 1 ? i.company : secret;
+    i.location = i.privacy_general === 1 ? i.location : secret;
+    i.website = i.privacy_general === 1 ? i.website : secret;
+    i.sex = i.privacy_sex === 1 ? i.sex : secret;
+    i.birthday = i.privacy_birthday === 1 ? i.birthday : secret;
+    i.phone = i.privacy_phone === 1 ? i.phone : secret;
+    i.email = i.privacy_email === 1 ? i.email : secret;
 
     // 清空本接口的无关数据
     i.privacy_general = undefined;

@@ -7,7 +7,8 @@ const {SERVER_PRIVATE_KEY, JWT_OPTIONS} = require('../../server-configure.js');
  * 新建并返回一个验证码，该验证码将被注册到`ctx.session.captcha`中；支持生成`math`表达式。
  * @input { type:$String['', 'math'], captchaLength<opt>: $Int }
  * @set-session { captcha: <token@subject:captcha> => captcha: $String }
- * @output { $svg }
+ * @output { $svg } 一个svg数据 <img src=".../captcha"/>
+ * @throw { 409: 生成验证码失败 }
  */
 async function GET_captcha(ctx, next) {
   try {
@@ -31,10 +32,11 @@ async function GET_captcha(ctx, next) {
 
 
 /**
- * 比对验证码，获取比对结果。比对成功将清除所记录的captcha。
+ * 比对验证码，获取比对结果。比对成功将清除所记录的captcha，可设置$keepAlive=true使其不被清除。
  * @need-session { captcha: <token@subject:captcha> => captcha: $String }
- * @input { captcha: $String }
- * @output { success: $Boolean }
+ * @input { captcha: $String, <opt>keepAlive: $Boolean }
+ * @output { match: $Boolean }
+ * @throw { 404:session数据丢失, 409: session验证码jwt检验不通过 }
  */
 async function POST_captcha(ctx, next) {
 
@@ -42,7 +44,7 @@ async function POST_captcha(ctx, next) {
   let captchaServer = ctx.session.captcha;
 
   ctx.assert(captcha, 400, '@input:captcha is required.');
-  ctx.assert(captchaServer, 400, '@session:captcha is undefined. Consider to regenerate it.');
+  ctx.assert(captchaServer, 404, '@session:captcha is undefined. Consider to regenerate it.');
 
   let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions('captcha', ctx.ip))
     .catch(err => {
@@ -53,12 +55,14 @@ async function POST_captcha(ctx, next) {
   // 不区分大小写
   let isMatched = captcha.toUpperCase() === decode.captcha.toUpperCase();
 
-  if (isMatched) {
+  // ctx.assert(isMatched, 406, 'Captcha doesn\'t match!'); // 比对验证码
+
+  if (!ctx.request.body.keepAlive) {
     ctx.session.captcha = null; // 清空已被使用的数据
   }
 
   ctx.body = {
-    success: !!isMatched
+    match: !!isMatched
   };
 
   return next();

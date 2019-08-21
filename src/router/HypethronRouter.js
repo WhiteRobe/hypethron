@@ -13,8 +13,10 @@ import appFooter from "../components/AppFooter/AppFooter.js";
 import hypethronIntroPage from "../pages/HypethronIntroPage/HypethronIntroPage.js";
 import homePage from "../pages/HomePage/HomePage.js";
 import loginPage from "../pages/LoginPage/LoginPage.js";
+import registerPage from "../pages/RegisterPage/RegisterPage.js";
 import retrievePasswordCbPage from "../pages/RetrievePasswordCbPage/RetrievePasswordCbPage.js";
 import retrievePasswordPage from "../pages/RetrievePasswordPage/RetrievePasswordPage.js";
+import profilePage from "../pages/ProfilePage/ProfilePage.js";
 
 import {store} from "../redux/HypethronRedux.js";
 
@@ -36,10 +38,15 @@ class HypethronRouter extends React.Component {
 
           {/*登录页面*/}
           <Route path="/pages/login" component={loginPage}/>
+          {/*注册页面*/}
+          <Route path="/pages/register" component={registerPage}/>
           {/*找回密码页面*/}
           <Route path="/pages/retrieve_password" component={retrievePasswordPage}/>
           {/*找回密码填写新密码页面*/}
           <Route path="/pages/retrieve_password_cb" component={retrievePasswordCbPage}/>
+          {/*个人资料页面*/}
+          <Route path="/pages/profile/:uid" component={profilePage}/>
+
           {/*所有`/pages`都会带有一个底部信息栏，除非带有`exact`属性*/}
           <Route path="/pages" component={appFooter}/>
         </Router>

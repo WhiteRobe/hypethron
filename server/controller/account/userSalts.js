@@ -2,6 +2,7 @@
  * 输入一个 username，返回一个该username的盐。username还可以是email或phone。
  * @input { username: $String }
  * @output { salt: $String }
+ * @throw { 403: 用户不存在 }
  */
 async function GET_userSalts(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -25,7 +26,7 @@ async function GET_userSalts(ctx, next) {
       salt: cb.result[0].salt
     }
   } else {
-    ctx.throw(409, 'User not exists!')
+    ctx.throw(403, 'User not exists!')
   }
 
   return next();
