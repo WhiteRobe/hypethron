@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
+import cookie from 'react-cookies'; // @See https://www.npmjs.com/package/react-cookies
 
 import {Form, Card, notification, Spin} from 'antd';
 
@@ -10,8 +11,8 @@ import 'antd/es/tabs/style/index.css'; // as tab-card
 import 'antd/es/notification/style/index.css';
 import 'antd/es/spin/style/index.css';
 
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 
 import LoginFormComponent from './LoginFormComponent.js';
 
@@ -59,7 +60,8 @@ class LoginPage extends React.Component {
         // document.cookie=`Authorization=${token}` // koa 服务器完成了这一步
       } else {
         // remove cookie
-        document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        // document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        cookie.remove('Authorization', { path: '/' });
       }
       // console.log(`用户已登录:${this.props.reduxState.token}`);
       notification.info({

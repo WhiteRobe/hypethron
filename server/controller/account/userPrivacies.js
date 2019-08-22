@@ -21,7 +21,7 @@ async function GET_userPrivacies(ctx, next) {
 
   ctx.assert(uid > 0, 400, "@url-params:uid should be positive.");
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -60,7 +60,7 @@ async function PATCH_userPrivacies(ctx, next) {
 
   ctx.assert(uid > 0, 400, "@url-params:uid should be positive.");
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 

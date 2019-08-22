@@ -1,7 +1,8 @@
 import React from 'react';
 import axios from 'axios';
+import {Link} from "react-router-dom";
 
-import {Input, Spin, Form, notification, Result, Button, Icon, Row, Col} from 'antd';
+import {Input, Spin, Form, notification, Result, Button, Icon, Card, Row, Col} from 'antd';
 
 import 'antd/es/input/style/index.css';
 import 'antd/es/spin/style/index.css';
@@ -9,10 +10,11 @@ import 'antd/es/form/style/index.css';
 import 'antd/es/notification/style/index.css';
 import 'antd/es/result/style/index.css';
 import 'antd/es/button/style/index.css';
+import 'antd/es/card/style/index.css';
 import 'antd/es/icon/style/index.css';
 
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 
 import Captcha from '../../components/util/Captcha.js';
 
@@ -61,34 +63,40 @@ class RetrievePasswordPage extends React.Component {
     return (
       <div>
         <Spin spinning={this.state.loading}>
-          <Row style={{"top": "150px"}}>
+          <Row style={{margin: "150px 0 150px 0"}}>
             <Col span={6}>&nbsp;</Col>
-            {this.state.success ?
-              <Result status="success"
-                      title="申请密码找回邮件发送成功!"
-                      subTitle={this.state.resultFeedback}
-                      extra={[
-                        <Button type="primary" shape="round" icon="home" href="/pages/home">返回首页</Button>
-                      ]}
-              /> :
-              <Col span={12}>
-                <p align="center">
-                  <span>
-                    <img src={logo} alt="logo" width="70px" height="70px"/>
-                  </span><br/>
+            <Col span={12}>
+              {this.state.success ?
+                <Result status="success"
+                        title="申请密码找回邮件发送成功!"
+                        subTitle={this.state.resultFeedback}
+                        extra={[
+                          <Button type="primary" shape="round" icon="home">
+                            <Link to="/pages/home" style={{color: 'white'}}>&nbsp;返回首页</Link>
+                          </Button>
+                        ]}
+                /> :
 
-                  <span style={{"margin": "10px 0 10px 0", "display": "block"}}>
-                    <b style={{"font-size": "2.0em"}}>密码找回</b>
-                  </span>
-                  <span style={{"margin": "0 0 10px 0", "display": "block"}}>请输入绑定的邮箱号以找回/重置你的用户密码</span><br/>
+                <Card style={{width: '700px'}}>
+                  <div align="center">
+                    <span>
+                      <img src={logo} alt="logo" width="70px" height="70px"/>
+                    </span><br/>
 
-                  {/*填写表单*/}
-                  <WrappedCustomForm beforeSubmit={this.toggleLoadingState} afterSubmit={this.handleSubmitResult}/>
-                </p>
-              </Col>
-            }
+                    <span style={{"margin": "10px 0 10px 0", "display": "block"}}>
+                      <b style={{fontSize: "2.0em"}}>密码找回</b>
+                    </span>
+                    <span style={{"margin": "0 0 10px 0", "display": "block"}}>请输入绑定的邮箱号以找回/重置你的用户密码</span><br/>
+
+                    {/*填写表单*/}
+                    <WrappedCustomForm beforeSubmit={this.toggleLoadingState} afterSubmit={this.handleSubmitResult}/>
+                  </div>
+                </Card>
+              }
+            </Col>
             <Col span={6}>&nbsp;</Col>
           </Row>
+
         </Spin>
       </div>
     )
@@ -102,15 +110,15 @@ class RetrievePasswordPage extends React.Component {
 class CustomForm extends React.Component {
   constructor(props) {
     super(props);
-    this.props.beforeSubmit = this.props.beforeSubmit || function () {
-    };
-    this.props.afterSubmit = this.props.afterSubmit || function () {
-    };
 
     this.sendEmail = this.sendEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.setCaptchaRef = this.setCaptchaRef.bind(this);
   }
 
+  setCaptchaRef(element) {
+    this.captcha = element;
+  }
 
   /**
    * 调用发送邮件的接口
@@ -134,7 +142,7 @@ class CustomForm extends React.Component {
         setTimeout(() => {
           that.props.afterSubmit(that.props.form, returnRes, returnErr);
         }, 500);
-        that.refreshCaptcha();
+        that.captcha.refreshCaptcha();
       });
   }
 
@@ -157,28 +165,28 @@ class CustomForm extends React.Component {
           {getFieldDecorator('captcha', {
             rules: [{required: true, len: 4, message: '请输入4位验证码!'}]
           })(
-            <Input
-              prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
-              placeholder="请输入4位长的验证码"
-              size="large"
-              maxlength="4"
-              style={{"width": "200px", "margin": "5px 20px 0 0"}}/>
+            <Input prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                   placeholder="请输入4位长的验证码"
+                   size="large"
+                   maxLength={4}
+                   style={{"width": "200px", "margin": "5px 20px 0 0"}}
+                   onPressEnter={this.handleSubmit}
+            />
           )}
-          <Captcha/>
+          <Captcha ref={this.setCaptchaRef}/>
         </Form.Item>
 
         <Form.Item>
           {getFieldDecorator('email', {
             rules: [{required: true, type: 'email', message: '请输入合法邮箱!'}]
           })(
-            <Search
-              prefix={<Icon type="mail" style={{color: 'rgba(0,0,0,.25)'}}/>}
-              placeholder="请输入账号所绑定的邮箱"
-              enterButton="发送邮件"
-              size="large"
-              style={{"width": "370px"}}
-              onSearch={this.handleSubmit}
-              onPressEnter={this.handleSubmit}/>
+            <Search prefix={<Icon type="mail" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                    placeholder="请输入账号所绑定的邮箱"
+                    enterButton="发送邮件"
+                    size="large"
+                    style={{"width": "370px"}}
+                    onSearch={this.handleSubmit}
+                    onPressEnter={this.handleSubmit}/>
           )}
         </Form.Item>
 

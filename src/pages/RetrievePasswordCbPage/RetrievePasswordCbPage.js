@@ -2,9 +2,10 @@ import React from 'react';
 import querystring from 'querystring';
 import axios from 'axios';
 import {connect} from 'react-redux';
+import {Link} from "react-router-dom";
 import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
-import {Input, Spin, Form, notification, Result, Button, Icon, Row, Col} from 'antd';
+import {Input, Spin, Form, notification, Result, Button, Icon, Card, Row, Col} from 'antd';
 
 import 'antd/es/input/style/index.css';
 import 'antd/es/spin/style/index.css';
@@ -13,9 +14,10 @@ import 'antd/es/notification/style/index.css';
 import 'antd/es/result/style/index.css';
 import 'antd/es/button/style/index.css';
 import 'antd/es/icon/style/index.css';
+import 'antd/es/card/style/index.css';
 
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 
 
 import logo from "../HypethronIntroPage/logo.png";
@@ -59,36 +61,40 @@ class RetrievePasswordCbPage extends React.Component {
     return (
       <div>
         <Spin spinning={this.state.loading}>
-          <Row style={{"top": "150px"}}>
+          <Row style={{margin: "150px 0 150px 0"}}>
             <Col span={6}>&nbsp;</Col>
-            {this.state.success ?
-              <Result status="success"
-                      title="密码更新成功!"
-                      subTitle="您的密码已重设，请使用新密码进行登录。"
-                      extra={[
-                        <Button type="primary" shape="round" icon="home" href="/pages/home">返回首页</Button>
-                      ]}
-              /> :
-              <Col span={12}>
-                <p align="center">
-                  <span>
-                    <img src={logo} alt="logo" width="70px" height="70px"/>
-                  </span><br/>
+            <Col span={12}>
+              {this.state.success ?
+                <Result status="success"
+                        title="密码更新成功!"
+                        subTitle="您的密码已重设，请使用新密码进行登录。"
+                        extra={[
+                          <Button type="primary" shape="round" icon="home">
+                            <Link to="/pages/home" style={{color: 'white'}}>&nbsp;返回首页</Link>
+                          </Button>
+                        ]}
+                /> :
+                <Card>
+                  <div align="center">
+                    <span>
+                      <img src={logo} alt="logo" width="70px" height="70px"/>
+                    </span><br/>
 
-                  <span style={{"margin": "10px 0 20px 0", "display": "block"}}>
-                    <b style={{"font-size": "2.0em"}}>设置新密码</b>
-                  </span>
+                    <span style={{"margin": "10px 0 20px 0", "display": "block"}}>
+                      <b style={{fontSize: "2.0em"}}>设置新密码</b>
+                    </span>
 
-                  {/*填写表单*/}
-                  <WrappedCustomForm
-                    beforeSubmit={this.toggleLoadingState}
-                    afterSubmit={this.handleSubmitResult}
-                    location={this.props.location}
-                    reduxState={this.props.reduxState}
-                  />
-                </p>
-              </Col>
-            }
+                    {/*填写表单*/}
+                    <WrappedCustomForm
+                      beforeSubmit={this.toggleLoadingState}
+                      afterSubmit={this.handleSubmitResult}
+                      location={this.props.location}
+                      reduxState={this.props.reduxState}
+                    />
+                  </div>
+                </Card>
+              }
+            </Col>
             <Col span={6}>&nbsp;</Col>
           </Row>
         </Spin>
@@ -105,11 +111,13 @@ class RetrievePasswordCbPage extends React.Component {
 class CustomForm extends React.Component {
   constructor(props) {
     super(props);
-    this.props.beforeSubmit = this.props.beforeSubmit || function(){};
-    this.props.afterSubmit = this.props.afterSubmit || function(){};
+
+    // 解码获得url参数
+    let location = props.location;
+    let retrievePWCert = location ? querystring.decode(location.search.replace("?", "")).retrievePWCert : null;
 
     this.state = {
-      retrievePWCert: querystring.decode(props.location.search.replace("?", "")).retrievePWCert // 解码获得url参数
+      retrievePWCert
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -145,7 +153,7 @@ class CustomForm extends React.Component {
   }
 
   handleSubmit() {
-    console.log(111);
+
     let that = this;
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (err) {
@@ -180,11 +188,11 @@ class CustomForm extends React.Component {
                 {type: 'string', pattern: /^\w+$/, message: '密码应为英文、数字等非制表符混合串'}
               ]
             })(
-              <Input.Password
-                prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                type="password"
-                style={{"width":"350px"}}
-                placeholder="请输入密码"
+              <Input.Password prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                              type="password"
+                              style={{"width": "350px"}}
+                              placeholder="请输入密码"
+                              onPressEnter={this.handleSubmit}
               />
             )}
           </Form.Item>
@@ -198,17 +206,17 @@ class CustomForm extends React.Component {
                 }
               ]
             })(
-              <Input.Password
-                prefix={<Icon type="retweet" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                type="password"
-                style={{"width":"350px"}}
-                placeholder="请确认密码"
+              <Input.Password prefix={<Icon type="retweet" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                              type="password"
+                              style={{"width": "350px"}}
+                              placeholder="请确认密码"
+                              onPressEnter={this.handleSubmit}
               />
             )}
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" onClick={this.handleSubmit} style={{"width":"200px"}}>确定</Button>
+            <Button type="primary" onClick={this.handleSubmit} style={{"width": "200px"}}>确定</Button>
           </Form.Item>
 
         </Form>

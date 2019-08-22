@@ -14,8 +14,8 @@ import 'antd/es/notification/style/index.css';
 import 'antd/es/statistic/style/index.css';
 import 'antd/es/spin/style/index.css';
 
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 
 import Captcha from '../../components/util/Captcha.js';
 
@@ -28,11 +28,6 @@ const {Countdown} = Statistic;
 class RegisterFormComponent extends React.Component {
   constructor(props) {
     super(props);
-
-    this.props.beforeSubmit = this.props.beforeSubmit || function () {
-    };
-    this.props.afterSubmit = this.props.afterSubmit || function () {
-    };
 
     this.state = {
       loading: false, // 载入遮罩
@@ -264,7 +259,7 @@ class RegisterFormComponent extends React.Component {
     const {getFieldDecorator} = this.props.form;
     return (
       <Spin spinning={this.state.loading}>
-        <Form style={{'max-width': '425px'}}>
+        <Form style={{maxWidth: '425px'}}>
           <Form.Item
             hasFeedback={this.state.emailValid}>
             {getFieldDecorator('userEmail', {
@@ -310,7 +305,7 @@ class RegisterFormComponent extends React.Component {
                   <Input
                     prefix={<Icon type="safety-certificate" style={{color: 'rgba(0,0,0,.25)'}}/>}
                     placeholder="请输入收到的6位邮箱验证码"
-                    maxLength="6"
+                    maxLength={6}
                     disabled={this.state.emailValid}
                     onPressEnter={(e) => e.preventDefault()}
                   />
@@ -335,7 +330,7 @@ class RegisterFormComponent extends React.Component {
                       <Input
                         prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
                         placeholder="请输入4位验证码"
-                        maxLength="4"
+                        maxLength={4}
                         onPressEnter={this.sendEmailCaptcha}
                       />
                     )}

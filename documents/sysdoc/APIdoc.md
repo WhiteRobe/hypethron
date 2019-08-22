@@ -235,7 +235,7 @@ When `ctx.params.{uid}` = 0:
       company: $String, // 支持模糊匹配
       location: $String // 支持模糊匹配
 Else:
-  @input { / }
+  @input { <opt>only: $Array } 只获取规定字段的项
 @output { result:$Array }
 @throw { 409: 认证token的jwt检验不通过 }
 ```
@@ -284,4 +284,9 @@ Else:
 @output { success: $Boolean }
 @throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
 ```
+
+
+---
+
+[返回首页](/README.md)
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
+import {Link} from "react-router-dom";
+import jwt from 'jsonwebtoken';
 
 import {Form, Card, notification, Spin, Result, Button} from "antd";
 
@@ -18,7 +20,8 @@ class RegisterPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false
+      loading: false,
+      userUID: 0
     };
 
     this.toggleLoadingState = this.toggleLoadingState.bind(this);
@@ -36,9 +39,12 @@ class RegisterPage extends React.Component {
     if (res) { // 注册成功
       let token = res.data.token;
       this.props.setToken(token); // 保存token到SPA的Store中
+      this.setState({
+        userUID: jwt.decode(token).uid
+      });
       // save cookie
       // document.cookie=`Authorization=${token}` // koa 服务器完成了这一步
-      console.log(this.props.reduxState.token);
+      // console.log(this.props.reduxState.token);
       notification.success({
         message: '注册成功',
         description: `欢迎您的加入，祝您在本站过得愉快！`,
@@ -65,10 +71,12 @@ class RegisterPage extends React.Component {
             title="恭喜您已经成功注册!"
             subTitle="您可以在之后修改资料，或者直接前往首页。"
             extra={[
-              <Button type="primary" key="home" icon="home" href="/pages/home">
-                前往首页
+              <Button type="primary" key="home" icon="home" >
+                <Link to="/pages/home" style={{color: 'white'}}>&nbsp;前往首页</Link>
               </Button>,
-              <Button key="profile" icon="user" href="/pages/profile">修改个人资料</Button>
+              <Button key="profile" icon="user">
+                <Link to={`/pages/profile/${this.state.userUID}`} style={{color: 'rgba(0,0,0,.65)'}}>&nbsp;修改个人资料</Link>
+              </Button>
             ]}
           />
           :

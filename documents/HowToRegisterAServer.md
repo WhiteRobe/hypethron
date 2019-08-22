@@ -65,5 +65,4 @@ DEBUG | boolean | debug模式 | false
 HIDE_CONNECT_DETAIL | any | 隐藏启动服务器时的参数配置输出 | null
 
 ---
-
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

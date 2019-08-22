@@ -71,7 +71,7 @@ async function POST_authorizationToken(ctx, next) {
       token: authorizationToken
     };
 
-    logger.info(`${res.result[0].uid} login with password:${password} ${salt}.`);
+    logger.info(`${res.result[0].uid} login with ip:${ctx.ip}.`);
 
     // 尝试写入cookies
     try {

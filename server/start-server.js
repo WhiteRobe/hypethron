@@ -17,7 +17,7 @@ const ipFilter = require('ip-filter'); // @See https://github.com/tunnckoCore/ip
 const smtpTest = require('./mail/smtp-test.js');
 const {connectRedis, redisConnectTest, getRedisPool, createRedisSession} = require('./dao/redis-connector.js');
 const {mysqlConnectTest, getMySQLPool} = require('./dao/mysql-connector.js');
-const {buildTables} = require('./dao/database-init.js');
+const {buildDBEnvironment} = require('./dao/database-init.js');
 const {MySQLPoolManager, RedisPoolManager} = require('./dao/db-manager.js');
 
 const {
@@ -88,10 +88,6 @@ app.keys = COOKIE_KEY_LIST;
   await getMySQLPool()
     .then((pool) => {
       registerMySQLPool(pool);
-      pool.getConnection((err, conn) => {
-        if (err) throw err;
-        buildTables('./server/dao/hypethron-database.sql', conn); // init mysql-database's tables
-      });
     });
   await getRedisPool()
     .then((pool) => {
@@ -102,6 +98,7 @@ app.keys = COOKIE_KEY_LIST;
   let ratelimitRedis = connectRedis(false, {db: 1});
   // <<< Get MySQL/Redis connection pool with default options <<<
 
+  // >>> Prepare server environment >>>
   const STATIC_RATE_LIMIT_CONFIGURE = Object.assign({
     db: ratelimitRedis,
     blacklist: (ctx) => {
@@ -112,7 +109,8 @@ app.keys = COOKIE_KEY_LIST;
     }
   }, RATE_LIMIT_CONFIGURE);
   const STATIC_KOA_SESSION_CONFIGURE = Object.assign(KOA_SESSION_CONFIGURE, {store: redisSession});
-  //
+  await buildDBEnvironment('./server/dao/hypethron-database.sql').then(); // after register-pool, init mysql-database
+  // <<< Prepare server environment <<<
 
   // >>> import middleware and load router >>>
   app

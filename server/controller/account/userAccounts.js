@@ -33,7 +33,7 @@ async function GET_userAccounts(ctx, next) {
 
   ctx.assert(uid >= 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -188,6 +188,7 @@ async function POST_userAccounts(ctx, next) {
       await connection.commit().catch(err => {
         throw err;
       });
+      connection.release();
 
       logger.info(`User ${res.result[0].uid} register success, his/her email is [${email}].`);
 
@@ -216,18 +217,15 @@ async function POST_userAccounts(ctx, next) {
       ctx.session.emailCaptcha = null;
 
     } else {
-      ctx.throw(502, 'register fail', {detail:`注册失败，请稍后重试.`});
+      throw new Error('register fail: Not created!');
     }
   } catch (err) {
     await connection.rollback() // 发生错误则事务回撤
       .catch(e => {
         /* ignore */
-      })
-      .finally(() => {
-        ctx.throw(500, err);
       });
-  } finally {
     connection.release();
+    ctx.throw(502, err);
   }
 
   return next();
@@ -248,7 +246,7 @@ async function PATCH_userAccounts(ctx, next) {
 
   ctx.assert(uid > 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -317,7 +315,7 @@ async function DELETE_userAccounts(ctx, next) {
 
   ctx.assert(ctx.params.uid > 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -350,16 +348,16 @@ async function DELETE_userAccounts(ctx, next) {
       success: true
     };
 
+    connection.release();
   } catch (err) {
     await connection.rollback() // 发生错误则事务回撤
       .catch(e => {
         /* ignore */
       })
       .finally(() => {
+        connection.release();
         ctx.throw(500, err);
       });
-  } finally {
-    connection.release();
   }
   return next();
 }

@@ -29,4 +29,4 @@ ctx.throw(403, {detail: "禁止访问"});
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

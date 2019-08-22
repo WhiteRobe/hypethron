@@ -12,8 +12,8 @@ import 'antd/es/button/style/index.css';
 import 'antd/es/checkbox/style/index.css';
 import 'antd/es/divider/style/index.css';
 
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 
 import Captcha from '../../components/util/Captcha.js';
 
@@ -24,10 +24,6 @@ import Captcha from '../../components/util/Captcha.js';
 class LoginFormComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.props.beforeSubmit = this.props.beforeSubmit || function () {
-    };
-    this.props.afterSubmit = this.props.afterSubmit || function () {
-    };
 
     this.state = {
       captchaPass: false
@@ -147,7 +143,7 @@ class LoginFormComponent extends React.Component {
     const {getFieldDecorator} = this.props.form;
     return (
       <div>
-        <Form style={{'max-width': '425px'}}>
+        <Form style={{maxWidth: '425px'}}>
 
           <Form.Item>
             {getFieldDecorator('username', {
@@ -199,7 +195,7 @@ class LoginFormComponent extends React.Component {
             })(
               <Input
                 prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                maxlength="4"
+                maxLength={4}
                 placeholder="请输入验证码"
                 disabled={this.state.captchaPass}
                 onPressEnter={this.handleSubmit}

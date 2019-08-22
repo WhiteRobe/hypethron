@@ -165,12 +165,13 @@ class SyncTransactionConnection {
 
   async trySyncCommitAndRelease() {
     let that = this;
-    await that.commit().catch(err => {
+    await that.commit().catch(error => {
       that.rollback().catch(err => {
+        that.release();
         throw err;
       });
       that.release();
-      throw err;
+      throw error;
     });
     that.release();
   }
