@@ -112,7 +112,7 @@ class LoginPage extends React.Component {
         maxWidth: '100%',
         padding: '40px'
       }}>
-        <Row gutter={64} style={{padding: '110px 0px 20px 80px', opacity: '0.8'}}>
+        <Row gutter={64} style={{padding: '110px 0px 20px', opacity: '0.8'}}>
           <Col span={2}>&nbsp;</Col>
           <Col span={12}>
             <IntroCardComponent/>{/* 介绍框 */}

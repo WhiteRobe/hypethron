@@ -59,7 +59,7 @@ class HypethronRouter extends React.Component {
               <Route path="/pages/profile/:uid" component={profilePage}/>
             </Content>
 
-            <Footer style={{ textAlign: 'center' }}>
+            <Footer style={{padding: 0}}>
               {/*所有`/pages`都会带有一个底部信息栏，除非带有`exact`属性*/}
               <Route path="/pages" component={appFooter}/>
             </Footer>
