@@ -49,6 +49,7 @@
 .AppFooterComponentInformation li {
     list-style:none; /* 将默认的列表符号去掉 */
     margin: 10px;
+    float: left;
     clear: both;
 }
 
@@ -61,9 +62,6 @@
 .AppFooterComponentLink li a:hover {
     color: #146C9C; /* 变换文字颜色 */
 }
-
-.clearFloat:after{display:block;clear:both;content:"";visibility:hidden;height:0}
-.clearFloat{zoom:1}
 
 .appFooterComponentRight{
     color: #fff;

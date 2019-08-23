@@ -62,7 +62,7 @@
 - 前端可跨平台开发
 - ...
 
-你可以到此处查看该项目的效果：[项目演示|Examples](https://github.com/WhiteRobe/hypethron#%E9%A1%B9%E7%9B%AE%E6%BC%94%E7%A4%BA-example)。
+你可以到此处查看该项目的效果：[项目演示|Examples](#-example)。
 
 
 ## 快速上手 Quick-Start
@@ -105,6 +105,13 @@
 
 1. (第一次启动时)执行`npm run build`打包、发布SPA应用到`/build`目录下。
 2. 在完备的Node.js开发环境下，进入项目根目录，通过 `npm run server-start` 指令启动服务器。
+
+程序将自动创建超级管理员账号，你可以使用超管的权限，利用[相关API](/documents/sysdoc/APIdoc.md#useraccountsuid)修改绑定的邮箱：
+
+字段|预设值
+:-:|:-:
+username/账户名|SuperAdmin
+password/密码|admin123
 
 ## 项目演示 Example
 

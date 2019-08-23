@@ -22,11 +22,11 @@
 ctx.throw(403, {detail: "禁止访问"});
 
 // >>> Forbidden
-// >>> 禁止访问
+// >>> {禁止访问}
 ```
 
 这个方法可以用作i18n的接口。
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

@@ -13,7 +13,7 @@ const {ReplyError} = require('ioredis');
  */
 function errorHandler(err, ctx) {
   ctx.status = typeof err.status ===  "number" ? err.status : 500;
-  ctx.body = err.detail ? `${err.message}\n${err.detail}` : err.message;
+  ctx.body = err.detail ? `${err.message}\n{${err.detail}}` : err.message;
 
   let logger = global.logger;
 

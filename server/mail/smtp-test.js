@@ -8,10 +8,12 @@ const chalk = require('chalk');
  * @return {Promise<any>}
  */
 module.exports = (opt) => {
-  console.log(chalk.bold("-----[" + new Date() + "]-----"));
-  console.log(chalk.bold("Trying to connect to SMTP with config:"));
-  console.log(SMTP_MAIL_CONFIGURE);
-  console.log();
+  if (!process.env.HIDE_CONNECT_DETAIL) {
+    console.log(chalk.bold("-----[" + new Date() + "]-----"));
+    console.log(chalk.bold("Trying to connect to SMTP with config:"));
+    console.log(SMTP_MAIL_CONFIGURE);
+    console.log();
+  }
   opt = opt || SMTP_MAIL_CONFIGURE;
   return new Promise((resolve, reject) => {
     nodemailer.createTransport(opt)
@@ -22,7 +24,7 @@ module.exports = (opt) => {
         } else {
           let msg = "[Hypethron]SMTP Connect Test: Success!";
           console.log(chalk.green(msg, '\n'));
-          resolve(msg);
+          resolve({message: '[Hypethron]Connect To SMTP!'});
         }
       });
   });

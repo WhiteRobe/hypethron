@@ -1,6 +1,6 @@
 # 如何正确安装、配置Redis
 
-> 如果您对如何安装和配置Redis有所经验，您可以跳过本篇指南并[返回首页](https://github.com/WhiteRobe/hypethron)。
+> 如果您对如何安装和配置Redis有所经验，您可以跳过本篇指南并[返回首页](/README.md)。
 
 ## 安装Redis
 
@@ -52,4 +52,4 @@ Linux下执行指令 `./src/redis-server ./redis.conf`。不同的系统环境�
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

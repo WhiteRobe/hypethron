@@ -1,6 +1,6 @@
 # 如何正确安装MySQL数据库
 
-> 如果您对如何安装和配置MySQL有所经验，您可以跳过本篇指南并[返回首页](https://github.com/WhiteRobe/hypethron)。
+> 如果您对如何安装和配置MySQL有所经验，您可以跳过本篇指南并[返回首页](/README.md)。
 
 ## 安装MySQL
 
@@ -51,4 +51,4 @@ mysql> FLUSH   PRIVILEGES;
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

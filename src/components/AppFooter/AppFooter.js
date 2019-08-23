@@ -1,20 +1,16 @@
 import React from "react";
 import {Link} from "react-router-dom";
 
-
-import {Col, Row, Card, Layout} from 'antd';
-import 'antd/es/col/style/css'; // col & row
-import 'antd/es/row/style/css'; // col & row
-import 'antd/es/layout/style/index.css';
+import {Col, Row, Card} from 'antd';
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
 import 'antd/es/layout/style/index.css';
 import './AppFooter.css';
 import qrCode from './qcode.png';
 import ghs from "./ghs.png";
 
-const {Footer} = Layout
 
 class AppFooter extends React.Component {
-    qrcode;
 
     constructor(props) {
         super(props);
@@ -32,7 +28,7 @@ class AppFooter extends React.Component {
     render() {
         return (
 
-            <Footer style={{background: '#2a2f35', padding: '30px', position: "absolute", bottom: '0', width: "100%"}}>
+            <Row style={{background: '#2a2f35', padding: '20px 0', position: "absolute", bottom: '0', width: "100%"}}>
                 <Row gutter={16}>
                     <Col span={9}>
                         <Row className="AppFooterComponentLeft">
@@ -64,8 +60,8 @@ class AppFooter extends React.Component {
                         </Row>
                     </Col>
 
-                    <Col span={9}>
-                        <Row className="AppFooterComponentRight" gutter={16}>
+                    <Col span={9} className="AppFooterComponentRight">
+                        <Row >
                             <Col span={24} className="AppFooterComponentLink">
                                 <li><a href={this.state.aboutUs}
                                        target="_blank" rel="noopener noreferrer">关于我们</a></li>
@@ -76,8 +72,8 @@ class AppFooter extends React.Component {
                                 <li><Link to="/pages/contact_cs">意见反馈</Link></li>
                             </Col>
                         </Row>
-                        <Row className="AppFooterComponentRight" gutter={16}>
-                            <Col span={24} className="AppFooterComponentInformation" >
+                        <Row >
+                            <Col span={24} className="AppFooterComponentInformation">
                                 <li>联系地址：陕西省西安市太白南路2号</li>
                                 <li>联系方式：example@qq.com</li>
                                 <li>{this.state.icp}</li>
@@ -91,11 +87,10 @@ class AppFooter extends React.Component {
                         @2019 hypethron/院庭
                     </Col>
                 </Row>
-
-
-            </Footer>
+            </Row>
         );
     }
+
 }
 
 export default AppFooter;

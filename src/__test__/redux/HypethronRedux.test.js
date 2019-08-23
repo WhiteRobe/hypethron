@@ -1,5 +1,5 @@
 import {store, unsubscribe} from "../../redux/HypethronRedux.js";
-import {addToken, removeToken, modifyDemoValue} from "../../redux/ActionCreateFunction.js";
+import {setToken, removeToken, modifyDemoValue} from "../../redux/ActionCreateFunction.js";
 
 
 
@@ -11,7 +11,7 @@ test('Redux work test', function () {
   store.dispatch(modifyDemoValue(testValue));
   expect(store.getState().demoStateManager.value===testValue).toBeTruthy();
 
-  store.dispatch(addToken(testValue));
+  store.dispatch(setToken(testValue));
   expect(store.getState().tokenStateManager.token===testValue).toBeTruthy();
 
   store.dispatch(removeToken());

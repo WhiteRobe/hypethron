@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from './logo.png';
+import {Link} from "react-router-dom";
 import './HypethronIntroPage.css';
 
 import { Button } from 'antd';
@@ -25,8 +26,8 @@ function HypethronIntroPage() {
 
         <br/>
 
-        <Button type="primary" shape="round" icon="home" size="large" href="/pages/home">
-          进入院庭
+        <Button type="primary" shape="round" icon="home" size="large">
+          <Link to="/pages/home" style={{color: 'white'}}>&nbsp;进入院庭</Link>
         </Button>
       </header>
     </div>

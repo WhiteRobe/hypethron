@@ -41,7 +41,7 @@ async function getMySQLPool(opt) {
  * 数据库接入测试
  */
 async function mysqlConnectTest() {
-  let mysql = connectMySQL(true /*connect with default params, but put detail*/);
+  let mysql = connectMySQL(!process.env.HIDE_CONNECT_DETAIL /*connect with default params, but put detail*/);
   return new Promise((resolve, reject) => {
     mysql.query('SELECT 1 + 1 AS solution',)
       .on('error', err => {

@@ -23,6 +23,7 @@ const {jwtVerify} = require('../../util/tools.js');
  * Else:
  *  @input { / }
  * @output { result:$Array }
+ * @throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
  */
 async function GET_userAccounts(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -32,7 +33,7 @@ async function GET_userAccounts(ctx, next) {
 
   ctx.assert(uid >= 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -99,11 +100,13 @@ async function GET_userAccounts(ctx, next) {
 
 /**
  * RESTful 注册接口，返回一个注册是否成功的标志即服务器签发的Token，并尝试写入session-cookies。
+ * 注册成功后清空session。
  * When do POST, response on ".../userAccounts/0"
  * @need-session { emailCaptcha: <token@subject:emailCaptcha> =>  { email: $String, captcha: $String }}
- * @input { username: $String, password: $String, salt: $String, captcha: $String }
+ * @input { username: $String, password: $String, salt: $String, emailCaptcha: $String }
  * @set-cookies { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
  * @output { token: $String }
+ * @throw { 403: 权限不足, 404: 缺失session数据, 406: 验证码不匹配, 409: jwt验证不通过, 502: 未知原因导致的写表错误 }
  */
 async function POST_userAccounts(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -114,14 +117,15 @@ async function POST_userAccounts(ctx, next) {
   let salt = ctx.request.body.salt; // 慢计算用盐
 
   // let email = ctx.session.emailForCaptcha; // 绑定的邮箱名(此时默认email已从邮箱绑定接口注册到session中)
+
+  let captchaClient = ctx.request.body.emailCaptcha; // 注册时的验证码(客户端)
   let captchaServer = ctx.session.emailCaptcha; // 注册时的验证码captcha(服务端) 应为6位字符长 | 同时绑定email字段
-  let captchaClient = ctx.request.body.captcha; // 注册时的验证码(客户端)
 
   ctx.assert(username, 400, `@input:username is required.`);
   ctx.assert(password, 400, `@input:password is required.`);
   ctx.assert(salt, 400, `@input:salt is required.`);
-  ctx.assert(captchaServer, 400, `@session:emailCaptcha is required. Try to regenerate it.`);
   ctx.assert(captchaClient, 400, `@input:captchaClient is required.`);
+  ctx.assert(captchaServer, 404, `@session:emailCaptcha is required. Try to regenerate it.`);
 
   let decode = await jwtVerify(captchaServer, SERVER_PRIVATE_KEY, jwtOptions(`emailCaptcha`, ctx.ip))
     .catch(err => {
@@ -129,8 +133,8 @@ async function POST_userAccounts(ctx, next) {
       ctx.throw(409, err.message);
     });
 
-  // 不区分验证码的大小写(尽管这里应该是6位数字)
-  ctx.assert(decode.captcha.toUpperCase() === `${captchaClient}`.toUpperCase(), 409, 'Captcha doesn\'t match.');
+  // 不区分邮箱验证码的大小写(尽管这里应该是6位数字)
+  ctx.assert(decode.captcha.toUpperCase() === `${captchaClient}`.toUpperCase(), 406, 'Captcha doesn\'t match.');
 
   let email = decode.email; // 绑定的邮箱名
 
@@ -184,6 +188,7 @@ async function POST_userAccounts(ctx, next) {
       await connection.commit().catch(err => {
         throw err;
       });
+      connection.release();
 
       logger.info(`User ${res.result[0].uid} register success, his/her email is [${email}].`);
 
@@ -208,22 +213,19 @@ async function POST_userAccounts(ctx, next) {
         /*ignore err*/
       }
 
-      // 清空session
+      // 注册成功后清空session
       ctx.session.emailCaptcha = null;
 
     } else {
-      ctx.throw(409, 'register fail', {detail:`注册失败，请稍后重试.`});
+      throw new Error('register fail: Not created!');
     }
   } catch (err) {
     await connection.rollback() // 发生错误则事务回撤
       .catch(e => {
         /* ignore */
-      })
-      .finally(() => {
-        ctx.throw(500, err);
       });
-  } finally {
     connection.release();
+    ctx.throw(502, err);
   }
 
   return next();
@@ -234,6 +236,7 @@ async function POST_userAccounts(ctx, next) {
  * @params { uid: $String }
  * @input { updateData: $Object => '{ username:$String, openid:$String, password:$String, salt:$String, authority:$Integer }'}
  * @output { success: $Boolean }
+ * @throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
  */
 async function PATCH_userAccounts(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -243,7 +246,7 @@ async function PATCH_userAccounts(ctx, next) {
 
   ctx.assert(uid > 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -300,7 +303,8 @@ async function PATCH_userAccounts(ctx, next) {
  * RESTful 删除用户账户信息表(及级联表)的接口，对权限有要求。返回操作是否成功的标志。
  * @params { uid: $Int }
  * @input { / }
- * @output { success: $Boolean }
+ * @output { success: $Boolean<true> }
+ * @throw { 401: 缺失认证信息, 403: 权限不足, 409: 权限jwt验证不通过 }
  */
 async function DELETE_userAccounts(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -311,7 +315,7 @@ async function DELETE_userAccounts(ctx, next) {
 
   ctx.assert(ctx.params.uid > 0, 400, '@url-params:uid should be positive.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -344,16 +348,16 @@ async function DELETE_userAccounts(ctx, next) {
       success: true
     };
 
+    connection.release();
   } catch (err) {
     await connection.rollback() // 发生错误则事务回撤
       .catch(e => {
         /* ignore */
       })
       .finally(() => {
+        connection.release();
         ctx.throw(500, err);
       });
-  } finally {
-    connection.release();
   }
   return next();
 }
