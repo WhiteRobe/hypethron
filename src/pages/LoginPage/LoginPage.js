@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
 import cookie from 'react-cookies'; // @See https://www.npmjs.com/package/react-cookies
 
-import {Form, Card, notification, Spin} from 'antd';
+import {Form, Card, notification, Spin, Row, Col} from 'antd';
 
 import 'antd/es/form/style/index.css';
 import 'antd/es/card/style/index.css';
@@ -14,7 +14,11 @@ import 'antd/es/spin/style/index.css';
 import 'antd/es/style/index.css' // col & row
 import 'antd/es/grid/style/index.css' // col & row
 
+import LoginBG from './LoginBG.jpg';
 import LoginFormComponent from './LoginFormComponent.js';
+import MessageLoginFormComponent from './MessageLoginFormComponent.js';
+import QcodeLoginFormComponent from './QcodeLoginFormComponent.js';
+import IntroCardComponent from './IntroCardComponent.js';
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -55,13 +59,13 @@ class LoginPage extends React.Component {
       let rememberFlag = form.getFieldValue('remember');
       let token = res.data.token;
       this.props.setToken(token); // 保存token到SPA的Store中
-      if(rememberFlag){
+      if (rememberFlag) {
         // save cookie
         // document.cookie=`Authorization=${token}` // koa 服务器完成了这一步
       } else {
         // remove cookie
         // document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-        cookie.remove('Authorization', { path: '/' });
+        cookie.remove('Authorization', {path: '/'});
       }
       // console.log(`用户已登录:${this.props.reduxState.token}`);
       notification.info({
@@ -90,9 +94,9 @@ class LoginPage extends React.Component {
         return (<WrappedLoginFormComponent beforeSubmit={this.toggleLoadingState}
                                            afterSubmit={this.handleSubmitResult}/>);
       case 'qcode':
-        return (<div>二维码登录</div>);
+        return (<QcodeLoginFormComponent/>);
       case 'phoneMsg':
-        return (<div>短信登录</div>);
+        return (<MessageLoginFormComponent/>);
       default:
         return (<WrappedLoginFormComponent beforeSubmit={this.toggleLoadingState}
                                            afterSubmit={this.handleSubmitResult}/>);
@@ -101,21 +105,35 @@ class LoginPage extends React.Component {
 
   render() {
     return (
-      <div>
-        <Spin spinning={this.state.loading}>
-          <Card
-            style={{width: '425px'}}
-            tabList={this.state.tabList}
-            activeTabKey={this.state.tabKey}
-            onTabChange={key => {
-              this.setState({
-                tabKey: key
-              });
-            }}
-          >
-            {this.findContent(this.state.tabKey)}
-          </Card>
-        </Spin>
+      <div style={{
+        backgroundImage: `url(${LoginBG})`,
+        height: '100%',
+        minHeight: '888px',
+        maxWidth: '100%',
+        padding: '40px'
+      }}>
+        <Row gutter={64} style={{padding: '110px 0px 20px 80px', opacity: '0.8'}}>
+          <Col span={2}>&nbsp;</Col>
+          <Col span={12}>
+            <IntroCardComponent/>{/* 介绍框 */}
+          </Col>
+          <Col span={10}>
+            <Spin spinning={this.state.loading}>
+              <Card
+                style={{width: '425px'}}
+                tabList={this.state.tabList}
+                activeTabKey={this.state.tabKey}
+                onTabChange={key => {
+                  this.setState({
+                    tabKey: key
+                  });
+                }}
+              >
+                {this.findContent(this.state.tabKey)}
+              </Card>
+            </Spin>
+          </Col>
+        </Row>
       </div>
     )
   }

@@ -62,8 +62,8 @@ class RetrievePasswordCbPage extends React.Component {
       <div>
         <Spin spinning={this.state.loading}>
           <Row style={{margin: "150px 0 150px 0"}}>
-            <Col span={6}>&nbsp;</Col>
-            <Col span={12}>
+            <Col span={8}>&nbsp;</Col>
+            <Col span={8}>
               {this.state.success ?
                 <Result status="success"
                         title="密码更新成功!"
@@ -95,7 +95,7 @@ class RetrievePasswordCbPage extends React.Component {
                 </Card>
               }
             </Col>
-            <Col span={6}>&nbsp;</Col>
+            <Col span={8}>&nbsp;</Col>
           </Row>
         </Spin>
       </div>
@@ -176,51 +176,50 @@ class CustomForm extends React.Component {
   render() {
     const {getFieldDecorator} = this.props.form;
     return (
-      <div>
-        <Form>
-          <Form.Item>
-            {getFieldDecorator('password', {
-              rules: [
-                {required: true, message: '请输入新密码'},
-                {min: 6, max: 16, message: '密码长度应为6~16(含)'},
-                {type: 'string', pattern: /\d+/, message: '密码应至少包含一位数字'},
-                {type: 'string', pattern: /[a-zA-Z]+/, message: '密码应至少包含一位大小写英文'},
-                {type: 'string', pattern: /^\w+$/, message: '密码应为英文、数字等非制表符混合串'}
-              ]
-            })(
-              <Input.Password prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                              type="password"
-                              style={{"width": "350px"}}
-                              placeholder="请输入密码"
-                              onPressEnter={this.handleSubmit}
-              />
-            )}
-          </Form.Item>
+      <Form>
+        <Form.Item>
+          {getFieldDecorator('password', {
+            rules: [
+              {required: true, message: '请输入新密码'},
+              {min: 6, max: 16, message: '密码长度应为6~16(含)'},
+              {type: 'string', pattern: /\d+/, message: '密码应至少包含一位数字'},
+              {type: 'string', pattern: /[a-zA-Z]+/, message: '密码应至少包含一位大小写英文'},
+              {type: 'string', pattern: /^\w+$/, message: '密码应为英文、数字等非制表符混合串'}
+            ]
+          })(
+            <Input.Password prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                            type="password"
+                            style={{"width": "350px"}}
+                            placeholder="请输入密码"
+                            onPressEnter={this.handleSubmit}
+            />
+          )}
+        </Form.Item>
 
-          <Form.Item>
-            {getFieldDecorator('confirmPassword', {
-              rules: [
-                {required: true, message: '请确认密码!'},
-                {
-                  validator: this.compareToFirstPassword
-                }
-              ]
-            })(
-              <Input.Password prefix={<Icon type="retweet" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                              type="password"
-                              style={{"width": "350px"}}
-                              placeholder="请确认密码"
-                              onPressEnter={this.handleSubmit}
-              />
-            )}
-          </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('confirmPassword', {
+            rules: [
+              {required: true, message: '请确认密码!'},
+              {
+                validator: this.compareToFirstPassword
+              }
+            ]
+          })(
+            <Input.Password prefix={<Icon type="retweet" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                            type="password"
+                            style={{"width": "350px"}}
+                            placeholder="请确认密码"
+                            onPressEnter={this.handleSubmit}
+            />
+          )}
+        </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" onClick={this.handleSubmit} style={{"width": "200px"}}>确定</Button>
-          </Form.Item>
+        <Form.Item>
+          <Button type="primary" onClick={this.handleSubmit} style={{"width": "200px"}}>确定</Button>
+        </Form.Item>
 
-        </Form>
-      </div>
+      </Form>
+
     )
   }
 }

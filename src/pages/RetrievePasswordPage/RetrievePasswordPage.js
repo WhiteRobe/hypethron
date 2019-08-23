@@ -64,8 +64,8 @@ class RetrievePasswordPage extends React.Component {
       <div>
         <Spin spinning={this.state.loading}>
           <Row style={{margin: "150px 0 150px 0"}}>
-            <Col span={6}>&nbsp;</Col>
-            <Col span={12}>
+            <Col span={8}>&nbsp;</Col>
+            <Col span={8}>
               {this.state.success ?
                 <Result status="success"
                         title="申请密码找回邮件发送成功!"
@@ -94,7 +94,7 @@ class RetrievePasswordPage extends React.Component {
                 </Card>
               }
             </Col>
-            <Col span={6}>&nbsp;</Col>
+            <Col span={8}>&nbsp;</Col>
           </Row>
 
         </Spin>

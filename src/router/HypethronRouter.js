@@ -43,7 +43,7 @@ class HypethronRouter extends React.Component {
               <Route path="/pages" component={appHeader}/>
             </Header>
 
-            <Content style={{ padding: '0 50px', marginTop: 64 }}>
+            <Content style={{ marginTop: 64 }}>
               {/*主页面*/}
               <Route path="/pages/home" component={homePage}/>
               {/*登录页面*/}
