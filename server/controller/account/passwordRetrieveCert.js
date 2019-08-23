@@ -11,9 +11,10 @@ const {generateSalt, hmac} = require('../../util/crypto-hash-tool.js');
  * 申请找回密码，向绑定的邮箱发送一份邮件，以获得相应的认证`retrievePWCert`。
  * @input { email: $String, captcha: $String }
  * @need-session { captcha: <token@subject:captcha> => captcha: $String }
- * @set-params { retrievePWCert: $String=<random-value:1> }
- * @set-session { <random-value:1>: <token@subject:retrievePWCert> => uid: $Int }
- * @output { success: $Boolean }
+ * @set-params { retrievePWCert: $String<@random-value<1>> }
+ * @set-session { @set-params[retrievePWCert]: <token@subject:retrievePWCert> => uid: $Int }
+ * @output { success: $Boolean<true> }
+ * @throw {403: 认证不通过(无此账号), 404:session数据丢失, 406: 验证码不匹配, 409: session验证码jwt检验不通过, 502: 发送邮件失败 }
  */
 async function POST_PasswordRetrieve(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -25,14 +26,14 @@ async function POST_PasswordRetrieve(ctx, next) {
 
   ctx.assert(email, 400, '@input:email is required.');
   ctx.assert(captcha, 400, '@input:captcha is required.');
-  ctx.assert(serverCaptcha, 400, '@session:captcha is required.');
+  ctx.assert(serverCaptcha, 404, '@session:captcha is required.');
 
   let decode = await jwtVerify(`${serverCaptcha}`, SERVER_PRIVATE_KEY, jwtOptions('captcha', ctx.ip))
     .catch(err => {
       ctx.throw(409, err.message);
     });
 
-  ctx.assert(captcha.toUpperCase() === decode.captcha.toUpperCase(), 409, 'Captcha doesn\'t match.');
+  ctx.assert(captcha.toUpperCase() === decode.captcha.toUpperCase(), 406, 'Captcha doesn\'t match.');
 
   let res = await mysql.query({
     sql: 'SELECT a.uid FROM user_account AS a LEFT JOIN user_profile AS b ON a.uid=b.uid WHERE b.email=?',
@@ -63,7 +64,7 @@ async function POST_PasswordRetrieve(ctx, next) {
     };
 
     let mailID = await mailerSend(mail).catch(err => {
-      ctx.throw(409, err.message);
+      ctx.throw(502, err.message);
     });
 
     logger.info(`${mailID} was sent to <${email}>, who ask for a password-retrieve-service.`);
@@ -75,7 +76,7 @@ async function POST_PasswordRetrieve(ctx, next) {
     }
 
   } else {
-    ctx.throw(409, 'Email address doesn\'t valid or matched.');
+    ctx.throw(403, 'Email address doesn\'t valid or matched.');
   }
 
   ctx.session.captcha = null; // 清空验证码
@@ -86,9 +87,11 @@ async function POST_PasswordRetrieve(ctx, next) {
 
 /**
  * 根据`retrievePWCert`的值从session中获得相应的jwt-token证明并验证身份，若通过则重设密码。
+ * 操作后，200状态下retrievePWCert会被清除。
  * @input { password: $String, salt: $String, retrievePWCert: $String }
- * @need-session { <random-value:@input[retrievePWCert]>: <token@subject:retrievePWCert> => uid: $Int }
+ * @need-session { @input[retrievePWCert]: <token@subject:retrievePWCert> => uid: $Int }
  * @output { success: $Boolean }
+ * @throw { 404:session数据丢失, 409: session数据jwt检验不通过 }
  */
 async function PATCH_PasswordRetrieve(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -104,7 +107,7 @@ async function PATCH_PasswordRetrieve(ctx, next) {
 
   let retrievePWCertS = ctx.session[retrievePWCert]; // 取出重设密码的认证token
 
-  ctx.assert(ctx.session[retrievePWCert], 400, '@session:retrievePWCert is undefined. Consider to regenerate it.');
+  ctx.assert(ctx.session[retrievePWCert], 404, '@session:retrievePWCert is undefined. Consider to regenerate it.');
 
   let decode = await jwtVerify(`${retrievePWCertS}`, SERVER_PRIVATE_KEY, jwtOptions('retrievePWCert', ctx.ip))
     .catch(err => {
@@ -121,16 +124,13 @@ async function PATCH_PasswordRetrieve(ctx, next) {
     throw err;
   });
 
-  if (res.result.affectedRows > 0) {
-    logger.info(`User[${uid}] reset his/her password.`);
-    ctx.body = {
-      success: true
-    }
-  } else {
-    ctx.throw(409, 'Reset password maybe error, please retry.');
-  }
+  logger.info(`User[${uid}] reset his/her password. Affected-rows=${res.result.affectedRows > 0}`);// 写入日志
 
-  ctx.session[retrievePWCert] = null;
+  ctx.body = {
+    success: res.result.affectedRows > 0
+  };
+
+  ctx.session[retrievePWCert] = null; // 成功之后清除认证
 
   return next();
 }

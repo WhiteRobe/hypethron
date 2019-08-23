@@ -1,6 +1,6 @@
 import React from "react";
-import {Link} from "react-router-dom";
 
+import {Link} from "react-router-dom";
 
 import {Col, Row, Card, Layout} from 'antd';
 import 'antd/es/col/style/css'; // col & row
@@ -14,7 +14,6 @@ import ghs from "./ghs.png";
 const {Footer} = Layout
 
 class AppFooter extends React.Component {
-    qrcode;
 
     constructor(props) {
         super(props);

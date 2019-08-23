@@ -1,17 +1,21 @@
 import React from 'react';
 import axios from 'axios';
-import {hmac, generateSalt} from '../../util/crypto-hash-tool.js';
+import { Link } from 'react-router-dom';
+import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
-import {Form, Icon, Input, Button, Checkbox, Divider, Col, Row} from 'antd';
-import 'antd/es/divider/style/index.css';
-import 'antd/es/checkbox/style/index.css';
-import 'antd/es/input/style/index.css';
+import {Form, Icon, Input, Button, Checkbox, Divider} from 'antd';
+
 import 'antd/es/form/style/index.css';
-import 'antd/es/button/style/index.css';
 import 'antd/es/icon/style/index.css';
-import 'antd/es/style/index.css'; // col & row
-import 'antd/es/layout/style/index.css';
+import 'antd/es/input/style/index.css';
+import 'antd/es/button/style/index.css';
+import 'antd/es/checkbox/style/index.css';
+import 'antd/es/divider/style/index.css';
 
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
+
+import Captcha from '../../components/util/Captcha.js';
 
 /**
  * @function beforeSubmit(form)
@@ -20,19 +24,22 @@ import 'antd/es/layout/style/index.css';
 class LoginFormComponent extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      captchaSeed: `/papi/captcha?seed=0`,
       captchaPass: false
     };
+
     this.handleSubmit = this.handleSubmit.bind(this);
     this.getUserSalt = this.getUserSalt.bind(this);
     this.login = this.login.bind(this);
     this.refreshCaptcha = this.refreshCaptcha.bind(this);
+    this.setCaptchaRef = this.setCaptchaRef.bind(this);
     this.asyncCaptchaValidator = this.asyncCaptchaValidator.bind(this);
   }
 
-  handleSubmit() {
-    this.props.form.validateFields((err) => {
+  handleSubmit(e) {
+    if(typeof e.preventDefault === 'function') e.preventDefault();
+    this.props.form.validateFieldsAndScroll((err) => {
       if (err) {
         console.error(err);
       } else {
@@ -70,15 +77,16 @@ class LoginFormComponent extends React.Component {
       salt = salt.data.salt;
     }
     let newSalt = generateSalt(16);
-    let newPassword = hmac(newSalt, password, {alg: 'sha256', repeat: 100});
-
+    let newPassword = slowHash(newSalt, password);
+    let captcha = this.props.form.getFieldValue('captcha');
     axios
       .post("/papi/authorizationToken", {
         username,
-        password: hmac(salt, password, {alg: 'sha256', repeat: 100}),
+        password: slowHash(salt, password),
         salt,
         newSalt,
-        newPassword
+        newPassword,
+        captcha
       })
       .then((res) => {
         returnRes = res;
@@ -92,41 +100,42 @@ class LoginFormComponent extends React.Component {
           that.setState({
             captchaPass: false,
           });
-          that.refreshCaptcha();
+          this.refreshCaptcha();
         }
         that.props.afterSubmit(that.props.form, returnRes, returnErr);
       });
   }
 
-  /**
-   * 刷新验证码
-   */
+  setCaptchaRef(element) {
+    this.captcha = element;
+  }
+
   refreshCaptcha() {
-    this.setState({
-      captchaSeed: `/papi/captcha?seed=${Math.random()}`
-    });
+    this.captcha.refreshCaptcha(); // @See '../../components/util/Captcha.js'
   }
 
   asyncCaptchaValidator(rule, value, callback) {
     let that = this;
-    if (this.state.captchaPass) return callback(); // 校验过一次的验证码直接通过验证
+    if (this.state.captchaPass) return callback(); // 已经通过一次校验的验证码直接通过验证
     if (!value || `${value}`.length < 4) return callback(); // 不满足条件默认通过验证
     axios
       .post("/papi/captcha", {
-        captcha: value
+        captcha: value,
+        keepAlive: true
       })
       .then((res) => {
         that.setState({
-          captchaPass: res.data.success
+          captchaPass: res.data.match
         });
-        if (res.data.success) {
+        if (res.data.match) {
           callback();
         } else {
-          callback('验证码不相同或已过期');
+          callback('验证码不一致');
         }
       })
       .catch((err) => {
-        callback('验证码不相同或已过期');
+        console.error(err.response.data);
+        callback('验证码已过期，请刷新验证码');
       });
   }
 
@@ -134,7 +143,7 @@ class LoginFormComponent extends React.Component {
     const {getFieldDecorator} = this.props.form;
     return (
       <div>
-        <Form style={{'max-width': '425px'}}>
+        <Form style={{maxWidth: '425px'}}>
 
           <Form.Item>
             {getFieldDecorator('username', {
@@ -142,7 +151,7 @@ class LoginFormComponent extends React.Component {
                 {required: true, message: '请输入账户名/绑定邮箱/手机号!'},
                 {
                   type: 'string',
-                  pattern: /^\w{6,16}$|^1\d{10}$|^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+                  pattern: /^\w{6,16}$|^1\d{10}$|^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
                   message: '应输入账户名(6-16位长)、绑定邮箱或手机号'
                 }
               ]
@@ -150,6 +159,7 @@ class LoginFormComponent extends React.Component {
               <Input
                 prefix={<Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>}
                 placeholder="请输入账户名/绑定邮箱/手机号"
+                onPressEnter={this.handleSubmit}
               />
             )}
           </Form.Item>
@@ -168,6 +178,7 @@ class LoginFormComponent extends React.Component {
                 prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
                 type="password"
                 placeholder="请输入密码"
+                onPressEnter={this.handleSubmit}
               />
             )}
           </Form.Item>
@@ -184,9 +195,10 @@ class LoginFormComponent extends React.Component {
             })(
               <Input
                 prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                maxlength="4"
+                maxLength={4}
                 placeholder="请输入验证码"
                 disabled={this.state.captchaPass}
+                onPressEnter={this.handleSubmit}
               />
             )}
           </Form.Item>
@@ -195,11 +207,10 @@ class LoginFormComponent extends React.Component {
             <Form.Item>
               <div align="center">
                 <b style={{'float': 'left'}}>验证码：</b>
-                <a href="#" style={{'float': 'right'}} onClick={this.refreshCaptcha}>
+                <button className={'link-button'} style={{'float': 'right'}} onClick={this.refreshCaptcha}>
                   点击刷新
-                </a>
-                <img src={this.state.captchaSeed} onClick={this.refreshCaptcha} alt="captcha"
-                     width="150px" height="40px" style={{"border": "1px solid silver"}}/>
+                </button>
+                <Captcha ref={this.setCaptchaRef}/>
               </div>
 
             </Form.Item>
@@ -211,14 +222,14 @@ class LoginFormComponent extends React.Component {
               initialValue: true,
             })(<Checkbox>记住我的登录状态</Checkbox>)}
 
-            <a href="/pages/retrieve_password" style={{'float': 'right'}}>
+            <Link to="/pages/retrieve_password" style={{'float': 'right'}}>
               忘记密码？
-            </a>
+            </Link>
 
             <Button type="primary" style={{'width': '100%'}} onClick={this.handleSubmit}>
               登&nbsp;录
             </Button>
-            或者 <a href="/pages/register">即刻快速注册成为会员!</a>
+            或者 <Link to="/pages/register">即刻快速注册成为会员!</Link>
           </Form.Item>
 
         </Form>

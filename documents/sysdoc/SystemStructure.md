@@ -142,4 +142,4 @@ console.log(ctx.session.name); // 后台会自动解码
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

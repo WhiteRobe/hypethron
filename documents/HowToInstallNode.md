@@ -1,6 +1,6 @@
 # 如何配置Node.js环境
 
-> 如果您对如何安装和配置Node.js有所经验，您可以跳过本篇指南并[返回首页](https://github.com/WhiteRobe/hypethron)。
+> 如果您对如何安装和配置Node.js有所经验，您可以跳过本篇指南并[返回首页](/README.md)。
 
 1. 下载Node.js(v10.8+)： [![](https://img.shields.io/badge/Node.js-download-green.svg?logo=node.js&style=flat)](https://nodejs.org/en/)
 
@@ -12,4 +12,4 @@
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

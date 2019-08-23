@@ -40,7 +40,18 @@ function hmac(secretKey, content, opt) {
   return hashMsg;
 }
 
-module.exports = { generateSalt, hmac };
+
+/**
+ * 客户端慢计算
+ * @param secretKey
+ * @param content
+ * @return {string}
+ */
+function slowHash(secretKey, content){
+  return hmac(secretKey, content, {alg:'sha256', repeat:100})
+}
+
+module.exports = { generateSalt, hmac, slowHash };
 
 
 /*

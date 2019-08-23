@@ -1,17 +1,24 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setToken} from "../../redux/ActionCreateFunction";
-import {Card, Form, notification, Spin, Tabs} from 'antd';
+import cookie from 'react-cookies'; // @See https://www.npmjs.com/package/react-cookies
 
-import 'antd/es/card/style/index.css';
-import 'antd/es/spin/style/index.css';
-import 'antd/es/notification/style/index.css';
+import {Form, Card, notification, Spin, Row, Col} from 'antd';
+
 import 'antd/es/form/style/index.css';
-import 'antd/es/tabs/style/index.css';
-import 'antd/es/layout/style/index.css';
-import 'antd/es/style/index.css';
+import 'antd/es/card/style/index.css';
+import 'antd/es/tabs/style/index.css'; // as tab-card
+import 'antd/es/notification/style/index.css';
+import 'antd/es/spin/style/index.css';
 
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
+
+import LoginBG from './LoginBG.jpg';
 import LoginFormComponent from './LoginFormComponent.js';
+import MessageLoginFormComponent from './MessageLoginFormComponent.js';
+import QcodeLoginFormComponent from './QcodeLoginFormComponent.js';
+import IntroCardComponent from './IntroCardComponent.js';
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -48,21 +55,27 @@ class LoginPage extends React.Component {
   }
 
   handleSubmitResult(form, res, err) {
-    let rememberFlag = form.getFieldValue('remember');
-    console.log(rememberFlag);
     if (res) { // 登录成功
-      console.log("yes");
       let rememberFlag = form.getFieldValue('remember');
       let token = res.data.token;
       this.props.setToken(token); // 保存token到SPA的Store中
-      if(rememberFlag){
+      if (rememberFlag) {
         // save cookie
         // document.cookie=`Authorization=${token}` // koa 服务器完成了这一步
       } else {
         // remove cookie
-        document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        // document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        cookie.remove('Authorization', {path: '/'});
       }
-      console.log(this.props.reduxState.token);
+      // console.log(`用户已登录:${this.props.reduxState.token}`);
+      notification.info({
+        message: '登录成功',
+        description: `两秒后自动跳转到首页！`,
+        duration: 1.5
+      });
+      setTimeout(() => { // 跳转到首页
+        this.props.history.push("/pages/home");
+      }, 2000);
     } else {
       // @See https://ant.design/components/notification-cn
       notification.warn({
@@ -71,8 +84,8 @@ class LoginPage extends React.Component {
         duration: 5
       });
       console.error(err.message, err.response.data);
+      this.toggleLoadingState(); // 登陆失败时解除Spin状态(成功时会自动跳转)
     }
-    this.toggleLoadingState();
   }
 
   findContent(key) {
@@ -81,9 +94,9 @@ class LoginPage extends React.Component {
         return (<WrappedLoginFormComponent beforeSubmit={this.toggleLoadingState}
                                            afterSubmit={this.handleSubmitResult}/>);
       case 'qcode':
-        return (<div>二维码登录</div>);
+        return (<QcodeLoginFormComponent/>);
       case 'phoneMsg':
-        return (<div>短信登录</div>);
+        return (<MessageLoginFormComponent/>);
       default:
         return (<WrappedLoginFormComponent beforeSubmit={this.toggleLoadingState}
                                            afterSubmit={this.handleSubmitResult}/>);
@@ -92,32 +105,48 @@ class LoginPage extends React.Component {
 
   render() {
     return (
-      <div>
-        <Spin spinning={this.state.loading}>
-          <Card
-            style={{width: '425px'}}
-            tabList={this.state.tabList}
-            activeTabKey={this.state.tabKey}
-            onTabChange={key => {
-              this.setState({
-                tabKey: key
-              });
-            }}
-          >
-            {this.findContent(this.state.tabKey)}
-          </Card>
-        </Spin>
+      <div style={{
+        backgroundImage: `url(${LoginBG})`,
+        height: '100%',
+        minHeight: '888px',
+        maxWidth: '100%',
+        padding: '40px'
+      }}>
+        <Row gutter={64} style={{padding: '110px 0px 20px 80px', opacity: '0.8'}}>
+          <Col span={2}>&nbsp;</Col>
+          <Col span={12}>
+            <IntroCardComponent/>{/* 介绍框 */}
+          </Col>
+          <Col span={10}>
+            <Spin spinning={this.state.loading}>
+              <Card
+                style={{width: '425px'}}
+                tabList={this.state.tabList}
+                activeTabKey={this.state.tabKey}
+                onTabChange={key => {
+                  this.setState({
+                    tabKey: key
+                  });
+                }}
+              >
+                {this.findContent(this.state.tabKey)}
+              </Card>
+            </Spin>
+          </Col>
+        </Row>
       </div>
     )
   }
 }
+
+const WrappedLoginFormComponent = Form.create({name: 'normal_login_form'})(LoginFormComponent);
 
 /**
  * 定义Redux状态到视图容器的映射方法
  */
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    reduxState: state.tokenState
+    reduxState: state.tokenStateManager
   }
 };
 
@@ -126,9 +155,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
  */
 const mapDispatchToProps = {setToken};
 
-const WrappedLoginFormComponent = Form.create({name: 'normal_login_form'})(LoginFormComponent);
-
-export default connect({
+export default connect(
   mapStateToProps,
   mapDispatchToProps
-})(LoginPage);
+)(LoginPage);

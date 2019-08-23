@@ -107,4 +107,4 @@ Authority|INT UNSIGNED|用户的权限
 
 ---
 
-[返回首页](https://github.com/WhiteRobe/hypethron)
+[返回首页](/README.md)

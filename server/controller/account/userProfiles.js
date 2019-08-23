@@ -1,5 +1,4 @@
 const {jwtVerify} = require('../../util/tools.js');
-const {TokenExpiredError} = require('jsonwebtoken');
 const {JWT_OPTIONS} = require('../../server-configure.js');
 
 /***
@@ -24,7 +23,9 @@ const {JWT_OPTIONS} = require('../../server-configure.js');
  *       location: $String // 支持模糊匹配
  * Else:
  *   @input { / }
- * @output { result:$Array }
+ * @input { <opt>only: $Array } 只获取规定字段的项
+ * @output { result: $Array }
+ * @throw { 409: 认证token的jwt检验不通过 }
  */
 async function GET_userProfile(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -34,16 +35,12 @@ async function GET_userProfile(ctx, next) {
 
   ctx.assert(uid >= 0, 400, '@url-params:uid is invalid.');
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
   if (token) { // 本人或管理组可以跳过隐私设定
     let decode = await jwtVerify(token, jwtOptions(`authorization`, ctx.ip)).catch(err => {
-      if (err instanceof TokenExpiredError) {
-        ctx.throw(409, err.message); // 若为过期TOKEN，抛出错误以给前台一个反馈
-      } else {
-        ignorePrivacySetting = false;
-      }
+      ctx.throw(409, err.message); // 若为过期TOKEN，抛出错误以给前台一个反馈
     });
-    ignorePrivacySetting = (decode.authority & AUTH.ADMIN_GROUP) <= 0 && decode.uid !== uid;
+    ignorePrivacySetting = (decode.authority & AUTH.ADMIN_GROUP) > 0 || decode.uid === uid;
   }
 
   if (uid > 0) { // 精确匹配模式
@@ -101,7 +98,7 @@ async function GET_userProfile(ctx, next) {
     let totalHit = res.result.length;
     let returnResult = res.result.slice(filter.max * (filter.page - 1), Math.min(totalHit, filter.max * filter.page));
     ctx.body = {
-      result: ignorePrivacySetting ? returnResult : privacyBlock(returnResult)
+      result: ignorePrivacySetting ? returnResult : onlyFilter(privacyBlock(returnResult), filter.only)
     };
   }
 
@@ -114,6 +111,7 @@ async function GET_userProfile(ctx, next) {
  * @params { uid: $Int }
  * @input { updateData: $Object } // 更改的值
  * @output { success: $Boolean }
+ * @throw { 401: 缺少认证, 403: 权限不足, 409: 认证token的jwt检验不通过 }
  */
 async function PATCH_userProfile(ctx, next) {
   let mysql = ctx.global.mysqlPoolDM;
@@ -124,7 +122,7 @@ async function PATCH_userProfile(ctx, next) {
   ctx.assert(uid > 0, 400, '@url-params:uid should be positive.');
 
 
-  let token = ctx.header.authorization;
+  let token = ctx.header.Authorization;
 
   ctx.assert(token, 401);
 
@@ -186,15 +184,16 @@ async function PATCH_userProfile(ctx, next) {
  * @param result 结果集的Array( 含隐私设定 )
  */
 function privacyBlock(result) {
+  let secret = '因隐私设定而保密';
   for (let i of result) {
     // 利用掩码调整输出到前端的内容
-    i.company = i.privacy_general === 1 ? i.company : '保密';
-    i.location = i.privacy_general === 1 ? i.location : '保密';
-    i.website = i.privacy_general === 1 ? i.website : '保密';
-    i.sex = i.privacy_sex === 1 ? i.sex : '保密';
-    i.birthday = i.privacy_birthday === 1 ? i.birthday : '保密';
-    i.phone = i.privacy_phone === 1 ? i.phone : '保密';
-    i.email = i.privacy_email === 1 ? i.email : '保密';
+    i.company = i.privacy_general === 1 ? i.company : secret;
+    i.location = i.privacy_general === 1 ? i.location : secret;
+    i.website = i.privacy_general === 1 ? i.website : secret;
+    i.sex = i.privacy_sex === 1 ? i.sex : secret;
+    i.birthday = i.privacy_birthday === 1 ? i.birthday : secret;
+    i.phone = i.privacy_phone === 1 ? i.phone : secret;
+    i.email = i.privacy_email === 1 ? i.email : secret;
 
     // 清空本接口的无关数据
     i.privacy_general = undefined;
@@ -206,6 +205,35 @@ function privacyBlock(result) {
   return result;
 }
 
+
+/**
+ * 按only中所列的字段进行过滤
+ * @param result 结果集的Array
+ * @param only 要留下的元素的字段Array
+ * @return {Array}
+ */
+function onlyFilter(result, only) {
+  let returnResult = [];
+  if (!!only && only.length > 0) {
+    for (let s of result) { // s:object
+      for (let f in s) { // f:key
+        let found = false;
+        for (let n of only) {
+          if (n.toUpperCase() === f.replace(/_/g, '').toUpperCase()) {
+            found = true;
+            break;
+          }
+        }
+        if(!found){
+          s[f] = undefined;
+        }
+      }
+    }
+  } else {
+    returnResult = result;
+  }
+  return returnResult;
+}
 
 module.exports = {
   GET_userProfile,

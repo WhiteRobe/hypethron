@@ -1,16 +1,22 @@
 import React from 'react';
 import axios from 'axios';
+import {Link} from "react-router-dom";
 
-import {Row, Col, Input, Spin, Form, notification, Result, Button} from 'antd';
-import 'antd/es/layout/style/index.css';
+import {Input, Spin, Form, notification, Result, Button, Icon, Card, Row, Col} from 'antd';
+
 import 'antd/es/input/style/index.css';
 import 'antd/es/spin/style/index.css';
 import 'antd/es/form/style/index.css';
 import 'antd/es/notification/style/index.css';
 import 'antd/es/result/style/index.css';
 import 'antd/es/button/style/index.css';
+import 'antd/es/card/style/index.css';
+import 'antd/es/icon/style/index.css';
 
-import 'antd/es/style/index.css'; // col & row
+import 'antd/es/style/index.css' // col & row
+import 'antd/es/grid/style/index.css' // col & row
+
+import Captcha from '../../components/util/Captcha.js';
 
 import logo from "../HypethronIntroPage/logo.png";
 
@@ -22,7 +28,7 @@ class RetrievePasswordPage extends React.Component {
     this.state = {
       loading: false,
       success: false,
-      resultFeedback:''
+      resultFeedback: ''
     };
     this.toggleLoadingState = this.toggleLoadingState.bind(this);
     this.handleSubmitResult = this.handleSubmitResult.bind(this);
@@ -39,7 +45,7 @@ class RetrievePasswordPage extends React.Component {
     if (res) { // 提交成功
       this.setState({
         success: true,
-        resultFeedback:`密码找回验证邮件已发往<${form.getFieldValue('email')}>，请在五分钟内完成验证。`
+        resultFeedback: `密码找回验证邮件已发往<${form.getFieldValue('email')}>，请在五分钟内完成验证。`
       })
     } else {
       // @See https://ant.design/components/notification-cn
@@ -57,34 +63,40 @@ class RetrievePasswordPage extends React.Component {
     return (
       <div>
         <Spin spinning={this.state.loading}>
-          <Row style={{"top": "150px"}}>
-            <Col span={6}>&nbsp;</Col>
-            {this.state.success ?
-              <Result status="success"
-                      title="申请密码找回邮件发送成功!"
-                      subTitle={this.state.resultFeedback}
-                      extra={[
-                        <Button type="primary" shape="round" icon="home" href="/pages/home">返回首页</Button>
-                      ]}
-              /> :
-              <Col span={12}>
-                <p align="center">
-                  <span>
-                    <img src={logo} alt="logo" width="70px" height="70px"/>
-                  </span><br/>
+          <Row style={{margin: "150px 0 150px 0"}}>
+            <Col span={8}>&nbsp;</Col>
+            <Col span={8}>
+              {this.state.success ?
+                <Result status="success"
+                        title="申请密码找回邮件发送成功!"
+                        subTitle={this.state.resultFeedback}
+                        extra={[
+                          <Button type="primary" shape="round" icon="home">
+                            <Link to="/pages/home" style={{color: 'white'}}>&nbsp;返回首页</Link>
+                          </Button>
+                        ]}
+                /> :
 
-                  <span style={{"margin": "10px 0 10px 0", "display": "block"}}>
-                    <b style={{"font-size": "2.0em"}}>密码找回</b>
-                  </span>
-                  <span style={{"margin": "0 0 10px 0", "display": "block"}}>请输入绑定的邮箱号以找回/重置你的用户密码</span><br/>
+                <Card style={{width: '700px'}}>
+                  <div align="center">
+                    <span>
+                      <img src={logo} alt="logo" width="70px" height="70px"/>
+                    </span><br/>
 
-                  {/*填写表单*/}
-                  <WrappedCustomForm beforeSubmit={this.toggleLoadingState} afterSubmit={this.handleSubmitResult}/>
-                </p>
-              </Col>
-            }
-            <Col span={6}>&nbsp;</Col>
+                    <span style={{"margin": "10px 0 10px 0", "display": "block"}}>
+                      <b style={{fontSize: "2.0em"}}>密码找回</b>
+                    </span>
+                    <span style={{"margin": "0 0 10px 0", "display": "block"}}>请输入绑定的邮箱号以找回/重置你的用户密码</span><br/>
+
+                    {/*填写表单*/}
+                    <WrappedCustomForm beforeSubmit={this.toggleLoadingState} afterSubmit={this.handleSubmitResult}/>
+                  </div>
+                </Card>
+              }
+            </Col>
+            <Col span={8}>&nbsp;</Col>
           </Row>
+
         </Spin>
       </div>
     )
@@ -98,22 +110,14 @@ class RetrievePasswordPage extends React.Component {
 class CustomForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      captchaSeed: '/papi/captcha?seed=0'
-    };
 
-    this.refreshCaptcha = this.refreshCaptcha.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.setCaptchaRef = this.setCaptchaRef.bind(this);
   }
 
-  /**
-   * 刷新验证码
-   */
-  refreshCaptcha() {
-    this.setState({
-      captchaSeed: `/papi/captcha?seed=${Math.random()}`
-    });
+  setCaptchaRef(element) {
+    this.captcha = element;
   }
 
   /**
@@ -138,36 +142,19 @@ class CustomForm extends React.Component {
         setTimeout(() => {
           that.props.afterSubmit(that.props.form, returnRes, returnErr);
         }, 500);
-        that.refreshCaptcha();
+        that.captcha.refreshCaptcha();
       });
   }
 
   handleSubmit() {
     let that = this;
-    this.checkForm()
-      .then(() => {
-        that.sendEmail();
-      })
-      .catch(err => {
+    this.props.form.validateFieldsAndScroll((err/*, values*/) => {
+      if (err) {
         console.error(err);
-      });
-  }
-
-  /**
-   * 表单校验
-   * @return {Promise<any>}
-   */
-  checkForm() {
-    let that = this;
-    return new Promise((resolve, reject) => {
-      that.props.form.validateFieldsAndScroll((err, values) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(values);
-        }
-      });
-    })
+      } else {
+        that.sendEmail();
+      }
+    });
   }
 
   render() {
@@ -178,26 +165,28 @@ class CustomForm extends React.Component {
           {getFieldDecorator('captcha', {
             rules: [{required: true, len: 4, message: '请输入4位验证码!'}]
           })(
-            <Input placeholder="请输入4位长的验证码"
+            <Input prefix={<Icon type="safety" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                   placeholder="请输入4位长的验证码"
                    size="large"
-                   maxlength="4"
-                   style={{"width": "200px", "margin": "5px 20px 0 0"}}/>
+                   maxLength={4}
+                   style={{"width": "200px", "margin": "5px 20px 0 0"}}
+                   onPressEnter={this.handleSubmit}
+            />
           )}
-          <img src={this.state.captchaSeed} onClick={this.refreshCaptcha} alt="captcha"
-               width="150px" height="40px" style={{"border": "1px solid silver"}}/>
+          <Captcha ref={this.setCaptchaRef}/>
         </Form.Item>
 
         <Form.Item>
           {getFieldDecorator('email', {
             rules: [{required: true, type: 'email', message: '请输入合法邮箱!'}]
           })(
-            <Search
-              placeholder="请输入账号所绑定的邮箱"
-              enterButton="发送邮件"
-              size="large"
-              style={{"width": "370px"}}
-              onSearch={this.handleSubmit}
-              onPressEnter={this.handleSubmit}/>
+            <Search prefix={<Icon type="mail" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                    placeholder="请输入账号所绑定的邮箱"
+                    enterButton="发送邮件"
+                    size="large"
+                    style={{"width": "370px"}}
+                    onSearch={this.handleSubmit}
+                    onPressEnter={this.handleSubmit}/>
           )}
         </Form.Item>
 
