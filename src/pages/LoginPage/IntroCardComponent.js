@@ -15,28 +15,31 @@ class MessageLoginFormComponent extends React.Component {
 
   render() {
     return (
-      <Card style={{minHeight: '567.5px', padding:'0'}}
+      <Card style={{minHeight: '577.5px', padding: '0'}}
             title={this.state.loginIntroTitle}
       >
         <div style={{background: '#364d79', minHeight: '460px'}}>
-          <Carousel autoplay dots style={{
-            textAlign: 'center',
-            height: '160px',
-            lineHeight: '160px',
-            background: '#364d79',
-            overflow: 'hidden'
-          }}>
+          <Carousel autoplay
+                    dots
+                    style={{
+                      textAlign: 'center',
+                      height: '160px',
+                      lineHeight: '160px',
+                      background: '#364d79',
+                      overflow: 'hidden'
+                    }}
+                    draggable
+                    slide={'div'}
+
+          >
             <div>
-              <h3 style={{ minHeight: '460px'}}>1</h3>
+              <h3 style={{minHeight: '460px'}}>1</h3>
             </div>
             <div>
               <h3>2</h3>
             </div>
             <div>
               <h3>3</h3>
-            </div>
-            <div>
-              <h3>4</h3>
             </div>
           </Carousel>
         </div>

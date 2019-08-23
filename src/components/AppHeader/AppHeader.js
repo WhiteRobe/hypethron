@@ -33,16 +33,19 @@ class AppHeader extends React.Component {
       uid: 0 // 用户uid
     };
 
-    this.readAuthorizationTokenFromCookie(); // 尝试从cookie中读取登录状态
-    setTimeout(() => this.pullUserAvatarUrl(), 1500); // 需要一定时间更新
-
     this.onBarSearch = this.onBarSearch.bind(this);
     this.useDefaultAvatar = this.useDefaultAvatar.bind(this);
     this.onMenuClick = this.onMenuClick.bind(this);
   }
 
-  onBarSearch(value){ // 菜单栏搜索
-    console.log(value);
+  componentDidMount(){ // 第一次渲染时调用
+    this.readAuthorizationTokenFromCookie(); // 尝试从cookie中读取登录状态
+    this.tellLoginTrace(); // 告知服务器我已登录
+    this.pullUserAvatarUrl(); // 拉取用户头像
+  }
+
+  onBarSearch(value) { // 菜单栏搜索
+    console.log(`菜单搜索${value}`);
   }
 
   readAuthorizationTokenFromCookie() {
@@ -54,18 +57,38 @@ class AppHeader extends React.Component {
       this.props.setToken(token);
       this.setState({
         uid: jwt.decode(token).uid
-      })
+      });
+    }
+  }
+
+  tellLoginTrace(){ // 告知服务器登录状态
+    let token = cookie.load('Authorization');
+    if (!!token){
+      axios
+        .post(`/api/loginTrace`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(res => {
+          console.log(`告知登录操作:${res.data}`);
+        })
+        .catch(err => {
+          console.error(err.message, err.response.data);
+          // 不做阻断处理
+        });
     }
   }
 
   pullUserAvatarUrl() {
     let that = this;
-    if (!!this.props.reduxState.token) { // 如果存在token，则拉取用户的头像
-      let uid = this.state.uid;
+    let token = cookie.load('Authorization');
+    if (!!token) { // 如果存在token，则拉取用户的头像
+      let uid = jwt.decode(token).uid;
       axios
         .get(`/papi/userProfiles/${uid}`, {
           headers: {
-            Authorization: `Bearer ${that.props.reduxState.token}`
+            Authorization: `Bearer ${token}`
           }
         })
         .then(res => {
@@ -163,21 +186,23 @@ class AppHeader extends React.Component {
             </Col>
             <Col span={10}>
               {!!this.props.reduxState.token ?
-                <Row style={{textAlign: 'right'}}>
-                  <Col span={16}>
+                <Row gutter={20}>
+                  <Col span={18}>
                     <Dropdown overlay={menu}>
                       {/*下拉菜单*/}
-                      <Icon type="plus" style={{fontSize: '20px', color: "white"}}/>
+                      <Icon type="plus"
+                            style={{fontSize: 24, color: "white", float: 'right', margin: `20px 0`}}/>
                     </Dropdown>
                   </Col>
-                  <Col span={8}>
+                  <Col span={5}>
                     <Link to={`/pages/profile/${this.state.uid}`}>
                       <Avatar src={this.state.userAvatarUrl} alt="logo"
-                              style={{float: 'right', margin: `16px 12px 16px 0`}}
+                              style={{float: 'right', margin: `16px 0 16px 0`}}
                               onError={this.useDefaultAvatar}
                       />
                     </Link>
                   </Col>
+                  <Col span={1}>&nbsp;</Col>
                 </Row>
                 :
                 <Button type="primary" style={{float: 'right', margin: `16px 12px 16px 0`}}>

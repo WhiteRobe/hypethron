@@ -45,6 +45,7 @@
 
 [私有接口](#私有接口)
 
+- ["/loginTrace"](#logintrace)
 - ["/userPrivacies/:uid"](#userprivaciesuid)
 
 ---
@@ -262,6 +263,26 @@ Else:
 
 
 ## 私有接口
+
+### "/loginTrace"
+
+
+**GET**：获取一个用户的登录轨迹
+
+```
+@need-head { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
+@input { / }
+@output { trace: $Array }
+```
+
+**POST**：记录一个用户当前的登录轨迹
+
+```
+@need-head { Authorization: <token>@subject:authorization => { uid: $Int, authority: $Int } }
+@input { / }
+@output { success: $Boolean }
+```
+
 
 ### "/userPrivacies/:uid"
 

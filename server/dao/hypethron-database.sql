@@ -39,3 +39,13 @@ CREATE TABLE IF NOT EXISTS user_privacy(
     PRIMARY KEY (uid),
     FOREIGN KEY (uid) REFERENCES user_account (uid)
 );
+
+/* 用户登录日迹表 */
+CREATE TABLE IF NOT EXISTS user_login_trace(
+    /* 自增表序号 */ id INTEGER UNSIGNED AUTO_INCREMENT,
+    /* 用户标识符 */ uid INTEGER UNSIGNED NOT NULL /* 自0起的无符号正整数 */,
+    /* 登陆日期 */ time_sign DATETIME NOT NULL /* 不重复的值，例值'2019-01-01 00:00:00' */,
+    PRIMARY KEY (id),
+    FOREIGN KEY (uid) REFERENCES user_account (uid),
+    UNIQUE KEY (uid, time_sign)
+);

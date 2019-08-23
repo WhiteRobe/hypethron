@@ -1,10 +1,10 @@
 import React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import {Provider} from 'react-redux';
-import {Layout} from "antd";
+import {Layout, BackTop} from "antd";
 
-import 'antd/es/menu/style/index.css'; // col & row
-import 'antd/es/layout/style/index.css'; // col & row
+import 'antd/es/back-top/style/index.css';
+import 'antd/es/layout/style/index.css';
 
 
 import axiosDemo from "../components/AxiosDemo/AxiosDemo.js";
@@ -32,6 +32,7 @@ class HypethronRouter extends React.Component {
   render() {
     return (
       <Provider store={store}>
+        <BackTop />
         <Router>
           <Route exact path="/" component={hypethronIntroPage}/>
           <Route exact path="/pages/AxiosDemo" component={axiosDemo}/>

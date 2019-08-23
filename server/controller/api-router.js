@@ -12,6 +12,7 @@ const authorizationTokenService = require('./account/authorizationToken.js');
 const apiDocumentService = require('./general/apiDocument.js');
 const captchaService = require('./general/captcha.js');
 const emailCaptchaService = require('./general/emailCaptcha.js');
+const loginTraceService = require('./account/loginTrace.js');
 const passwordRetrieveCertService = require('./account/passwordRetrieveCert.js');
 const restfulStatusService = require('./general/restfulStatus.js');
 const userAccountsService = require('./account/userAccounts.js');
@@ -66,7 +67,8 @@ const API_ROUTER_TABLE = {
       }
     ]
   },*/
-  "/userPrivacies/:uid": binder(userPrivaciesService)
+  "/userPrivacies/:uid": binder(userPrivaciesService),
+  "/loginTrace": binder(loginTraceService)
 };
 
 

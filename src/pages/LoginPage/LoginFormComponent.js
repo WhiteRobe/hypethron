@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {slowHash, generateSalt} from '../../util/crypto-hash-tool.js';
 
-import {Form, Icon, Input, Button, Checkbox, Divider} from 'antd';
+import {Form, Icon, Input, Button, Checkbox, Divider, notification} from 'antd';
 
 import 'antd/es/form/style/index.css';
 import 'antd/es/icon/style/index.css';
@@ -11,6 +11,7 @@ import 'antd/es/input/style/index.css';
 import 'antd/es/button/style/index.css';
 import 'antd/es/checkbox/style/index.css';
 import 'antd/es/divider/style/index.css';
+import 'antd/es/notification/style/index.css';
 
 import 'antd/es/style/index.css' // col & row
 import 'antd/es/grid/style/index.css' // col & row
@@ -35,10 +36,11 @@ class LoginFormComponent extends React.Component {
     this.refreshCaptcha = this.refreshCaptcha.bind(this);
     this.setCaptchaRef = this.setCaptchaRef.bind(this);
     this.asyncCaptchaValidator = this.asyncCaptchaValidator.bind(this);
+    this.thirdPartyLogin = this.thirdPartyLogin.bind(this);
   }
 
   handleSubmit(e) {
-    if(typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.preventDefault === 'function') e.preventDefault();
     this.props.form.validateFieldsAndScroll((err) => {
       if (err) {
         console.error(err);
@@ -137,6 +139,18 @@ class LoginFormComponent extends React.Component {
         console.error(err.response.data);
         callback('验证码已过期，请刷新验证码');
       });
+  }
+
+  thirdPartyLogin(value){ // 第三方登录
+    // console.log(value);
+    switch (value) {
+      default:
+        notification.info({
+          message: '该第三方尚未接入',
+          description: `通过${value}的登录方式暂未完成`,
+          duration: 2
+        })
+    }
   }
 
   render() {
@@ -238,12 +252,15 @@ class LoginFormComponent extends React.Component {
 
         <div align="center">
           {/*<Icon type="qq" theme="twoTone" twoToneColor="#00b0fb"/>*/}
-          <Icon type="qq"/>
+          <Icon type="qq" style={{fontSize: 30, color: '#009fda', margin: '0 10px'}}
+                onClick={() => this.thirdPartyLogin('qq')}/>
           <Divider type="vertical"/>
           {/*<Icon type="wechat" theme="twoTone" twoToneColor="#46d800"/>*/}
-          <Icon type="wechat"/>
+          <Icon type="wechat" style={{fontSize: 30, color: '#46d800', margin: '0 10px'}}
+                onClick={() => this.thirdPartyLogin('wechat')}/>
           <Divider type="vertical"/>
-          <Icon type="github"/>
+          <Icon type="github" style={{fontSize: 30, color: '#24292e', margin: '0 10px'}}
+                onClick={() => this.thirdPartyLogin('github')}/>
         </div>
       </div>
     );

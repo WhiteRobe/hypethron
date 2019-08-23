@@ -12,7 +12,7 @@ class MessageLoginFormComponent extends React.Component {
 
   render() {
     return (
-      <Row style={{minHeight: '463.5px'}}>
+      <Row style={{minHeight: '473.5px'}}>
         <Col span={5}>&nbsp;</Col>
         <Col span={14} style={{textAlign: 'center'}}>
           短信登录暂未制作

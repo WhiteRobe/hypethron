@@ -62,7 +62,7 @@
 - 前端可跨平台开发
 - ...
 
-你可以到此处查看该项目的效果：[项目演示|Examples](#-example)。
+你可以到此处查看该项目的效果：[项目演示|Examples](#-example) ；或在此查看版本信息及开发进度：[![](https://img.shields.io/github/package-json/version/WhiteRobe/hypethron)](https://github.com/WhiteRobe/hypethron/projects)
 
 
 ## 快速上手 Quick-Start
