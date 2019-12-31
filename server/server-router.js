@@ -28,11 +28,11 @@ router.post("/test", koaBody(), async (ctx, next) => {
 
 
 /**
- * expose all RESTful-api to /api/*
+ * expose RESTful-api to /api/* with the protect of JWT while /papi/* not
  */
-const apiRouter = require('./controller/api-router');
+const {apiRouter, publicApiRouter} = require('./controller/api-router');
 router.use("/api", apiRouter.routes(), apiRouter.allowedMethods());
-
+router.use("/papi", publicApiRouter.routes(), publicApiRouter.allowedMethods());
 
 /**
  * expose all pages to /pages/*

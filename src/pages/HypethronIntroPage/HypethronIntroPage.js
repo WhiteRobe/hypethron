@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from './logo.png';
+import {Link} from "react-router-dom";
 import './HypethronIntroPage.css';
 
 import { Button } from 'antd';
@@ -14,7 +15,7 @@ function HypethronIntroPage() {
         <br/>
 
         <p>
-          hypethron/院庭 是一款基于<code>React</code>和<code>Node.js</code>的人员信息分布统计、管理系统。
+          hypethron/院庭 是一款基于<code>React</code>和<code>Node.js</code>的信息可视化、统计和管理系统。
         </p>
 
         <a className="HypethronIntroPage-link" href="https://github.com/WhiteRobe/hypethron"
@@ -25,8 +26,8 @@ function HypethronIntroPage() {
 
         <br/>
 
-        <Button type="primary" shape="round" icon="home" size="large" href="/pages/home">
-          进入院庭
+        <Button type="primary" shape="round" icon="home" size="large">
+          <Link to="/pages/home" style={{color: 'white'}}>&nbsp;进入院庭</Link>
         </Button>
       </header>
     </div>

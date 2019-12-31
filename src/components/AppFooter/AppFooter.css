@@ -1,0 +1,70 @@
+.AppFooterComponentLeft {
+  float: right;
+  color: #8793a2;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.AppFooterComponentCenter {
+  color: #fff;
+  font-size: 20px;
+  text-align: center;
+  padding-top: 1.875em;
+  margin-top: 60px;
+  /* display: flex;
+   align-items:center;
+   justify-content:center;
+   flex-wrap: wrap;*/
+}
+
+.AppFooterComponentRight {
+  border-left: 1px solid #646f7c;
+  overflow: hidden;
+  min-height: 265px;
+  max-height: 265px;
+  /*display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: hidden;
+  flex:1;*/
+}
+
+.AppFooterComponentLink {
+  font-size: 12px;
+  color: #8793a2;
+  padding-left: auto;
+  width: 100%;
+  margin-bottom: 0;
+
+}
+
+.AppFooterComponentInformation {
+  font-size: 12px;
+  color: #8793a2;
+  padding-left: auto;
+}
+
+.AppFooterComponentLink li {
+  list-style: none; /* 将默认的列表符号去掉 */
+  margin: 10px;
+  float: left;
+}
+
+.AppFooterComponentInformation li {
+  list-style: none; /* 将默认的列表符号去掉 */
+  margin: 12px;
+  float: left;
+  clear: both;
+}
+
+.AppFooterComponentLink li a {
+  text-align: center; /* 居中对齐文字 */
+  color: #fff; /* 设置文字颜色 */
+  text-decoration: none; /* 去掉下划线 */
+}
+
+.AppFooterComponentLink li a:hover {
+  color: #146C9C; /* 变换文字颜色 */
+}
+
+

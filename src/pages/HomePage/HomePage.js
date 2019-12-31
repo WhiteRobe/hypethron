@@ -1,11 +1,19 @@
 import React from 'react';
 
-function HomePage() {
-  return (
-    <div>
-      这是主页
-    </div>
-  );
+class HomePage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state={};
+  }
+
+  render() {
+    return (
+      < div>
+        这是主页
+      </div>
+    )
+  }
 }
+
 
 export default HomePage;
